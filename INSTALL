@@ -1,0 +1,34 @@
+# $Id$
+
+This file contains very brief instructions on how to install and activate
+this plugin on SlimServer. For full details please refer to:
+http://hickinbottom.demon.co.uk/slimserver/lazy-searching/lazy-searching2.htm
+
+1. Make sure you are running SlimServer 6.5 or later.
+
+2. Copy LazySearch2.pm to your SlimServer plugins directory.
+Windows: C:\Program Files\SlimServer\Server\Plugins
+Linux: it depends, but something like /usr/local/slimserver/Plugins
+
+3. Restart SlimServer to make sure it has seen the new plugin.
+
+4. Make sure the plugin is present and ticked on the 'Server Settings/Plugins'
+page on the SlimServer web interface.
+
+5. Start using the plugin when the initial background scan has finished.
+The plugin will begin adding lazy search indexing the first time the server
+is restarted, and this will take a while. The server and player should remain
+responsive during this period, but you'll get a brief warning on the player
+if you try to search before the process has finished. This won't interrupt
+the indexing, however, so you can safely keep trying to see if the scan has
+finished.
+
+Press SEARCH on the SqueezeBox remote to access the Lazy Search Music menu;
+press SEARCH again to access the original Search Music menu.
+
+If you need further information then please refer to the homepage of this
+plugin:
+http://hickinbottom.demon.co.uk/slimserver/lazy-searching/lazy-searching2.htm
+
+---
+Stuart Hickinbottom
