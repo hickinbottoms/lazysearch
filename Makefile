@@ -2,14 +2,15 @@
 # 
 # $Id$
 #
-# Stuart Hickinbottom 2005
+# Stuart Hickinbottom 2006
 
-SOURCE=LazySearch2.pm.in
+SOURCE=LazySearch2.pm
+RELEASEDIR=releases
 DEST=LazySearch2.pm
-DISTFILES=$(DEST) INSTALL
+DESTSTAGE=$(RELEASEDIR)/$(DEST)
+DISTFILES=$(DESTSTAGE) INSTALL
 SLIMDIR=~slim
 PLUGINDIR=$(SLIMDIR)/Plugins
-RELEASEDIR=releases
 REVISION=`svn info . | grep "^Revision:" | cut -d' ' -f2`
 DISTFILE=LazySearch2-6_5-r$(REVISION).zip
 DISTFILEDIR=$(RELEASEDIR)/$(DISTFILE)
@@ -30,7 +31,7 @@ pretty:
 # Install the plugin in SlimServer.
 install: $(PLUGINDIR)/$(DEST)
 
-$(PLUGINDIR)/$(DEST): $(DEST)
+$(PLUGINDIR)/$(DEST): $(DESTSTAGE)
 	echo Installing plugin...
 	chmod +w "$@"
 	cp "$^" "$@"
@@ -42,12 +43,12 @@ release: $(DISTFILES)
 	echo Building distfile: $(DISTFILE)
 	echo Remember to have committed and updated first.
 	rm "$(DISTFILEDIR)" >/dev/null 2>&1 || true
-	zip "$(DISTFILEDIR)" $(DISTFILES)
+	zip -j "$(DISTFILEDIR)" $(DISTFILES)
 	rm "$(LATESTLINK)" >/dev/null 2>&1 || true
 	ln -s "$(DISTFILE)" "$(LATESTLINK)"
-	rm $(DEST)
+	rm $(DESTSTAGE)
 
 # Build a version of the plugin with the revision information substituted
-$(DEST): $(SOURCE)
+$(DESTSTAGE): $(SOURCE)
 	echo "Inserting plugin revision ($(REVISION))..."
 	sed "s/@@REVISION@@/$(REVISION)/" <"$^" >"$@"
