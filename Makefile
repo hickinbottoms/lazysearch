@@ -14,6 +14,7 @@ PLUGINDIR=$(SLIMDIR)/Plugins
 REVISION=`svn info . | grep "^Revision:" | cut -d' ' -f2`
 DISTFILE=LazySearch2-6_5-r$(REVISION).zip
 DISTFILEDIR=$(RELEASEDIR)/$(DISTFILE)
+SVNDISTFILE=LazySearch2.zip
 LATESTLINK=$(RELEASEDIR)/LazySearch2-6_5-latest.zip
 
 .SILENT:
@@ -47,6 +48,7 @@ release: $(DISTFILES)
 	rm "$(LATESTLINK)" >/dev/null 2>&1 || true
 	ln -s "$(DISTFILE)" "$(LATESTLINK)"
 	rm $(DESTSTAGE)
+	cp $(DISTFILEDIR) $(SVNDISTFILE)
 
 # Build a version of the plugin with the revision information substituted
 $(DESTSTAGE): $(SOURCE)
