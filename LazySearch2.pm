@@ -432,6 +432,8 @@ sub initPlugin() {
 		'arrow_left.hold' => 'leftHold',
 		'arrow_right'     => 'exit_right',
 		'play'            => 'play',
+		'pause.single'    => 'pause',
+		'pause.hold'      => 'stop',
 		'add.single'      => 'addSingle',
 		'add.hold'        => 'addHold',
 		'search'          => 'forceSearch',
@@ -1632,7 +1634,7 @@ SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_DESC
 	DE	Die Suche nach Interpreten, Alben, Stilrichtungen oder Titel mit einer zu kleinen Zahl von Zeichen ist nicht besonders sinnvoll, da sie zu viele Ergebnisse liefert. Um zu verhindern, dass eine Suche gestartet wird, bevor eine sinnvolle Anzahl von Zeichen eingeben wurde, ist eine Mindestzahl von Zeichen vorgegeben. Es gibt unterschiedliche Einstellungen für Interpretennamen, Albumnamen und Liedertitel - sinnvolle Voreinstellungen sind 3 für Interpreten und Alben und 4 für Lieder.
-	EN	Searching for artists, albums, genres or songs with a short number of characters isn\'t very useful as it will return so many results. To prevent a search being performed until a more useful number of characters have been entered a mininum number of characters is specified here. There are separate settings for artists and album names, genres and track titles - a setting of 3 for artists, albums and genres, and 4 for tracks, is a useful default.
+	EN	Searching for artists, albums, genres or songs with a short number of characters isn\'t very useful as it will return so many results. To prevent a search being performed until a more useful number of characters have been entered a mininum number of characters is specified here. There are separate settings for artists and album names, genres and song titles - a setting of 3 for artists, albums and genres, and 4 for songs, is a useful default.
 	ES	El buscar artistas, álbumes, géneros o canciones con muy pocos caracteres no es muy útil, ya que retornará demasiados resultados. Para evitar que se efectúe una búsqueda hasta que se hayan ingresado más caracteres, se especifica aquí un número mínimo de ellos. Existen configuraciones individuales para búsqueda por nombre de artistas, nombre de álbumes, y nombre de canciones - valores por defecto apropiados son 3 caracteres para artistas, álbumes y géneros, y 4 caracteres para canciones.
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_CHOOSE
@@ -1667,12 +1669,12 @@ SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK_CHOOSE
 	DE	Mindestlänge für die Suche nach Titel (2-9 Zeichen):
-	EN	Minimum length for track search (2-9 characters):
+	EN	Minimum length for song search (2-9 characters):
 	ES	Mínima longitud para búsqueda de canción (2-9 caracteres):
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK_CHANGE
 	DE	Mindestlänge für die Suche nach Titel wurde geändert in:
-	EN	Minimum length for track search changed to:
+	EN	Minimum length for song search changed to:
 	ES	Mínima longitud para búsqueda de canción cambió a:
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE
