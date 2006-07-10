@@ -55,7 +55,7 @@ use constant LAZYSEARCH_HOOKSEARCHBUTTON_DEFAULT => 1;
 use constant LAZYSEARCH_ALLENTRIES_DEFAULT       => 1;
 
 # Constants that control the background lazy search database encoding.
-use constant LAZYSEARCH_ENCODE_MAX_QUANTA => 0.5;
+use constant LAZYSEARCH_ENCODE_MAX_QUANTA => 0.4;
 
 # Special item IDs that are used to recognise non-result items in the
 # search results list.
@@ -65,15 +65,14 @@ use constant RESULT_ENTRY_ID_ALL => -1;
 use vars qw($VERSION);
 $VERSION = 'trunk-6.5-r@@REVISION@@';
 
-# The DataStore. We keep this as global to avoid keep looking it up.
-my $ds;
-
 # This hash-of-hashes contains state information on the current lazy search for
 # each player. The first hash index is the player (eg $clientMode{$client}),
 # and the second a 'parameter' for that player.
 # The elements of the second hash are as follows:
-#	search_items:	This holds the result of the find() operation, and will
-#					be an array of album, artist or track objects.
+#	search_type:	This is the item type being searched for, and can be one
+#					of Track, Contributor, Album or Genre.
+#	text_col:		The column of the search_type row that holds the text that
+#					will be shown on the player as the result of the search.
 #	search_text:	The current search text (ie the number keys on the remote
 #					control).
 #	search_performed:	A Boolean flag indicating whether a search has yet
@@ -86,9 +85,6 @@ my $ds;
 #						the end of the list. If this isn't defined then there
 #						won't be an 'all' entry added.
 #	select_col:			This is the 'field' that the find returns.
-#	search_col:			This is the column that the lazy search is applied to
-#						when performing the find().
-#	sortby_col:			The column used to order the result of the find().
 #	player_title:		Start of line1 player text when there are search
 #						results.
 #	player_title_empty:	The line1 text when no search has yet been performed.
@@ -96,13 +92,13 @@ my $ds;
 #						search text entered to perform the search.
 #	min_search_length:	The minimum number of characters that must be entered
 #						before the lazy search is performed.
-#	gettext:			Function reference to a method that can return the
-#						next to display for a find-returned item.
 #	onright:			Function reference to a method that enters a browse
 #						mode on the item being displayed.
-#	playlevel:			Identifying the type of item to be added to the
-#						playlist if the user presses PLAY/ADD/INSERT on a
-#						search result.
+#	search_items:		Function reference to a method that will return all
+#						the tracks corresponding to the found item (the item
+#						is passed as a parameter to this method). This is used
+#						to find the tracks that will be added/replaced in the
+#						playlist when ADD/INSERT/PLAY is pressed.
 my %clientMode = ();
 
 # Hash of outstanding database objects that are to be lazy-encoded. This is
@@ -182,9 +178,8 @@ sub setMode {
 			$clientMode{$client}{search_pending}   = 0;
 
 			if ( $item eq '{ARTISTS}' ) {
-				$clientMode{$client}{select_col}   = 'artist';
-				$clientMode{$client}{search_col}   = 'contributor.customsearch';
-				$clientMode{$client}{sortby_col}   = 'artist';
+				$clientMode{$client}{search_type}  = 'Contributor';
+				$clientMode{$client}{text_col}     = 'name';
 				$clientMode{$client}{all_entry}    = '{ALL_ARTISTS}';
 				$clientMode{$client}{player_title} = '{LINE1_BROWSE_ARTISTS}';
 				$clientMode{$client}{player_title_empty} =
@@ -194,7 +189,6 @@ sub setMode {
 				$clientMode{$client}{min_search_length} =
 				  Slim::Utils::Prefs::get(
 					'plugin-lazysearch2-minlength-artist');
-				$clientMode{$client}{gettext} = sub { return shift->name; };
 				$clientMode{$client}{onright} = sub {
 					my ( $client, $item ) = @_;
 
@@ -203,18 +197,28 @@ sub setMode {
 						$client,
 						'browsedb',
 						{
-							'hierarchy'    => 'artist,album,track',
+							'hierarchy'    => 'contributor,album,track',
 							'level'        => 1,
-							'findCriteria' => { 'artist' => $item->{'id'} },
+							'findCriteria' =>
+							  { 'contributor.id' => $item->{'id'} },
 						}
 					);
 				};
-				$clientMode{$client}{playlevel} = 'artist';
+				$clientMode{$client}{search_tracks} = sub {
+					my $id = shift;
+					return Slim::Schema->search( 'ContributorTrack',
+						{ 'me.contributor' => $id } )->search_related(
+						'track', undef,
+						{
+							'order_by' =>
+'track.album, track.disc, track.tracknum, track.titlesort'
+						}
+						)->all;
+				};
 				setSearchBrowseMode( $client, $item, 0 );
 			} elsif ( $item eq '{ALBUMS}' ) {
-				$clientMode{$client}{select_col}   = 'album';
-				$clientMode{$client}{search_col}   = 'album.customsearch';
-				$clientMode{$client}{sortby_col}   = 'album';
+				$clientMode{$client}{search_type}  = 'Album';
+				$clientMode{$client}{text_col}     = 'title';
 				$clientMode{$client}{all_entry}    = '{ALL_ALBUMS}';
 				$clientMode{$client}{player_title} = '{LINE1_BROWSE_ALBUMS}';
 				$clientMode{$client}{player_title_empty} =
@@ -223,7 +227,6 @@ sub setMode {
 				  'LINE2_ENTER_MORE_ALBUMS';
 				$clientMode{$client}{min_search_length} =
 				  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-album');
-				$clientMode{$client}{gettext} = sub { return shift->title; };
 				$clientMode{$client}{onright} = sub {
 					my ( $client, $item ) = @_;
 
@@ -232,18 +235,24 @@ sub setMode {
 						$client,
 						'browsedb',
 						{
-							'hierarchy'    => 'track',
-							'level'        => 0,
-							'findCriteria' => { 'album' => $item->{'id'} },
+							'hierarchy'    => 'album,track',
+							'level'        => 1,
+							'findCriteria' => { 'album.id' => $item->{'id'} },
 						}
 					);
 				};
-				$clientMode{$client}{playlevel} = 'album';
+				$clientMode{$client}{search_tracks} = sub {
+					my $id = shift;
+					return Slim::Schema->search(
+						'track',
+						{ 'album'    => $id },
+						{ 'order_by' => 'me.disc, me.tracknum, me.titlesort' }
+					)->all;
+				};
 				setSearchBrowseMode( $client, $item, 0 );
 			} elsif ( $item eq '{GENRES}' ) {
-				$clientMode{$client}{select_col}   = 'genre';
-				$clientMode{$client}{search_col}   = 'genre.customsearch';
-				$clientMode{$client}{sortby_col}   = 'name';
+				$clientMode{$client}{search_type}  = 'Genre';
+				$clientMode{$client}{text_col}     = 'name';
 				$clientMode{$client}{all_entry}    = undef;
 				$clientMode{$client}{player_title} = '{LINE1_BROWSE_GENRES}';
 				$clientMode{$client}{player_title_empty} =
@@ -252,7 +261,6 @@ sub setMode {
 				  'LINE2_ENTER_MORE_GENRES';
 				$clientMode{$client}{min_search_length} =
 				  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-genre');
-				$clientMode{$client}{gettext} = sub { return shift->name; };
 				$clientMode{$client}{onright} = sub {
 					my ( $client, $item ) = @_;
 
@@ -261,18 +269,27 @@ sub setMode {
 						$client,
 						'browsedb',
 						{
-							'hierarchy'    => 'artist,album,track',
-							'level'        => 0,
-							'findCriteria' => { 'genre' => $item->{'id'} },
+							'hierarchy'    => 'genre,contributor,album,track',
+							'level'        => 1,
+							'findCriteria' => { 'genre.id' => $item->{'id'} },
 						}
 					);
 				};
-				$clientMode{$client}{playlevel} = 'genre';
+				$clientMode{$client}{search_tracks} = sub {
+					my $id = shift;
+					return Slim::Schema->search( 'GenreTrack',
+						{ 'me.genre' => $id } )->search_related(
+						'track', undef,
+						{
+							'order_by' =>
+'track.album, track.disc, track.tracknum, track.titlesort'
+						}
+						)->all;
+				};
 				setSearchBrowseMode( $client, $item, 0 );
 			} elsif ( $item eq '{SONGS}' ) {
-				$clientMode{$client}{select_col}   = 'lightweighttrack';
-				$clientMode{$client}{search_col}   = 'track.customsearch';
-				$clientMode{$client}{sortby_col}   = 'title';
+				$clientMode{$client}{search_type}  = 'Track';
+				$clientMode{$client}{text_col}     = 'title';
 				$clientMode{$client}{all_entry}    = '{ALL_SONGS}';
 				$clientMode{$client}{player_title} = '{LINE1_BROWSE_TRACKS}';
 				$clientMode{$client}{player_title_empty} =
@@ -281,21 +298,24 @@ sub setMode {
 				  'LINE2_ENTER_MORE_TRACKS';
 				$clientMode{$client}{min_search_length} =
 				  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-track');
-				$clientMode{$client}{gettext} = sub { return shift->title; };
 				$clientMode{$client}{onright} = sub {
 					my ( $client, $item ) = @_;
 
 					# Push into the trackinfo mode for this one track.
-					my $track = $ds->objectForId( 'track', $item->{'id'} );
+					my $track =
+					  Slim::Schema->rs('Track')->find( $item->{'id'} );
 					Slim::Buttons::Common::pushModeLeft( $client, 'trackinfo',
 						{ 'track' => $track->url } );
 				};
-				$clientMode{$client}{playlevel} = 'track';
+				$clientMode{$client}{search_tracks} = sub {
+					my $id = shift;
+					return Slim::Schema->find( 'Track', $id );
+				};
 				setSearchBrowseMode( $client, $item, 0 );
 			}
 
 			# If rescan is in progress then warn the user.
-			if ( $lazifying_database || Slim::Music::Import::stillScanning() ) {
+			if ( $lazifying_database || Slim::Music::Import->stillScanning() ) {
 				$::d_plugins
 				  && Slim::Utils::Misc::msg(
 					"LazySearch2: Entering search while scan in progress\n");
@@ -317,11 +337,6 @@ sub setMode {
 			return [ undef, Slim::Display::Display::symbol('rightarrow') ];
 		},
 	);
-
-	# Find the datastore we're going to do queries on later. This allows it
-	# to change inbetween invocations of this mode (although I don't know why
-	# it would change), without re-querying what it is excessively.
-	$ds = Slim::Music::Info->getCurrentDataStore();
 
 	# Use our INPUT.Choice-derived mode to show the menu and let it do all the
 	# hard work of displaying the list, moving it up and down, etc, etc.
@@ -374,10 +389,18 @@ sub initPlugin() {
 	# on them later.
 	checkDefaults();
 
-	# Subscribe so that we are notified when the database has been rescanned;
-	# we use this so that we can apply lazification.
-	Slim::Control::Request::subscribe( \&Plugins::LazySearch2::scanDoneCallback,
-		[ ['rescan'], ['done'] ] );
+  # @@TODO - re-enable this when the SlimServer trunk supports the 'rescan
+  # done' callback again.@@
+  # Subscribe so that we are notified when the database has been rescanned;
+  # we use this so that we can apply lazification.
+  #	Slim::Control::Request::subscribe( \&Plugins::LazySearch2::scanDoneCallback,
+  #		[ ['rescan'], ['done'] ] );
+
+	# @@TODO - remove this when the above 'rescan done' hook is re-enabled.@@
+	# Subscribe to detect when rescans are initiated.
+	Slim::Control::Request::subscribe(
+		\&Plugins::LazySearch2::scanStartCallback,
+		[ [ 'rescan', 'wipecache' ] ] );
 
 	# Top-level menu mode. We register a custom INPUT.Choice mode so that
 	# we can detect when we're in it (for SEARCH button toggle).
@@ -450,6 +473,12 @@ sub initPlugin() {
 
 	$::d_plugins
 	  && Slim::Utils::Misc::msg("LazySearch2: Initialisation completed\n");
+
+	# @@REMOVE ME - it should be possible to remove this because we should
+	# receive a normal "rescan done" dispatch when that mechanism has been
+	# hooked up@@
+	Slim::Utils::Timers::setTimer( undef, Time::HiRes::time() + 5,
+		\&scanDoneCallback );
 }
 
 sub shutdownPlugin() {
@@ -457,9 +486,16 @@ sub shutdownPlugin() {
 
 	$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: Shutting down\n");
 
+	# @@TODO - re-enable this when the SlimServer trunk supports the 'rescan
+	# done' callback again.@@
+	# Remove the subscription we'd previously registered
+	#	Slim::Control::Request::unsubscribe(
+	#		\&Plugins::LazySearch2::scanDoneCallback );
+
+	# @@TODO - remove this when the above 'rescan done' hook is re-enabled.@@
 	# Remove the subscription we'd previously registered
 	Slim::Control::Request::unsubscribe(
-		\&Plugins::LazySearch2::scanDoneCallback );
+		\&Plugins::LazySearch2::scanStartCallback );
 
 	# @@TODO@@
 	# Do we need to remove our top-level mode?
@@ -491,7 +527,7 @@ sub setupGroup {
 
 	my %setupPrefs = (
 		'plugin-lazysearch2-minlength-artist' => {
-			'validate'     => \&Slim::Web::Setup::validateInt,
+			'validate'     => \&Slim::Utils::Validate::isInt,
 			'validateArgs' =>
 			  [ LAZYSEARCH_MINLENGTH_MIN, LAZYSEARCH_MINLENGTH_MAX ],
 			'PrefHead' => string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST'),
@@ -503,7 +539,7 @@ sub setupGroup {
 			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_CHANGE'),
 		},
 		'plugin-lazysearch2-minlength-album' => {
-			'validate'     => \&Slim::Web::Setup::validateInt,
+			'validate'     => \&Slim::Utils::Validate::isInt,
 			'validateArgs' =>
 			  [ LAZYSEARCH_MINLENGTH_MIN, LAZYSEARCH_MINLENGTH_MAX ],
 			'PrefHead'   => string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ALBUM'),
@@ -513,7 +549,7 @@ sub setupGroup {
 			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ALBUM_CHANGE'),
 		},
 		'plugin-lazysearch2-minlength-genre' => {
-			'validate'     => \&Slim::Web::Setup::validateInt,
+			'validate'     => \&Slim::Utils::Validate::isInt,
 			'validateArgs' =>
 			  [ LAZYSEARCH_MINLENGTH_MIN, LAZYSEARCH_MINLENGTH_MAX ],
 			'PrefHead'   => string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE'),
@@ -523,7 +559,7 @@ sub setupGroup {
 			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE_CHANGE'),
 		},
 		'plugin-lazysearch2-minlength-track' => {
-			'validate'     => \&Slim::Web::Setup::validateInt,
+			'validate'     => \&Slim::Utils::Validate::isInt,
 			'validateArgs' =>
 			  [ LAZYSEARCH_MINLENGTH_MIN, LAZYSEARCH_MINLENGTH_MAX ],
 			'PrefHead'   => string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK'),
@@ -533,7 +569,7 @@ sub setupGroup {
 			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK_CHANGE'),
 		},
 		'plugin-lazysearch2-leftdeletes' => {
-			'validate'   => \&Slim::Web::Setup::validateTrueFalse,
+			'validate'   => \&Slim::Utils::Validate::trueFalse,
 			'PrefHead'   => string('SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES'),
 			'PrefDesc'   => string('SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_DESC'),
 			'PrefChoose' =>
@@ -546,7 +582,7 @@ sub setupGroup {
 			},
 		},
 		'plugin-lazysearch2-hooksearchbutton' => {
-			'validate' => \&Slim::Web::Setup::validateTrueFalse,
+			'validate' => \&Slim::Utils::Validate::trueFalse,
 			'PrefHead' => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON'),
 			'PrefDesc' =>
 			  string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_DESC'),
@@ -560,7 +596,7 @@ sub setupGroup {
 			},
 		},
 		'plugin-lazysearch2-lazifynow' => {
-			'validate'    => \&Slim::Web::Setup::validateAcceptAll,
+			'validate'    => \&Slim::Utils::Validate::acceptAll,
 			'PrefHead'    => string('SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW'),
 			'PrefDesc'    => string('SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_DESC'),
 			'changeIntro' =>
@@ -845,7 +881,7 @@ sub lazyOnPlay {
 	my $id = $item->{'id'};
 	$::d_plugins
 	  && Slim::Utils::Misc::msg(
-"LazySearch2: PLAY pressed on '$clientMode{$client}{select_col}' search results (id $id), addMode=$addMode\n"
+"LazySearch2: PLAY pressed on '$clientMode{$client}{search_type}' search results (id $id), addMode=$addMode\n"
 	  );
 	my ( $line1, $line2, $msg, $cmd );
 
@@ -883,75 +919,42 @@ sub lazyOnPlay {
 		}
 	);
 
+	# Function that will return all tracks for the given item - used for
+	# handling both individual entries and ALL entries.
+	my $searchTracksFunction = $clientMode{$client}{search_tracks};
+
+	# The playlist of tracks that we'll then action with the appropriate
+	# command. This is built up for both an individual item or for ALL items.
+	my @playItems = ();
+
 	# Handle 'ALL' entries specially
 	if ( $id != RESULT_ENTRY_ID_ALL ) {
-		$client->execute(
-			[
-				'playlist', $cmd,
-				sprintf( $clientMode{$client}{playlevel} . '=%d', $id )
-			]
-		);
+		@playItems = &$searchTracksFunction($id);
 	} else {
 
 		$::d_plugins
 		  && Slim::Utils::Misc::msg(
-			"LazySearch2: All for '$clientMode{$client}{select_col}' chosen\n");
-		my @playItems = ();
+			"LazySearch2: All for '$clientMode{$client}{search_type}' chosen\n"
+		  );
 
-		if ( $item->{'name'} eq '{ALL_ARTISTS}' ) {
-			for $item (@$listRef) {
+		for $item (@$listRef) {
 
-				# Don't try to search for the 'all items' entry.
-				next if $item->{id} == -1;
+			# Don't try to search for the 'all items' entry.
+			next if $item->{id} == -1;
 
-				# Find the tracks by this artist.
-				my $tracks = $ds->find(
-					{
-						'field' => 'lightweighttrack',
-						'find'  => { 'contributor' => $item->{id} }
-					}
-				);
+			# Find the tracks by this artist.
+			my @tracks = &$searchTracksFunction( $item->{id} );
 
-			  # Add these tracks to the list we're building up for the playlist.
-				for my $track (@$tracks) {
-					push @playItems, $track;
-				}
-			}
-		} elsif ( $item->{'name'} eq '{ALL_ALBUMS}' ) {
-			for $item (@$listRef) {
-
-				# Don't try to search for the 'all items' entry.
-				next if $item->{id} == -1;
-
-				# Find the tracks in this album.
-				my $tracks = $ds->find(
-					{
-						'field' => 'lightweighttrack',
-						'find'  => { 'album' => $item->{id} }
-					}
-				);
-
-			  # Add these tracks to the list we're building up for the playlist.
-				for my $track (@$tracks) {
-					push @playItems, $track;
-				}
-			}
-		} else {
-
-			# It must be the ALL_SONGS entry.
-			for $item (@$listRef) {
-				push @playItems,
-				  $ds->objectForId( 'lightweighttrack', $item->{id} )
-				  unless ( $item->{id} == RESULT_ENTRY_ID_ALL );
-			}
+			# Add these tracks to the list we're building up for the playlist.
+			push @playItems, @tracks;
 		}
-
-		# Now we've built the list of track items, play them.
-		$::d_plugins
-		  && Slim::Utils::Misc::msg(
-			"LazySearch2: About to '$cmd' " . scalar @playItems . " items\n" );
-		$client->execute( [ 'playlist', $cmd, 'listref', \@playItems ] );
 	}
+
+	# Now we've built the list of track items, play them.
+	$::d_plugins
+	  && Slim::Utils::Misc::msg(
+		"LazySearch2: About to '$cmd' " . scalar @playItems . " items\n" );
+	$client->execute( [ 'playlist', $cmd, 'listref', \@playItems ] );
 
 	# Not sure why, but we don't need to start the play
 	# here - seems something by default is grabbing and
@@ -1064,23 +1067,24 @@ sub onFindTimer() {
 				)
 			}
 		);
-		my $findResults = $ds->find(
+
+		my $searchResults =
+		  Slim::Schema->resultset( $clientMode{$client}{search_type} )
+		  ->search_like(
+			{ customsearch => buildFind( $clientMode{$client}{search_text} ) },
 			{
-				'field' => $clientMode{$client}{select_col},
-				'find'  => {
-					$clientMode{$client}{search_col} =>
-					  buildFind( $clientMode{$client}{search_text} )
-				},
-				'sortBy' => $clientMode{$client}{sortby_col},
+				columns => [ 'id', "$clientMode{$client}{text_col}" ],
+				order_by => $clientMode{$client}{text_col}
 			}
-		);
+		  );
 
 		# Each element of the listRef will be a hash with keys name and id.
 		# This is true for artists, albums and tracks.
 		my @searchItems = ();
-		for my $findItem (@$findResults) {
-			my $text = $clientMode{$client}{gettext}($findItem);
-			my $id   = $findItem->id;
+		while ( my $searchItem = $searchResults->next ) {
+			my $text =
+			  $searchItem->get_column( $clientMode{$client}{text_col} );
+			my $id = $searchItem->id;
 			push @searchItems, { name => $text, id => $id };
 		}
 
@@ -1117,13 +1121,13 @@ sub buildFind($) {
 	my $searchReturn;
 
 	if ($searchSubstring) {
-		$searchReturn = [ '%' . $searchText . '%' ];
+		$searchReturn = '%' . $searchText . '%';
 	} else {
 
 		# Search for start of words only. The lazy encoded version in the
 		# database has a encoded space on the front so that the first word
 		# isn't a special case here.
-		$searchReturn = [ '%' . lazyEncode(' ') . $searchText . '%' ];
+		$searchReturn = '%' . lazyEncode(' ') . $searchText . '%';
 	}
 
 	return $searchReturn;
@@ -1292,9 +1296,6 @@ sub checkDefaults {
 # information.
 sub scanDoneCallback {
 
-	my $request = shift;
-	my $client  = $request->client();
-
 	$::d_plugins
 	  && Slim::Utils::Misc::msg(
 "LazySearch2: Received notification of end of rescan - lazifying database\n"
@@ -1311,48 +1312,23 @@ sub lazifyDatabase {
 	%encodeQueues = ();
 
 	# Convert the albums table.
-	lazifyDatabaseType(
-		'album',
-		'album.customsearch',
-		sub {
-			my $obj = shift;
-			$obj->customsearch( lazifyColumn( $obj->titlesearch ) );
-		}
-	);
+	lazifyDatabaseType( 'Album', 'titlesearch' );
 
 	# Convert the artists (contributors) table.
-	lazifyDatabaseType(
-		'artist',
-		'contributor.customsearch',
-		sub {
-			my $obj = shift;
-			$obj->customsearch( lazifyColumn( $obj->namesearch ) );
-		}
-	);
+	lazifyDatabaseType( 'Contributor', 'namesearch' );
 
 	# Convert the genres table.
-	lazifyDatabaseType(
-		'genre',
-		'genre.customsearch',
-		sub {
-			my $obj = shift;
-			$obj->customsearch( lazifyColumn( $obj->namesearch ) );
-		}
-	);
+	lazifyDatabaseType( 'Genre', 'namesearch' );
 
 	# Convert the songs (tracks) table.
-	lazifyDatabaseType(
-		'lightweighttrack',
-		'track.customsearch',
-		sub {
-			my $obj = shift;
-			$obj->customsearch( lazifyColumn( $obj->titlesearch ) );
-		}
-	);
+	lazifyDatabaseType( 'Track', 'titlesearch' );
 
 	# If there are any items to encode then initialise a background task that
 	# will do that work in chunks.
 	if ( scalar keys %encodeQueues ) {
+		$::d_plugins
+		  && Slim::Utils::Misc::msg(
+			"LazySearch2: Scheduling backround lazification\n");
 		Slim::Utils::Scheduler::add_task( \&encodeTask );
 		$lazifying_database = 1;
 	} else {
@@ -1385,29 +1361,24 @@ sub lazifyColumn {
 # Those it finds are added to a global hash that is later worked through from
 # the background task.
 sub lazifyDatabaseType {
-	my $type       = shift;
-	my $lazy_col   = shift;
-	my $lazify_sub = shift;
-	$ds = Slim::Music::Info->getCurrentDataStore();
+	my $type        = shift;
+	my $source_attr = shift;
+	my $lazify_sub  = shift;
 
 	# Find all entries that are not yet converted.
-	my %todo = map { $_ => 1 } $ds->find(
-		{
-			'field'  => $type,
-			'idOnly' => 1,
-			'find'   => { $lazy_col => { '=', undef } }
-		}
-	);
+	my $rs = Slim::Schema->resultset($type)->search( { customsearch => undef },
+		{ columns => [ 'id', $source_attr, 'customsearch' ] } );
+	my $rs_count = $rs->count;
 
 	$::d_plugins
-	  && Slim::Utils::Misc::msg( "LazySearch2: Lazify type=$type, "
-		  . scalar( keys %todo )
-		  . " items to lazify\n" );
+	  && Slim::Utils::Misc::msg(
+		"LazySearch2: Lazify type=$type, " . $rs_count . " items to lazify\n" );
 
-	# Put these IDs into the queue to be processed. Later, we'll work on these
-	# in chunks from within a task.
-	if ( scalar keys %todo ) {
-		my %typeHash = ( lazify_sub => $lazify_sub, ids => [ keys %todo ] );
+	# Store the unlazified item IDs; later, we'll work on these in chunks from
+	# within a task.
+	if ( $rs_count > 0 ) {
+		my %typeHash =
+		  ( lazify_sub => $lazify_sub, rs => $rs, source_attr => $source_attr );
 		$encodeQueues{$type} = \%typeHash;
 	}
 }
@@ -1421,7 +1392,7 @@ sub encodeTask {
 
 	# As protection from two encodes going on simultaneously, if we detect that
 	# a scan is in progress we cancel the whole encode task.
-	if ( Slim::Music::Import::stillScanning() ) {
+	if ( Slim::Music::Import->stillScanning() ) {
 		$::d_plugins
 		  && Slim::Utils::Misc::msg(
 "LazySearch2: Detected a rescan while database scan in progress - cancelling lazy encoding\n"
@@ -1436,42 +1407,56 @@ sub encodeTask {
 	my $type        = ( keys %encodeQueues )[0];
 	my $typeHashRef = $encodeQueues{$type};
 	my %typeHash    = %$typeHashRef;
-
-	# Go through and encode each of the identified IDs. To maintain performance
-	# we will bail out if this takes more than a half a second.
-
-	my $lazifySub  = $typeHash{lazify_sub};
-	my $ids        = $typeHash{ids};
-	my $start_time = Time::HiRes::time();
-	$ds = Slim::Music::Info->getCurrentDataStore();
+	my $rs          = $typeHash{rs};
+	my $source_attr = $typeHash{source_attr};
 
 	$::d_plugins
-	  && Slim::Utils::Misc::msg( "LazySearch2: EncodeTask called - "
-		  . scalar @$ids
-		  . " $type object(s) remaining\n" );
+	  && Slim::Utils::Misc::msg( 'LazySearch2: EncodeTask - '
+		  . $rs->count
+		  . " $type"
+		  . "s remaining\n" );
 
-	while (
-		( scalar @$ids )
+	# Go through and encode each of the identified IDs. To maintain performance
+	# we will bail out if this takes more than a defined time slice.
+
+	my $rows_done  = 0;
+	my $start_time = Time::HiRes::time();
+	my $obj;
+	do {
+
+		# Get the next row from the resultset.
+		$obj = $rs->next;
+		if ($obj) {
+
+			# Update the search text for this one row and write it back to the
+			# database.
+			$obj->set_column( 'customsearch',
+				lazifyColumn( $obj->get_column($source_attr) ) );
+			$obj->update;
+
+			$rows_done++;
+		}
+	  } while (
+		$obj
 		&& ( ( Time::HiRes::time() - $start_time ) <
 			LAZYSEARCH_ENCODE_MAX_QUANTA )
-	  )
-	{
-		my $id = pop @$ids;
+	  );
 
-		# Update the search text for this one object and write it back to the
-		# database. We check that the object was successfully retrived as it
-		# may have been deleted in the meantime.
-		my $obj = $ds->objectForId( $type, $id );
-		if ( defined $obj ) {
-			&$lazifySub($obj);
-			$obj->update;
-		}
+	my $end_time = Time::HiRes::time();
+
+	# Speedometer
+	my $speed = 0;
+	if ( $end_time != $start_time ) {
+		$speed = int( $rows_done / ( $end_time - $start_time ) );
 	}
+	$::d_plugins
+	  && Slim::Utils::Misc::msg(
+		"LazySearch2: Lazifier running at $speed $type" . "s/sec\n" );
 
 	# If we've exhausted the ids for this type then remove this type from the
 	# hash. If there are any left, however, we'll leave those in for the task
 	# next time.
-	if ( !( scalar @$ids ) ) {
+	if ( !defined($obj) ) {
 		delete $encodeQueues{$type};
 		$::d_plugins
 		  && Slim::Utils::Misc::msg("LazySearch2: Exhaused IDs for $type\n");
@@ -1489,7 +1474,7 @@ sub encodeTask {
 		$reschedule_task = 0;
 
 		# Make sure our work gets persisted.
-		$ds->forceCommit;
+		Slim::Schema->forceCommit;
 
 		# Clear the global flag indicating the task is in progress.
 		$lazifying_database = 0;
@@ -1524,6 +1509,58 @@ sub lazyEncode($) {
 tr/ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 /2223334445556667777888999912345678900/;
 
 	return $out_string;
+}
+
+#@@REMOVEME@@
+sub scanStartCallback {
+
+	$::d_plugins
+	  && Slim::Utils::Misc::msg(
+"LazySearch2: Received notification of start of rescan - monitoring for end of scan\n"
+	  );
+
+	startScanEndMonitor();
+}
+
+#@@REMOVEME@@
+# This starts a timer to monitor for the end of the core SlimServer database
+# scan.
+sub startScanEndMonitor() {
+	my $timerName = PLUGIN_NAME . '.rescanCheck';
+
+	# Remove any previous timer and add our new one.
+	Slim::Utils::Timers::killTimers( $timerName, \&onRescanTimer );
+	Slim::Utils::Timers::setTimer( $timerName, Time::HiRes::time() + 5,
+		\&onRescanTimer );
+}
+
+#@@REMOVEME@@
+# This function is called periodically whilst a database scan is being
+# performed (as detected through the command callback above). This checks
+# whether the scan is still taking place, and if so schedules another timer
+# in a while. If, however, the scan is found to have finished then that's the
+# time to initiate the task of encoding each artist, track, genre and album
+# into a lazy-searchable version.
+sub onRescanTimer() {
+	my $timerName = shift;
+	my $client    = shift;
+
+	# Check whether the scan is still going on; if so just schedule another
+	# timer.
+	if ( Slim::Music::Import->stillScanning() ) {
+		my $newTimerName = PLUGIN_NAME . '.rescanCheck';
+		$::d_plugins
+		  && Slim::Utils::Misc::msg(
+"LazySearch2: scan still in progress; deferring database lazification\n"
+		  );
+		Slim::Utils::Timers::setTimer( $newTimerName, Time::HiRes::time() + 5,
+			\&onRescanTimer );
+	} else {
+		$::d_plugins
+		  && Slim::Utils::Misc::msg(
+			"LazySearch2: scan finished; starting database lazification\n");
+		lazifyDatabase();
+	}
 }
 
 # Standard plugin function to return our message catalogue. Many thanks to the

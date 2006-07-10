@@ -21,6 +21,7 @@ LATESTLINK=$(RELEASEDIR)/LazySearch2-6_5-latest.zip
 
 all:
 	echo Try 'make install', 'make release' or 'make pretty'
+	echo Or, 'make install restart logtail'
 
 FORCE:
 
@@ -31,6 +32,19 @@ pretty:
 
 # Install the plugin in SlimServer.
 install: $(PLUGINDIR)/$(DEST)
+
+# Restart SlimServer, quite forcefully. This is obviously quite
+# Gentoo-specific.
+restart:
+	echo "Forcefully restarting SlimServer..."
+	>/var/log/slimserver/messages
+	/etc/init.d/slimserver stop
+	/etc/init.d/slimserver zap
+	/etc/init.d/slimserver restart
+
+logtail:
+	echo "Following the end of the SlimServer log..."
+	tail -F /var/log/slimserver/messages
 
 $(PLUGINDIR)/$(DEST): $(DESTSTAGE)
 	echo Installing plugin...
