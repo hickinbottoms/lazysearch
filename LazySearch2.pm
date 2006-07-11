@@ -55,7 +55,8 @@ use constant LAZYSEARCH_HOOKSEARCHBUTTON_DEFAULT => 1;
 use constant LAZYSEARCH_ALLENTRIES_DEFAULT       => 1;
 
 # Constants that control the background lazy search database encoding.
-use constant LAZYSEARCH_ENCODE_MAX_QUANTA => 0.4;
+use constant LAZYSEARCH_ENCODE_MAX_QUANTA    => 0.4;
+use constant LAZYSEARCH_INITIAL_LAZIFY_DELAY => 5;
 
 # Special item IDs that are used to recognise non-result items in the
 # search results list.
@@ -389,18 +390,10 @@ sub initPlugin() {
 	# on them later.
 	checkDefaults();
 
-  # @@TODO - re-enable this when the SlimServer trunk supports the 'rescan
-  # done' callback again.@@
-  # Subscribe so that we are notified when the database has been rescanned;
-  # we use this so that we can apply lazification.
-  #	Slim::Control::Request::subscribe( \&Plugins::LazySearch2::scanDoneCallback,
-  #		[ ['rescan'], ['done'] ] );
-
-	# @@TODO - remove this when the above 'rescan done' hook is re-enabled.@@
-	# Subscribe to detect when rescans are initiated.
-	Slim::Control::Request::subscribe(
-		\&Plugins::LazySearch2::scanStartCallback,
-		[ [ 'rescan', 'wipecache' ] ] );
+	# Subscribe so that we are notified when the database has been rescanned;
+	# we use this so that we can apply lazification.
+	Slim::Control::Request::subscribe( \&Plugins::LazySearch2::scanDoneCallback,
+		[ ['rescan'], ['done'] ] );
 
 	# Top-level menu mode. We register a custom INPUT.Choice mode so that
 	# we can detect when we're in it (for SEARCH button toggle).
@@ -471,14 +464,16 @@ sub initPlugin() {
 	# Intercept the 'search' button to take us to our top-level menu.
 	Slim::Buttons::Common::setFunction( 'search', \&lazyOnSearch );
 
+	# Schedule a lazification to ensure that the database is lazified. This
+	# is useful because the user might shut down the server during the scan
+	# and we would otherwise have a part filled database that couldn't be
+	# lazy searched.
+	Slim::Utils::Timers::setTimer( undef, Time::HiRes::time() +
+		LAZYSEARCH_INITIAL_LAZIFY_DELAY,
+		\&scanDoneCallback );
+
 	$::d_plugins
 	  && Slim::Utils::Misc::msg("LazySearch2: Initialisation completed\n");
-
-	# @@REMOVE ME - it should be possible to remove this because we should
-	# receive a normal "rescan done" dispatch when that mechanism has been
-	# hooked up@@
-	Slim::Utils::Timers::setTimer( undef, Time::HiRes::time() + 5,
-		\&scanDoneCallback );
 }
 
 sub shutdownPlugin() {
@@ -486,16 +481,9 @@ sub shutdownPlugin() {
 
 	$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: Shutting down\n");
 
-	# @@TODO - re-enable this when the SlimServer trunk supports the 'rescan
-	# done' callback again.@@
-	# Remove the subscription we'd previously registered
-	#	Slim::Control::Request::unsubscribe(
-	#		\&Plugins::LazySearch2::scanDoneCallback );
-
-	# @@TODO - remove this when the above 'rescan done' hook is re-enabled.@@
 	# Remove the subscription we'd previously registered
 	Slim::Control::Request::unsubscribe(
-		\&Plugins::LazySearch2::scanStartCallback );
+		\&Plugins::LazySearch2::scanDoneCallback );
 
 	# @@TODO@@
 	# Do we need to remove our top-level mode?
@@ -1509,58 +1497,6 @@ sub lazyEncode($) {
 tr/ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 /2223334445556667777888999912345678900/;
 
 	return $out_string;
-}
-
-#@@REMOVEME@@
-sub scanStartCallback {
-
-	$::d_plugins
-	  && Slim::Utils::Misc::msg(
-"LazySearch2: Received notification of start of rescan - monitoring for end of scan\n"
-	  );
-
-	startScanEndMonitor();
-}
-
-#@@REMOVEME@@
-# This starts a timer to monitor for the end of the core SlimServer database
-# scan.
-sub startScanEndMonitor() {
-	my $timerName = PLUGIN_NAME . '.rescanCheck';
-
-	# Remove any previous timer and add our new one.
-	Slim::Utils::Timers::killTimers( $timerName, \&onRescanTimer );
-	Slim::Utils::Timers::setTimer( $timerName, Time::HiRes::time() + 5,
-		\&onRescanTimer );
-}
-
-#@@REMOVEME@@
-# This function is called periodically whilst a database scan is being
-# performed (as detected through the command callback above). This checks
-# whether the scan is still taking place, and if so schedules another timer
-# in a while. If, however, the scan is found to have finished then that's the
-# time to initiate the task of encoding each artist, track, genre and album
-# into a lazy-searchable version.
-sub onRescanTimer() {
-	my $timerName = shift;
-	my $client    = shift;
-
-	# Check whether the scan is still going on; if so just schedule another
-	# timer.
-	if ( Slim::Music::Import->stillScanning() ) {
-		my $newTimerName = PLUGIN_NAME . '.rescanCheck';
-		$::d_plugins
-		  && Slim::Utils::Misc::msg(
-"LazySearch2: scan still in progress; deferring database lazification\n"
-		  );
-		Slim::Utils::Timers::setTimer( $newTimerName, Time::HiRes::time() + 5,
-			\&onRescanTimer );
-	} else {
-		$::d_plugins
-		  && Slim::Utils::Misc::msg(
-			"LazySearch2: scan finished; starting database lazification\n");
-		lazifyDatabase();
-	}
 }
 
 # Standard plugin function to return our message catalogue. Many thanks to the
