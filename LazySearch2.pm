@@ -1362,8 +1362,15 @@ sub performTimedKeywordSearch($$) {
 		\&rightIntoArtist,
 		\&searchTracksForArtist,
 		'Contributor',
+		'albums', 'id',
+		'contributor_album', 'album',
+		'contributor_album', 'contributor',
+		'tracks', 'id',
+		'contributor_track', 'track',
+		'contributor_track', 'contributor',
 		\@categoryItems);
 	main::idleStreams();
+
 	doCategoryKeywordSearch($client,
 		$forceSearch,
 		\@keywordParts,
@@ -1375,7 +1382,14 @@ sub performTimedKeywordSearch($$) {
 		\&rightIntoAlbum,
 		\&searchTracksForAlbum,
 		'Album',
+		'contributors', 'id',
+		'contributor_album', 'contributor',
+		'contributor_album', 'album',
+		'tracks', 'album',
+		'albums', 'id',
+		'tracks', 'album',
 		\@categoryItems);
+
 	main::idleStreams();
 	doCategoryKeywordSearch($client,
 		$forceSearch,
@@ -1388,13 +1402,19 @@ sub performTimedKeywordSearch($$) {
 		\&rightIntoTrack,
 		\&searchTracksForTrack,
 		'Song',
+		'contributors', 'id',
+		'contributor_track', 'contributor',
+		'contributor_track', 'track',
+		'albums', 'id',
+		'tracks', 'album',
+		'tracks', 'id',
 		\@categoryItems);
 
 	# Make these items available to the results-listing mode.
 	$clientMode{$client}{search_items} = \@categoryItems;
 }
 
-sub doCategoryKeywordSearch($$$$$$$$$$$$) {
+sub doCategoryKeywordSearch($$$$$$$$$$$$$$$$$$$$$$) {
 	my $client = shift;
 	my $forceSearch = shift;
 	my $keywordParts = shift;
@@ -1406,15 +1426,29 @@ sub doCategoryKeywordSearch($$$$$$$$$$$$) {
 	my $onRightHandler = shift;
 	my $searchTracksFunction = shift;
 	my $searchType = shift;
+	my $joinTable11 = shift;
+	my $joinColumn11 = shift;
+	my $joinTable12 = shift;
+	my $joinColumn12 = shift;
+	my $joinTable13 = shift;
+	my $joinColumn13 = shift;
+	my $joinTable21 = shift;
+	my $joinColumn21 = shift;
+	my $joinTable22 = shift;
+	my $joinColumn22 = shift;
+	my $joinTable23 = shift;
+	my $joinColumn23 = shift;
 	my $categoryItems = shift;
 
 	# We only do this search type if the user has enabled it.
 	if (Slim::Utils::Prefs::get($enabledPrefName)) {
 		$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: About to perform timed keyword $menuEntryText search (type=$type, searchType=$searchType)\n");
 
-		# Build the WHERE clause for the query, containing multiple AND clauses
+		# Build the WHERE clause for the query, containing multiple OR clauses
 		# and LIKE searches.
-		my @andClause = ();
+		my @orClause = ();
+		my $orClauseSQL1 = '';
+		my $orClauseSQL2 = '';
 		foreach my $keyword (@{$keywordParts}) {
 			# We don't include zero-length keywords.
 			next if (length($keyword) == 0);
@@ -1423,23 +1457,41 @@ sub doCategoryKeywordSearch($$$$$$$$$$$$) {
 			next if (!$forceSearch && (length($keyword) < $clientMode{$client}{min_search_length}));
 
 			# Otherwise, here's the search term for this one keyword.
-			push @andClause, 'customsearch';
-			push @andClause, { 'like', buildFind( $keyword ) };
+			my $find = buildFind( $keyword );
+			push @orClause, 'customsearch';
+			push @orClause, { 'like', $find };
+
+			# And the same thing for the SQL subquerys.
+			$orClauseSQL1 .= ' OR ' if (length($orClauseSQL1) > 0);
+			$orClauseSQL1 .= "$joinTable11.customsearch LIKE \"$find\"";
+			$orClauseSQL2 .= ' OR ' if (length($orClauseSQL2) > 0);
+			$orClauseSQL2 .= "$joinTable21.customsearch LIKE \"$find\"";
 		}
 
 		# Bail out here if we've not found any keywords we're interested
 		# in searching. This can happen because the outer minimum length is
 		# based on the whole string, not the maximum individual keyword.
-		return if (@andClause == 0);
+		return if (@orClause == 0);
+
+		# Build the SQL subqueries used.
+		my $subquery1 = "IN (SELECT $joinTable13.$joinColumn13 FROM $joinTable11, $joinTable12 WHERE $joinTable11.$joinColumn11 = $joinTable12.$joinColumn12 AND ($orClauseSQL1))";
+		my $subquery2 = "IN (SELECT $joinTable23.$joinColumn23 FROM $joinTable21, $joinTable22 WHERE $joinTable21.$joinColumn21 = $joinTable22.$joinColumn22 AND ($orClauseSQL2))";
+		$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: subquery1: $subquery1\n");
+		$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: subquery2: $subquery2\n");
 
 		# Need to wrap the clause like this, or it won't work.
-		@andClause = [ @andClause ];
+		@orClause = [ @orClause ];
 		
 		# Execute that search.
 		my $results =
 		  Slim::Schema->resultset($type)->search(
-			{
-				-and => @andClause
+			{	-and => [
+					-or => @orClause,
+					-or => [
+						id => \$subquery1,
+						id => \$subquery2
+						]
+					]
 			},
 			{
 				columns => [ 'id', $textColumn ],
@@ -1979,14 +2031,14 @@ sub keywordMatchText($$$) {
 		if (length($text) == 0) {
 			$text .= "$keyword";
 		} else {
-			$text .= "&$keyword";
+			$text .= ",$keyword";
 		}
 	}
 
 	# If we're not hiding short keywords (ie the user is entering the search)
-	# we add a trailing '&' if the last key entry was the separator.
+	# we add a trailing ',' if the last key entry was the separator.
 	if (!$hideShorties && (substr($searchText, length($searchText) - 1) == lazyEncode(' '))) {
-		$text .= '&';
+		$text .= ',';
 	}
 
 	return $text;
