@@ -14,8 +14,8 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
-# This is a plugin to implement lazy searching using the SqueezeBox remote
-# control.
+# This is a plugin to implement lazy searching using the Squeezebox/Transporter
+# remote control.
 #
 # For further details see:
 # http://hickinbottom.demon.co.uk/SlimServer/lazy_searching2.htm
@@ -30,6 +30,9 @@ use Slim::Utils::Misc;
 use Slim::Utils::Text;
 use Slim::Utils::Timers;
 use Time::HiRes;
+
+# @@TODO@@ - removeme
+use Data::Dumper;
 
 # Name of this plugin - used for various global things to prevent clashes with
 # other plugins.
@@ -80,11 +83,15 @@ $VERSION = 'trunk-6.5-r@@REVISION@@';
 # and the second a 'parameter' for that player.
 # The elements of the second hash are as follows:
 #	search_type:	This is the item type being searched for, and can be one
-#					of Track, Contributor, Album or Genre.
+#					of Track, Contributor, Album, Genre or Keyword.
 #	text_col:		The column of the search_type row that holds the text that
 #					will be shown on the player as the result of the search.
 #	search_text:	The current search text (ie the number keys on the remote
 #					control).
+#	side:				Allows the search to be constrained to one side of
+#						the pipe in the customsearch column or the other.
+#						side=1 searches left, side=2 searches right, anything
+#						else isn't specific.
 #	search_performed:	Indicates whether a search has yet been performed
 #						(and hence whether search_items has the search
 #						results). It contains the search text at the time the
@@ -119,12 +126,18 @@ my %clientMode = ();
 # present to allow a background task to work on them in chunks, preventing
 # performance problems caused by the server going busy for a long time.
 # The structure of the hash is as follows:
-# 	type => { lazify_sub => XX, ids => (YY) }
+# 	type => { rs, source_attr, keyword_artist, keyword_album, keyword_track,
+# 	          ids }
 # Where:
 # 	type is 'album', 'artist', 'genre' or 'track'.
-# 	XX is a subroutine that will update the appropriate 'search' attribute of
-# 		the object
-# 	YY is a list (array) of IDs to process.
+#	rs is the DBIx ResultSet containing the items of that type that need to
+#	  be lazified.
+#	source_attr is the column name in the ResultSet that has the source
+#	  attribute that will be lazified into the custom search.
+#	keyword_artist, keyword_album, keyword_track are flags (0/1) that indicate
+#	  whether those items are lazified into the customsearch field to support
+#	  custom searches.
+# 	ids is a list (array) of IDs to process.
 my %encodeQueues = ();
 
 # Flag to protect against multiple initialisation or shutdown
@@ -133,7 +146,7 @@ my $initialised = 0;
 # Flag to indicate whether we're currently applying 'lazification' to the
 # database. Used to detect and warn the user of this when entering
 # lazy search mode while this is in progress.
-my $lazifying_database = 0;
+my $lazifyingDatabase = 0;
 
 # Map which is used to quickly translate the button pushes captured by our
 # mode back into the numbers on those keys.
@@ -200,6 +213,7 @@ sub setMode {
 
 			if ( $item eq '{ARTISTS}' ) {
 				$clientMode{$client}{search_type}  = 'Contributor';
+				$clientMode{$client}{side} 		   = 0;
 				$clientMode{$client}{text_col}     = 'name';
 				$clientMode{$client}{all_entry}    = '{ALL_ARTISTS}';
 				$clientMode{$client}{player_title} = '{LINE1_BROWSE_ARTISTS}';
@@ -215,6 +229,7 @@ sub setMode {
 				setSearchBrowseMode( $client, $item, 0 );
 			} elsif ( $item eq '{ALBUMS}' ) {
 				$clientMode{$client}{search_type}  = 'Album';
+				$clientMode{$client}{side} 		   = 0;
 				$clientMode{$client}{text_col}     = 'title';
 				$clientMode{$client}{all_entry}    = '{ALL_ALBUMS}';
 				$clientMode{$client}{player_title} = '{LINE1_BROWSE_ALBUMS}';
@@ -229,6 +244,7 @@ sub setMode {
 				setSearchBrowseMode( $client, $item, 0 );
 			} elsif ( $item eq '{GENRES}' ) {
 				$clientMode{$client}{search_type}  = 'Genre';
+				$clientMode{$client}{side} 		   = 0;
 				$clientMode{$client}{text_col}     = 'name';
 				$clientMode{$client}{all_entry}    = undef;
 				$clientMode{$client}{player_title} = '{LINE1_BROWSE_GENRES}';
@@ -243,6 +259,7 @@ sub setMode {
 				setSearchBrowseMode( $client, $item, 0 );
 			} elsif ( $item eq '{SONGS}' ) {
 				$clientMode{$client}{search_type}  = 'Track';
+				$clientMode{$client}{side} 		   = 1;
 				$clientMode{$client}{text_col}     = 'title';
 				$clientMode{$client}{all_entry}    = '{ALL_SONGS}';
 				$clientMode{$client}{player_title} = '{LINE1_BROWSE_TRACKS}';
@@ -257,9 +274,10 @@ sub setMode {
 				setSearchBrowseMode( $client, $item, 0 );
 			} elsif ( $item eq '{KEYWORD_MENU_ITEM}' ) {
 				$clientMode{$client}{search_type}  = SEARCH_TYPE_KEYWORD;
+				$clientMode{$client}{side} 		   = 2;
 				$clientMode{$client}{text_col}     = undef;
 				$clientMode{$client}{all_entry}    = undef;
-				$clientMode{$client}{player_title} = '{LINE1_BROWSE_KEYWORDS}';
+				$clientMode{$client}{player_title} = '{LINE1_BROWSE_ARTISTS}';
 				$clientMode{$client}{player_title_empty} =
 				  '{LINE1_BROWSE_KEYWORDS_EMPTY}';
 				$clientMode{$client}{enter_more_prompt} =
@@ -273,7 +291,7 @@ sub setMode {
 			}
 
 			# If rescan is in progress then warn the user.
-			if ( $lazifying_database || Slim::Music::Import->stillScanning() ) {
+			if ( $lazifyingDatabase || Slim::Music::Import->stillScanning() ) {
 				$::d_plugins
 				  && Slim::Utils::Misc::msg(
 					"LazySearch2: Entering search while scan in progress\n");
@@ -538,7 +556,7 @@ sub initPlugin() {
 	Slim::Buttons::Common::addMode( LAZYBROWSE_KEYWORD_MODE, \%chFunctions2,
 		\&Slim::Buttons::Input::Choice::setMode );
 
-	# Our input map for the new keyword browse mode, based on thd default map
+	# Our input map for the new keyword browse mode, based on the default map
 	# contents for INPUT.Choice.
 	my %keywordInputMap = (
 		'arrow_left'      => 'exit_left',
@@ -741,7 +759,7 @@ sub setupGroup {
 			'ChangeButton'  =>
 			  string('SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_BUTTON'),
 			'onChange' => sub {
-				if ( !$lazifying_database ) {
+				if ( !$lazifyingDatabase ) {
 					$::d_plugins
 					  && Slim::Utils::Misc::msg(
 						"LazySearch2: Manual lazification requested\n");
@@ -1026,12 +1044,6 @@ sub lazyOnPlay {
 	# handling both individual entries and ALL entries.
 	my $searchTracksFunction = $clientMode{$client}{search_tracks};
 
-	# Keyword search doesn't support PLAY/INSERT/ADD on the category menu so we
-	# bail out early here.
-	if (!defined($searchTracksFunction)) {
-		return;
-	}
-
 	# Cancel any pending timer.
 	cancelPendingSearch($client);
 
@@ -1041,6 +1053,22 @@ sub lazyOnPlay {
 	my $listRef = $client->param('listRef');
 	if ( length($clientMode{$client}{search_performed}) == 0 ) {
 		return;
+	}
+
+	# If we're on the keyword hierarchy then the function is dependent on the
+	# level of the item we're on.
+	if ($clientMode{$client}{search_type} eq SEARCH_TYPE_KEYWORD) {
+		my $level = $item->{'level'};
+		if ($level == 1) {
+			$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: lazyOnPlay called for keyword artist\n");
+			$searchTracksFunction = \&searchTracksForArtist;
+		} elsif ($level == 2) {
+			$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: lazyOnPlay called for keyword album\n");
+			$searchTracksFunction = \&searchTracksForAlbum;
+		} else {
+			$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: lazyOnPlay called for keyword track\n");
+			$searchTracksFunction = \&searchTracksForTrack;
+		}
 	}
 
 	my $id = $item->{'value'};
@@ -1299,7 +1327,7 @@ sub performTimedItemSearch($) {
 	my $searchResults =
 	  Slim::Schema->resultset( $clientMode{$client}{search_type} )
 	  ->search_like(
-		{ customsearch => buildFind( $clientMode{$client}{search_text} ) },
+		{ customsearch => buildFind( $clientMode{$client}{search_text}, $clientMode{$client}{side} ) },
 		{
 			columns => [ 'id', "$clientMode{$client}{text_col}" ],
 			order_by => $clientMode{$client}{text_col}
@@ -1316,10 +1344,8 @@ sub performTimedItemSearch($) {
 		push @searchItems, { name => $text, value => $id };
 	}
 
-	# If there are results, and the user wanted it, show the 'all X'
-	# choice.
-	if (   Slim::Utils::Prefs::get('plugin-lazysearch2-leftdeletes')
-		&& ( scalar(@searchItems) > 1 )
+	# If there are multiple results, show the 'all X' choice.
+	if (( scalar(@searchItems) > 1 )
 		&& defined( $clientMode{$client}{all_entry} ) )
 	{
 		push @searchItems,
@@ -1334,194 +1360,122 @@ sub performTimedItemSearch($) {
 }
 
 # Perform the lazy search for the keywords. This performs an AND query with
-# each entered query within each of the enabled keyword search categories.
+# each entered query matching somewhere within the custom search text (the
+# database lazification will have put all candidate text within the
+# customsearch column).
 sub performTimedKeywordSearch($$) {
 	my $client = shift;
 	my $forceSearch = shift;
 
 	$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: About to perform timed keyword search\n");
 
-	# Each element of the listRef will be a hash with category name and
-	# category results in it. There will be categories for those enabled and
-	# that return results (empty categories are hidden).
-	my @categoryItems = ();
+	# Perform the search. The search will always be an unconstrained one
+	# because it is at the top level (we've not yet pushed into contributor
+	# or album to constrain the results).
+	my $searchItems = doKeywordSearch($client, $clientMode{$client}{search_text}, $forceSearch, 1, undef, undef);
+
+	# Make these items available to the results-listing mode.
+	$clientMode{$client}{search_items} = $searchItems;
+	$clientMode{$client}{lazysearch_keyword_level} = 1;
+	delete $clientMode{$client}{lazysearch_keyword_contributor};
+	delete $clientMode{$client}{lazysearch_keyword_album};
+}
+
+# Actually perform the keyword search. This supports all levels of searching
+# and will filter on contributor or album as requested.
+sub doKeywordSearch($$$$$$) {
+	my $client = shift;
+	my $searchText = shift;
+	my $forceSearch = shift;
+	my $level = shift;
+	my $contributorConstraint = shift;
+	my $albumConstraint = shift;
+	my @items;
+
+	$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: doing keyword search, level=$level, contributorConstraint=$contributorConstraint, albumConstraint=$albumConstraint\n");
 
 	# Keyword searches are separate 'keywords' separated by a space (lazy
 	# encoded). We split those out here.
-	my @keywordParts = split(lazyEncode(' '),  $clientMode{$client}{search_text});
+	my @keywordParts = split(lazyEncode(' '), $searchText);
 
-	# Perform the keyword search against each category.
-	doCategoryKeywordSearch($client,
-		$forceSearch,
-		\@keywordParts,
-		'plugin-lazysearch2-keyword-artists-enabled',
-		'Contributor',
-		'name',
-		'ARTISTS',
-		'LINE1_BROWSE_ARTISTS',
-		\&rightIntoArtist,
-		\&searchTracksForArtist,
-		'Contributor',
-		'albums', 'id',
-		'contributor_album', 'album',
-		'contributor_album', 'contributor',
-		'tracks', 'id',
-		'contributor_track', 'track',
-		'contributor_track', 'contributor',
-		\@categoryItems);
-	main::idleStreams();
+	#@@TODO@@ remove this test code
+#	$level = 3;
+#	my @keywordParts = ( '9255' );
+#	$keywordParts = \@keywordParts;
+#	$albumConstraint=275;
+#	$contributorConstraint=556;
 
-	doCategoryKeywordSearch($client,
-		$forceSearch,
-		\@keywordParts,
-		'plugin-lazysearch2-keyword-albums-enabled',
-		'Album',
-		'title',
-		'ALBUMS',
-		'LINE1_BROWSE_ALBUMS',
-		\&rightIntoAlbum,
-		\&searchTracksForAlbum,
-		'Album',
-		'contributors', 'id',
-		'contributor_album', 'contributor',
-		'contributor_album', 'album',
-		'tracks', 'album',
-		'albums', 'id',
-		'tracks', 'album',
-		\@categoryItems);
+	# Build the WHERE clause for the query, containing multiple AND clauses
+	# and LIKE searches.
+	my @andClause = ();
+	foreach my $keyword (@keywordParts) {
 
-	main::idleStreams();
-	doCategoryKeywordSearch($client,
-		$forceSearch,
-		\@keywordParts,
-		'plugin-lazysearch2-keyword-tracks-enabled',
-		'Track',
-		'title',
-		'SONGS',
-		'LINE1_BROWSE_TRACKS',
-		\&rightIntoTrack,
-		\&searchTracksForTrack,
-		'Song',
-		'contributors', 'id',
-		'contributor_track', 'contributor',
-		'contributor_track', 'track',
-		'albums', 'id',
-		'tracks', 'album',
-		'tracks', 'id',
-		\@categoryItems);
+		# We don't include zero-length keywords.
+		next if (length($keyword) == 0);
 
-	# Make these items available to the results-listing mode.
-	$clientMode{$client}{search_items} = \@categoryItems;
-}
+		# We don't include short keywords unless the search is forced.
+		next if (!$forceSearch && (length($keyword) < $clientMode{$client}{min_search_length}));
 
-sub doCategoryKeywordSearch($$$$$$$$$$$$$$$$$$$$$$) {
-	my $client = shift;
-	my $forceSearch = shift;
-	my $keywordParts = shift;
-	my $enabledPrefName = shift;
-	my $type = shift;
-	my $textColumn = shift;
-	my $menuEntryText = shift;
-	my $line1Text = shift;
-	my $onRightHandler = shift;
-	my $searchTracksFunction = shift;
-	my $searchType = shift;
-	my $joinTable11 = shift;
-	my $joinColumn11 = shift;
-	my $joinTable12 = shift;
-	my $joinColumn12 = shift;
-	my $joinTable13 = shift;
-	my $joinColumn13 = shift;
-	my $joinTable21 = shift;
-	my $joinColumn21 = shift;
-	my $joinTable22 = shift;
-	my $joinColumn22 = shift;
-	my $joinTable23 = shift;
-	my $joinColumn23 = shift;
-	my $categoryItems = shift;
-
-	# We only do this search type if the user has enabled it.
-	if (Slim::Utils::Prefs::get($enabledPrefName)) {
-		$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: About to perform timed keyword $menuEntryText search (type=$type, searchType=$searchType)\n");
-
-		# Build the WHERE clause for the query, containing multiple OR clauses
-		# and LIKE searches.
-		my @orClause = ();
-		my $orClauseSQL1 = '';
-		my $orClauseSQL2 = '';
-		foreach my $keyword (@{$keywordParts}) {
-			# We don't include zero-length keywords.
-			next if (length($keyword) == 0);
-
-			# We don't include short keywords unless the search is forced.
-			next if (!$forceSearch && (length($keyword) < $clientMode{$client}{min_search_length}));
-
-			# Otherwise, here's the search term for this one keyword.
-			my $find = buildFind( $keyword );
-			push @orClause, 'customsearch';
-			push @orClause, { 'like', $find };
-
-			# And the same thing for the SQL subquerys.
-			$orClauseSQL1 .= ' OR ' if (length($orClauseSQL1) > 0);
-			$orClauseSQL1 .= "$joinTable11.customsearch LIKE \"$find\"";
-			$orClauseSQL2 .= ' OR ' if (length($orClauseSQL2) > 0);
-			$orClauseSQL2 .= "$joinTable21.customsearch LIKE \"$find\"";
-		}
-
-		# Bail out here if we've not found any keywords we're interested
-		# in searching. This can happen because the outer minimum length is
-		# based on the whole string, not the maximum individual keyword.
-		return if (@orClause == 0);
-
-		# Build the SQL subqueries used.
-		my $subquery1 = "IN (SELECT $joinTable13.$joinColumn13 FROM $joinTable11, $joinTable12 WHERE $joinTable11.$joinColumn11 = $joinTable12.$joinColumn12 AND ($orClauseSQL1))";
-		my $subquery2 = "IN (SELECT $joinTable23.$joinColumn23 FROM $joinTable21, $joinTable22 WHERE $joinTable21.$joinColumn21 = $joinTable22.$joinColumn22 AND ($orClauseSQL2))";
-		$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: subquery1: $subquery1\n");
-		$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: subquery2: $subquery2\n");
-
-		# Need to wrap the clause like this, or it won't work.
-		@orClause = [ @orClause ];
-		
-		# Execute that search.
-		my $results =
-		  Slim::Schema->resultset($type)->search(
-			{	-and => [
-					-or => @orClause,
-					-or => [
-						id => \$subquery1,
-						id => \$subquery2
-						]
-					]
-			},
-			{
-				columns => [ 'id', $textColumn ],
-				order_by => $textColumn
-			}
-		  );
-
-		# If any results were found then that is added to the keyword result
-		# menu.
-		my $count = $results->count;
-		if ($count) {
-			push @{$categoryItems}, {
-				name => string($menuEntryText) . " ($count)",
-				value => 0,
-				line1_browse_text => $line1Text,
-				text_column => $textColumn,
-				result_set => $results,
-				on_right => $onRightHandler,
-				search_type => $searchType,
-				search_tracks => $searchTracksFunction
-			};
-		}
+		# Otherwise, here's the search term for this one keyword.
+		push @andClause, 'me.customsearch';
+		push @andClause, { 'like', buildFind( $keyword, $clientMode{$client}{side} ) };
 	}
+
+	# Bail out here if we've not found any keywords we're interested
+	# in searching. This can happen because the outer minimum length is
+	# based on the whole string, not the maximum individual keyword.
+	return if (@andClause == 0);
+
+	# Perform the search, depending on the level.
+	my $textColumn;
+	my $results;
+	if ($level == 1) {
+		$results = Slim::Schema->resultset('Track')->search({ -and => [ @andClause ] }, { order_by => 'namesort', distinct => 1 })->search_related('contributorTracks')->search_related('contributor');
+		$textColumn = 'name';
+
+		#@@TODO@@ - removeme
+		while (my $item = $results->next) {
+			$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: id=" . $item->id . ", item=\'" . $item->name . "\'\n");
+		}
+		$results->reset;
+
+	} elsif ($level == 2) {
+
+		$results = Slim::Schema->resultset('Track')->search({ -and => [ @andClause, 'contributorTracks.contributor' => { '=', $contributorConstraint } ] }, { order_by => 'titlesort', distinct => 1, join => 'contributorTracks' })->search_related('album');
+		$textColumn = 'title';
+
+		#@@TODO@@ - removeme
+		while (my $item = $results->next) {
+			$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: id=" . $item->id . ", item=\'" . $item->title . "\'\n");
+		}
+		$results->reset;
+	} elsif ($level == 3) {
+		$results = Slim::Schema->resultset('Track')->search({ -and => [ @andClause, 'contributorTracks.contributor' => { '=', $contributorConstraint }, 'album' => { '=', $albumConstraint } ] }, { join => 'contributorTracks', order_by => 'disc,tracknum,titlesort' });
+		$textColumn = 'title';
+
+		#@@TODO@@ - removeme
+		while (my $item = $results->next) {
+			$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: id=" . $item->id . ", item=\'" . $item->title . "\'\n");
+		}
+		$results->reset;
+	}
+
+	# Build up the item array.
+	while (my $item = $results->next) {
+		push @items, { name => $item->get_column($textColumn), value => $item->id, level => $level };
+	}
+
+	return \@items;
 }
 
 # Construct the search terms. This takes into account the 'search substring'
 # preference to build an appropriate array. Additionally, it can split separate
 # keywords (separated by a space encoded as '0'), to build an AND search.
+# An optional flag can be passed to constrain the search to either the left (1)
+# or the right (2) hand-side of the customsearch value.
 sub buildFind($) {
 	my $searchText       = shift;
+	my $side			 = shift || 0;
 	my $searchSubstring  = ( Slim::Utils::Prefs::get('searchSubString') );
 	my $searchReturn;
 
@@ -1534,6 +1488,10 @@ sub buildFind($) {
 		# isn't a special case here.
 		$searchReturn = '%' . lazyEncode(' ') . $searchText . '%';
 	}
+
+	# Constrain for one side or the other, if specified.
+	$searchReturn .= '|%' if $side == 1; # Left-hand side
+	$searchReturn = ('%|' . $searchReturn) if $side == 2; # Right-hand side
 
 	return $searchReturn;
 }
@@ -1736,16 +1694,16 @@ sub lazifyDatabase {
 	%encodeQueues = ();
 
 	# Convert the albums table.
-	lazifyDatabaseType( 'Album', 'titlesearch' );
+	lazifyDatabaseType( 'Album', 'titlesearch', 0, 0, 0 );
 
 	# Convert the artists (contributors) table.
-	lazifyDatabaseType( 'Contributor', 'namesearch' );
+	lazifyDatabaseType( 'Contributor', 'namesearch, 0, 0, 0' );
 
 	# Convert the genres table.
-	lazifyDatabaseType( 'Genre', 'namesearch' );
+	lazifyDatabaseType( 'Genre', 'namesearch', 0, 0, 0 );
 
 	# Convert the songs (tracks) table.
-	lazifyDatabaseType( 'Track', 'titlesearch' );
+	lazifyDatabaseType( 'Track', 'titlesearch', 1, 1, 1 );
 
 	# If there are any items to encode then initialise a background task that
 	# will do that work in chunks.
@@ -1754,7 +1712,7 @@ sub lazifyDatabase {
 		  && Slim::Utils::Misc::msg(
 			"LazySearch2: Scheduling backround lazification\n");
 		Slim::Utils::Scheduler::add_task( \&encodeTask );
-		$lazifying_database = 1;
+		$lazifyingDatabase = 1;
 	} else {
 		$::d_plugins
 		  && Slim::Utils::Misc::msg(
@@ -1786,23 +1744,52 @@ sub lazifyColumn {
 # the background task.
 sub lazifyDatabaseType {
 	my $type        = shift;
-	my $source_attr = shift;
-	my $lazify_sub  = shift;
+	my $sourceAttr = shift;
+	my $considerKeywordArtist = shift;
+	my $considerKeywordAlbum = shift;
+	my $considerKeywordTrack = shift;
+
+	# Include keywords in the lazified version if the caller asked for it and
+	# the user preference says they want it.
+	my $includeKeywordArtist = $considerKeywordArtist && Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-artists-enabled');
+	my $includeKeywordAlbum = $considerKeywordAlbum && Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-albums-enabled');
+	my $includeKeywordTrack = $considerKeywordTrack && Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-tracks-enabled');
+
+	# If adding keywords for album titles then we need to join to the album
+	# table, to.
+	my $extraJoins;
+	$extraJoins = qw/ album / if $includeKeywordAlbum;
+
+	# The query to find items to lazify takes into account keyword columns
+	# in case that column was previously lazified before keywords were
+	# introduced.
+	my $itemsToFind;
+	if ($considerKeywordArtist || $considerKeywordAlbum || $considerKeywordTrack) {
+		$itemsToFind = { 'not like', '%|%' };
+	} else {
+		$itemsToFind = undef;
+	}
 
 	# Find all entries that are not yet converted.
-	my $rs = Slim::Schema->resultset($type)->search( { customsearch => undef },
-		{ columns => [ 'id', $source_attr, 'customsearch' ] } );
-	my $rs_count = $rs->count;
+	my $rs = Slim::Schema->resultset($type)->search( { 'me.customsearch' => $itemsToFind },
+		{ columns => [ 'id', $sourceAttr, 'me.customsearch' ], join => $extraJoins, prefetch => $extraJoins } );
+	my $rsCount = $rs->count;
 
 	$::d_plugins
 	  && Slim::Utils::Misc::msg(
-		"LazySearch2: Lazify type=$type, " . $rs_count . " items to lazify\n" );
+		"LazySearch2: Lazify type=$type, " . $rsCount . " items to lazify\n" );
 
 	# Store the unlazified item IDs; later, we'll work on these in chunks from
 	# within a task.
-	if ( $rs_count > 0 ) {
+	if ( $rsCount > 0 ) {
 		my %typeHash =
-		  ( lazify_sub => $lazify_sub, rs => $rs, source_attr => $source_attr );
+		  (
+			  rs => $rs,
+			  source_attr => $sourceAttr,
+			  keyword_artist => $includeKeywordArtist,
+			  keyword_album => $includeKeywordAlbum,
+			  keyword_track => $includeKeywordTrack,
+		  );
 		$encodeQueues{$type} = \%typeHash;
 	}
 }
@@ -1832,7 +1819,10 @@ sub encodeTask {
 	my $typeHashRef = $encodeQueues{$type};
 	my %typeHash    = %$typeHashRef;
 	my $rs          = $typeHash{rs};
-	my $source_attr = $typeHash{source_attr};
+	my $sourceAttr = $typeHash{source_attr};
+	my $keywordArtist = $typeHash{keyword_artist};
+	my $keywordAlbum = $typeHash{keyword_album};
+	my $keywordTrack = $typeHash{keyword_track};
 
 	$::d_plugins
 	  && Slim::Utils::Misc::msg( 'LazySearch2: EncodeTask - '
@@ -1843,8 +1833,8 @@ sub encodeTask {
 	# Go through and encode each of the identified IDs. To maintain performance
 	# we will bail out if this takes more than a defined time slice.
 
-	my $rows_done  = 0;
-	my $start_time = Time::HiRes::time();
+	my $rowsDone  = 0;
+	my $startTime = Time::HiRes::time();
 	my $obj;
 	do {
 
@@ -1854,24 +1844,51 @@ sub encodeTask {
 
 			# Update the search text for this one row and write it back to the
 			# database.
-			$obj->set_column( 'customsearch',
-				lazifyColumn( $obj->get_column($source_attr) ) );
+			my $customSearch = lazifyColumn( $obj->get_column($sourceAttr));
+
+			# If keyword searching is enabled then add keywords.
+			if ($keywordArtist || $keywordAlbum || $keywordTrack) {
+				my $encodedArtist = '';
+				my $encodedAlbum = '';
+				my $encodedTrack = '';
+
+				if ($keywordTrack) {
+					$encodedTrack = lazifyColumn( $obj->get_column($sourceAttr));
+				}
+
+				if ($keywordArtist) {
+					my $contributors = $obj->contributors;
+					while (my $contributor = $contributors->next) {
+						$encodedArtist .= lazifyColumn($contributor->name);
+					}
+				}
+
+				if ($keywordAlbum) {
+					$encodedAlbum = lazifyColumn($obj->album->title);
+				}
+
+				# Add this to the custom search column.
+				$customSearch .= "|$encodedTrack$encodedAlbum$encodedArtist";
+			}
+
+			# Get the custom search added to the database.
+			$obj->set_column( 'customsearch', $customSearch);
 			$obj->update;
 
-			$rows_done++;
+			$rowsDone++;
 		}
 	  } while (
 		$obj
-		&& ( ( Time::HiRes::time() - $start_time ) <
+		&& ( ( Time::HiRes::time() - $startTime ) <
 			LAZYSEARCH_ENCODE_MAX_QUANTA )
 	  );
 
-	my $end_time = Time::HiRes::time();
+	my $endTime = Time::HiRes::time();
 
 	# Speedometer
 	my $speed = 0;
-	if ( $end_time != $start_time ) {
-		$speed = int( $rows_done / ( $end_time - $start_time ) );
+	if ( $endTime != $startTime ) {
+		$speed = int( $rowsDone / ( $endTime - $startTime ) );
 	}
 	$::d_plugins
 	  && Slim::Utils::Misc::msg(
@@ -1888,23 +1905,23 @@ sub encodeTask {
 
 	# Find if there there is more work to do, and if so request that this task
 	# is rescheduled.
-	my $reschedule_task;
+	my $rescheduleTask;
 	if ( scalar keys %encodeQueues ) {
-		$reschedule_task = 1;
+		$rescheduleTask = 1;
 	} else {
 		$::d_plugins
 		  && Slim::Utils::Misc::msg("LazySearch2: Lazification completed\n");
 
-		$reschedule_task = 0;
+		$rescheduleTask = 0;
 
 		# Make sure our work gets persisted.
 		Slim::Schema->forceCommit;
 
 		# Clear the global flag indicating the task is in progress.
-		$lazifying_database = 0;
+		$lazifyingDatabase = 0;
 	}
 
-	return $reschedule_task;
+	return $rescheduleTask;
 }
 
 # Convert a search string to a lazy-entry encoded search string. This includes
@@ -1943,70 +1960,109 @@ sub keywordSearchEnabled {
 		Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-tracks-enabled');
 }
 
-# Handler when RIGHT is pressed on the keyword search category menu (ie the
-# one that contains the artists, albums and songs submenus). This puts us into
-# a mode that lists the results of the keyword search within that category.
+# Handler when RIGHT is pressed on the top-level keyword search results mode.
+# This pushes into a browse mode that constrains the search results.
 sub keywordOnRightHandler {
 	my ( $client, $item ) = @_;
 
-	# Extract the result items that we'll display.
-	my @items = ();
-	my $resultSet = $item->{'result_set'};
-	$resultSet->reset();
-	while (my $result = $resultSet->next) {
-		push @items, { name => $result->get_column($item->{'text_column'}), value => $result->id };
+	# If the list is empty then don't push into browse mode
+	my $listRef = $client->param('listRef');
+	if ( scalar(@$listRef) == 0 ) {
+		$client->bumpRight();
+	} else {
+
+		# Only allow right if we've performed a search.
+		if ( (length($clientMode{$client}{search_performed}) > 0)
+			&& ( $item->{value} != RESULT_ENTRY_ID_ALL ) )
+		{
+			my $name = $item->{name};
+			my $value = $item->{value};
+			my $level = $item->{level};
+			my $contributorConstraint = $clientMode{$client}{contributor_constraint};
+			my $albumConstraint = $clientMode{$client}{album_constraint};
+			$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: level=$level keyword results OnRight, value=$value, name=\'$name\', contributorConstraint=$contributorConstraint, albumConstraint=$albumConstraint\n");
+
+			# Cancel any pending timer.
+			cancelPendingSearch($client);
+
+			# Track details are a special case.
+			if ($level < 3) {
+				my $line1BrowseText;
+				if ($level == 1) {
+					# Current item provides contributor constraint.
+					$contributorConstraint = $value;
+					$line1BrowseText = '{LINE1_BROWSE_ALBUMS}';
+				} elsif ($level == 2) {
+					# Current item provides album constraint.
+					$albumConstraint = $value;
+					$line1BrowseText = '{LINE1_BROWSE_TRACKS}';
+				}
+
+				# Remember these consraints in the mode.
+				$clientMode{$client}{contributor_constraint} = $contributorConstraint;
+				$clientMode{$client}{album_constraint} = $albumConstraint;
+
+				# The current unique text to make the mode unique.
+				my $searchText = $clientMode{$client}{search_text};
+				my $forceSearch = $clientMode{$client}{search_forced};
+
+				# Do the next level of keyword search.
+				my $items = doKeywordSearch($client, $searchText, $forceSearch, ($level + 1), $contributorConstraint, $albumConstraint);
+
+				# Use INPUT.Choice to display the results for this selected keyword search
+				# category.
+				my %params = (
+
+					# The header (first line) to display whilst in this mode.
+					header => $line1BrowseText . ' \'' . keywordMatchText($client, 1) . '\' {count}',
+
+					# A reference to the list of items to display.
+					listRef => $items,
+
+					# A unique name for this mode that won't actually get displayed
+					# anywhere.
+					modeName => "LAZYBROWSE_KEYWORD_MODE:$level:$searchText",
+
+					# An anonymous function that is called every time the user presses the
+					# RIGHT button.
+					onRight => \&keywordOnRightHandler,
+
+					# A handler that manages play/add/insert (differentiated by the
+					# last parameter).
+					onPlay => sub {
+						my ( $client, $item, $addMode ) = @_;
+
+						$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: lazyOnPlay called for keyword search result\n");
+
+						# Start playing the item selected (in the correct mode - play, add
+						# or insert).
+						lazyOnPlay( $client, $item, $addMode );
+					},
+
+					# These are all menu items and so have a right-arrow overlay
+					overlayRef => sub {
+						return [ undef, Slim::Display::Display::symbol('rightarrow') ];
+					},
+				);
+
+				$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: setSearchBrowseMode called with mode \'LAZYBROWSE_KEYWORD_MODE:$level:$searchText\'\n");
+
+				# Use our INPUT.Choice-derived mode to show the menu and let it do all the
+				# hard work of displaying the list, moving it up and down, etc, etc.
+				Slim::Buttons::Common::pushModeLeft( $client, LAZYBROWSE_KEYWORD_MODE, \%params );
+			} else {
+				# We're currently at the track level so push into track info
+				# browse mode (which needs the track URL to be looked-up).
+				my $track =
+				  Slim::Schema->rs('Track')->find($value);
+				$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: going into trackinfo mode for track URL=$track\n");
+				Slim::Buttons::Common::pushModeLeft( $client, 'trackinfo',
+					{ 'track' => $track } );
+			}
+		} else {
+			$client->bumpRight();
+		}
 	}
-
-	# The handler that allows browsing into the results.
-	my $onRightHandler = $item->{'on_right'};
-	$clientMode{$client}{search_tracks} = $item->{'search_tracks'};
-
-	# The type of search now being conducted (since we've pushed into a
-	# specific category).
-	my $searchType = $item->{search_type};
-	my $searchText = $clientMode{$client}{search_text};
-
-	# Use INPUT.Choice to display the results for this selected keyword search
-	# category.
-	my %params = (
-
-		# The header (first line) to display whilst in this mode.
-		header => '{' . $item->{'line1_browse_text'} . '} \'' . keywordMatchText($client, 1) . '\' {count}',
-
-		# A reference to the list of items to display.
-		listRef => \@items,
-
-		# A unique name for this mode that won't actually get displayed
-		# anywhere.
-		modeName => "LAZYBROWSE_KEYWORD_MODE:$searchType:$searchText",
-
-		# An anonymous function that is called every time the user presses the
-		# RIGHT button.
-		onRight => $onRightHandler,
-
-		# A handler that manages play/add/insert (differentiated by the
-		# last parameter).
-		onPlay => sub {
-			my ( $client, $item, $addMode ) = @_;
-
-			$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: lazyOnPlay called for keyword category search result\n");
-
-			# Start playing the item selected (in the correct mode - play, add
-			# or insert).
-			lazyOnPlay( $client, $item, $addMode );
-		},
-
-		# These are all menu items and so have a right-arrow overlay
-		overlayRef => sub {
-			return [ undef, Slim::Display::Display::symbol('rightarrow') ];
-		},
-	);
-
-	$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: setSearchBrowseMode called with mode \'LAZYBROWSE_KEYWORD_MODE:$searchType:$searchText\'\n");
-
-	# Use our INPUT.Choice-derived mode to show the menu and let it do all the
-	# hard work of displaying the list, moving it up and down, etc, etc.
-	Slim::Buttons::Common::pushModeLeft( $client, LAZYBROWSE_KEYWORD_MODE, \%params );
 }
 
 sub keywordMatchText($$$) {
@@ -2246,14 +2302,14 @@ SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON
 	ES	Comportamiento del Botón SEARCH
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_DESC
-	DE	Mit dieser Einstellung kann die SEARCH-Taste auf der Squeezebox-Fernbedienung mit der <i>Faulpelz-Suche</i> statt mit der <i>Originalsuche</i> belegt werden. Durch Aktivieren dieser Einstellung kann diese Taste entsprechend umbelegt werden, ohne die Dateien <i>Default.map</i> oder <i>Custom.map</i> ändern zu müssen. Hinweis: Änderungen an dieser Einstellung werden erst nach einem erneuten Start des Plugins wirksam (z.B. bei einem Neustart des SlimServers).
-	EN	This setting allows the SEARCH button on the Squeezebox remote to be remapped to the <i>lazy search music</i> function instead of the original <i>search music</i> function. Enabling this setting allows this button remapping to be performed without editing the <i>Default.map</i> or <i>Custom.map</i> files. Note that changes to this setting do not take effect until the plugin is reloaded (eg by restarting SlimServer).
-	ES	Esta configuración permite reasignar el boton SEARCH del control remoto de Squeezebox a la función de <i>búsqueda laxa de música</i>, en lugar de la función de <i>búsqueda de música</i> original. Habilitando esto se logra que la reasignación del botón sea realizada sin editar los archivos <i>Default.map</i> o <i>Custom.map</i>. Notar que los cambios no tendrán efecto hasta que el plugin sea recargado (por ej. al reiniciar SlimServer).
+	DE	Mit dieser Einstellung kann die SEARCH-Taste auf der Squeezebox/Transporter-Fernbedienung mit der <i>Faulpelz-Suche</i> statt mit der <i>Originalsuche</i> belegt werden. Durch Aktivieren dieser Einstellung kann diese Taste entsprechend umbelegt werden, ohne die Dateien <i>Default.map</i> oder <i>Custom.map</i> ändern zu müssen. Hinweis: Änderungen an dieser Einstellung werden erst nach einem erneuten Start des Plugins wirksam (z.B. bei einem Neustart des SlimServers).
+	EN	This setting allows the SEARCH button on the Squeezebox/Transporter remote control to be remapped to the <i>lazy search music</i> function instead of the original <i>search music</i> function. Enabling this setting allows this button remapping to be performed without editing the <i>Default.map</i> or <i>Custom.map</i> files. Note that changes to this setting do not take effect until the plugin is reloaded (eg by restarting SlimServer).
+	ES	Esta configuración permite reasignar el boton SEARCH del control remoto de Squeezebox/Transporter a la función de <i>búsqueda laxa de música</i>, en lugar de la función de <i>búsqueda de música</i> original. Habilitando esto se logra que la reasignación del botón sea realizada sin editar los archivos <i>Default.map</i> o <i>Custom.map</i>. Notar que los cambios no tendrán efecto hasta que el plugin sea recargado (por ej. al reiniciar SlimServer).
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_CHOOSE
-	DE	Drücken der SEARCH-Taste auf der Squeezebox-Fernbedienung:
-	EN	Pressing SEARCH on the Squeezebox remote:
-	ES	Presionando SEARCH en el remoto de Squeezebox:
+	DE	Drücken der SEARCH-Taste auf der Squeezebox/Transporter-Fernbedienung:
+	EN	Pressing SEARCH on the Squeezebox/Transporter remote control:
+	ES	Presionando SEARCH en el remoto de Squeezebox/Transporter:
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_CHANGE
 	DE	Drücken der SEARCH-Taste wurde geändert in:
@@ -2304,7 +2360,7 @@ SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_HEAD
 	EN	Keyword Search
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_OPTIONS_DESC
-	EN	Keyword search allows searching across multiple categories, finding albums, artists and songs that match one or more <i>keywords</i> within their titles. This may be useful, for example, with classical music collections which can have artists, composers and performers included in the song titles as well as in the album artist and song artist because it lets you search and find your music no matter how the tracks were tagged. The following settings allow you to specify which categories will be included in keyword searches. If all categories are disabled then the keyword search option won\'t appear in the player\'s Lazy Search menu at all.
+	EN	Keyword search allows searching across multiple categories, finding albums, artists and songs that match one or more <i>keywords</i> within their titles. This may be useful, for example, with classical music collections which can have artists, composers and performers included in the song titles as well as in the album artist and song artist because it lets you search and find your music no matter how the tracks were tagged. The following settings allow you to specify which categories will be included in keyword searches. If all categories are disabled then the keyword search option won\'t appear in the player\'s Lazy Search menu at all.<br/><br/><b>Note</b> that this change will only take effect once a complete database clear and rescan has been performed.
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_CHOOSE
 	EN	Keyword search for artists:
@@ -2332,9 +2388,6 @@ SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_CHANGE
 
 KEYWORD_MENU_ITEM
 	EN	Keywords
-
-LINE1_BROWSE_KEYWORDS
-	EN	Items Matching
 
 LINE1_BROWSE_KEYWORDS_EMPTY
 	EN	Lazy Search by Keywords
