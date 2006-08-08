@@ -4,7 +4,9 @@ This file contains very brief instructions on how to install and activate
 this plugin on SlimServer. For full details please refer to:
 http://hickinbottom.demon.co.uk/slimserver/lazy-searching/lazy-searching2.htm
 
-1. Make sure you are running SlimServer 6.5 or later.
+1. Make sure you are running SlimServer 6.5 or later (you need a different
+version of the plugin for SlimServer 6.3.x or 6.2.x - see the website if that
+applies to you).
 
 2. Copy LazySearch2.pm to your SlimServer plugins directory.
 Windows: C:\Program Files\SlimServer\Server\Plugins
