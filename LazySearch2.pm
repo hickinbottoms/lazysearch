@@ -1763,15 +1763,19 @@ sub lazifyDatabaseType {
 	# The query to find items to lazify takes into account keyword columns
 	# in case that column was previously lazified before keywords were
 	# introduced.
-	my $itemsToFind;
+	my $whereClause;
 	if ($considerKeywordArtist || $considerKeywordAlbum || $considerKeywordTrack) {
-		$itemsToFind = { 'not like', '%|%' };
+		$whereClause = { -or => [
+			'me.customsearch' => { 'not like', '%|%' },
+			'me.customsearch' => undef
+			]
+		};
 	} else {
-		$itemsToFind = undef;
+		$whereClause = { 'me.customsearch' => undef };
 	}
 
 	# Find all entries that are not yet converted.
-	my $rs = Slim::Schema->resultset($type)->search( { 'me.customsearch' => $itemsToFind },
+	my $rs = Slim::Schema->resultset($type)->search( $whereClause,
 		{ columns => [ 'id', $sourceAttr, 'me.customsearch' ], join => $extraJoins, prefetch => $extraJoins } );
 	my $rsCount = $rs->count;
 
