@@ -2114,299 +2114,365 @@ PLUGIN_LAZYSEARCH2
 	DE	Faulpelz-Suche
 	EN	Lazy Search Music
 	ES	Búsqueda Laxa de Música
+	DA	Lazy Search Music
 
 PLUGIN_LAZYSEARCH2_TOPMENU
 	DE	Faulpelz-Suche
 	EN	Lazy Search Music
 	ES	Búsqueda Laxa de Música
+	DA	Lazy Search Music
 
 LINE1_BROWSE
 	DE	Faulpelz-Suche
 	EN	Lazy Search
 	ES	Búsqueda Laxa
+	DA	Lazy Search
 
 LINE1_SEARCHING
 	DE	Suchen nach \'%s\' ...
 	EN	Searching for \'%s\' ...
 	ES	Buscando \'%s\' ...
+	DA	Søger efter \'%s\' ...
 
 SHOWBRIEFLY_DISPLAY
 	DE	Faulpelz-Suche
 	EN	Lazy Search
 	ES	Búsqueda Laxa
+	DA	Lazy Search
 
 LINE1_BROWSE_ARTISTS
 	DE	Passende Interpreten
 	EN	Artists Matching
 	ES	Artistas Coincidentes
+	DA	Kunstner søgning
 
 LINE1_BROWSE_ARTISTS_EMPTY
 	DE	Faulpelz-Suche nach Interpreten
 	EN	Lazy Search for Artists
 	ES	Búsqueda Laxa de Artistas
+	DA	Lazy Search efter kunstner
 
 LINE1_BROWSE_ALBUMS
 	DE	Passende Alben
 	EN	Albums Matching
 	ES	Álbumes Coincidentes
+	DA	Matchende albums
 
 LINE1_BROWSE_ALBUMS_EMPTY
 	DE	Faulpelz-Suche nach Alben
 	EN	Lazy Search for Albums
 	ES	Búsqueda Laxa de Álbumes
+	DA	Lazy Search efter Album
 
 LINE1_BROWSE_TRACKS
 	DE	Passende Titel
 	EN	Songs Matching
 	ES	Canciones Coincidentes
+	DA	Matchende sange
 
 LINE1_BROWSE_TRACKS_EMPTY
 	DE	Faulpelz-Suche nach Titel
 	EN	Lazy Search for Songs
 	ES	Búsqueda Laxa de Canciones
+	DA	Lazy Search efter sange
 
 LINE1_BROWSE_GENRES
 	DE	Passende Stilrichtungen
 	EN	Genres Matching
 	ES	Géneros Coincidentes
+	DA	Matchende genre
 
 LINE1_BROWSE_GENRES_EMPTY
 	DE	Faulpelz-Suche nach Stilrichtungen
 	EN	Lazy Search for Genres
 	ES	Búsqueda Laxa de Géneros
+	DA	Lazy Search efter genre
 
 LINE2_ENTER_MORE_ARTISTS
 	DE	Interpret eingeben
 	EN	Enter Artist Search
 	ES	Ingresar Búsqueda de Artista
+	DA	Indtast kunstner
 
 LINE2_ENTER_MORE_ALBUMS
 	DE	Album eingeben
 	EN	Enter Album Search
 	ES	Ingresar Búsqueda de Álbumes
+	DA	Indtast album
 
 LINE2_ENTER_MORE_TRACKS
 	DE	Titel eingeben
 	EN	Enter Song Search
 	ES	Ingresar Búsqueda de Canciones
+	DA	Indtast sang
 
 LINE2_ENTER_MORE_GENRES
 	DE	Stilrichtung eingeben
 	EN	Enter Genre Search
 	ES	Ingresar Búsqueda de Géneros
+	DA	Indtast genre
 
 SETUP_GROUP_PLUGIN_LAZYSEARCH2
 	DE	Faulpelz-Suche
 	EN	Lazy Search
 	ES	Búsqueda Laxa
+	DA	Lazy Search
 
 SETUP_GROUP_PLUGIN_LAZYSEARCH2_DESC
 	DE	Mit den unten angebenen Einstellungen kann definiert werden, wie sich die Player-Oberfläche der Faulpelz-Suche verhält. Es wird empfohlen, den Plugin-Menüpunkt <i>Faulpelz-Suche</i> zum Hauptmenü des Players hinzuzufügen, um einen einfachen Zugriff auf die Funktionen dieses Plugins zu ermöglichen (die Standard <i>SEARCH</i>-Taste auf der Fernbedienung ermöglicht ebenfalls den Zugang zu dieser Funktionalität).
 	EN	The settings below control how the lazy searching player interface performs. It is suggested that the <i>Lazy Search Music</i> menu item from this plugin is added to a player\'s home menu to provide easy access to this plugin\'s functions (the standard remote <i>search</i> button will also access this functionality).
 	ES	La configuración debajo controla cómo actúa la interface de búsqueda laxa del reproductor. Se sugiere que el item de menú <i>Búsqueda Laxa de Música</i> para este plugin se añada al menú inicial del reproductor para brindar un acceso fácil a las funciones del plugin (el botón <i>search</i> estándar del control remoto tendrá también acceso a esta funcionalidad).
+	DA	Indstillingen nedenfor styrer ydelsen af lazy search afspillerens interface. Det er anbefalet at <i>Lazy Search Music</i> menuen fra dette plugin bliver tilføjet til en afspiller\'s home menu for at give nem adgang til dette plugin\'s funktioner. (Standard søgefunktionen vil også give adgang til denne funktionalitet).
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST
 	DE	Mindestlänge für die Suche nach Interpreten
 	EN	Minimum Artist Search Length
 	ES	Mínima Longitud para Búsqueda de Artista
+	DA	Minimum kunstnersøge længde
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_DESC
 	DE	Die Suche nach Interpreten, Alben, Stilrichtungen oder Titel mit einer zu kleinen Zahl von Zeichen ist nicht besonders sinnvoll, da sie zu viele Ergebnisse liefert. Um zu verhindern, dass eine Suche gestartet wird, bevor eine sinnvolle Anzahl von Zeichen eingeben wurde, ist eine Mindestzahl von Zeichen vorgegeben. Es gibt unterschiedliche Einstellungen für Interpretennamen, Albumnamen und Liedertitel - sinnvolle Voreinstellungen sind 3 für Interpreten und Alben und 4 für Lieder.
 	EN	Searching for artists, albums, genres or songs with a short number of characters isn\'t very useful as it will return so many results. To prevent a search being performed until a more useful number of characters have been entered a mininum number of characters is specified here. There are separate settings for artists and album names, genres and song titles - a setting of 3 for artists, albums and genres, and 4 for songs, is a useful default.
 	ES	El buscar artistas, álbumes, géneros o canciones con muy pocos caracteres no es muy útil, ya que retornará demasiados resultados. Para evitar que se efectúe una búsqueda hasta que se hayan ingresado más caracteres, se especifica aquí un número mínimo de ellos. Existen configuraciones individuales para búsqueda por nombre de artistas, nombre de álbumes, y nombre de canciones - valores por defecto apropiados son 3 caracteres para artistas, álbumes y géneros, y 4 caracteres para canciones.
+	DA	Søgning efter kunstner, album, genre eller sang med et kort antal tegn er ikke brugbart i praksis, da det vil resultere i et stort antal resultater. For at undgå at søgningen starter før et mere brugbart antal tegn bliver tastet, kan et minimum antal tegn specificeres her. Der er separate indstillinger for kunstner og album navn, genre og sangtitel. - Det anbefales at bruge 3 for kunstner, album og genre, og 4 for sangtitel.
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_CHOOSE
 	DE	Mindestlänge für die Suche nach Interpreten (2-9 Zeichen):
 	EN	Minimum length for artist search (2-9 characters):
 	ES	Mínima longitud para búsqueda de artista (2-9 caracteres):
+	DA	Minimum længde for kunstner søgning (2-9 tegn):
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_CHANGE
 	DE	Mindestlänge für die Suche nach Interpreten wurde geändert in:
 	EN	Minimum length for artist search changed to:
 	ES	Mínima longitud para búsqueda de artista cambió a:
+	DA	Minimum længde for kunstner søgning ændret til:
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ALBUM
 	DE	Mindestlänge für die Suche nach Alben
 	EN	Minimum Album Search Length
 	ES	Mínima Longitud para Búsqueda de Álbum
+	DA	Minimum længde for album søgning
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ALBUM_CHOOSE
 	DE	Mindestlänge für die Suche nach Alben (2-9 Zeichen):
 	EN	Minimum length for album search (2-9 characters):
 	ES	Mínima longitud para búsqueda de álbum (2-9 caracteres):
+	DA	Minimum længde for album søgning (2-9 tegn):
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ALBUM_CHANGE
 	DE	Mindestlänge für die Suche nach Alben wurde geändert in:
 	EN	Minimum length for album search changed to:
 	ES	Mínima longitud para búsqueda de álbum cambió a:
+	DA	Minimum længde for album søgning rettet til:
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK
 	DE	Mindestlänge für die Suche nach Titel
 	EN	Minimum Song Search Length
 	ES	Mínima Longitud para Búsqueda de Canción
+	DA	Minimum længde for sang søgning
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK_CHOOSE
 	DE	Mindestlänge für die Suche nach Titel (2-9 Zeichen):
 	EN	Minimum length for song search (2-9 characters):
 	ES	Mínima longitud para búsqueda de canción (2-9 caracteres):
+	DA	Minimum længde for sang søgning (2-9 tegn):
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK_CHANGE
 	DE	Mindestlänge für die Suche nach Titel wurde geändert in:
 	EN	Minimum length for song search changed to:
 	ES	Mínima longitud para búsqueda de canción cambió a:
+	DA	Minimum længde for sang søgning rettet til:
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE
 	DE	Mindestlänge für die Suche nach Stilrichtungen
 	EN	Minimum Genre Search Length
 	ES	Mínima Longitud para Búsqueda de Género
+	DA	Minimum længde for sang søgning
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE_CHOOSE
 	DE	Mindestlänge für die Suche nach Stilrichtungen (2-9 Zeichen):
 	EN	Minimum length for genre search (2-9 characters):
 	ES	Mínima longitud para búsqueda de género (2-9 caracteres):
+	DA	Minimum længde for genre søgning (2-9 tegn):
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE_CHANGE
 	DE	Mindestlänge für die Suche nach Stilrichtungen wurde geändert in:
 	EN	Minimum length for genre search changed to:
 	ES	Mínima longitud para búsqueda de género cambió a:
+	DA	Minimum længde for genre søgning rettet til:
 
 SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES
 	DE	Verhalten der LINKS-Taste
 	EN	LEFT Button Behaviour
 	ES	Comportamiento del Botón IZQUIERDA
+	DA	VENSTRE-knap opførsel
 
 SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_DESC
 	DE	Man kann einstellen, wie sich die LINKS-Taste auf der Fernbedienung bei der Eingabe von Suchtext verhält. Mit der LINKS-Taste kann entweder das zuletzt eingegeben Zeichen gelöscht werden (z.B. um einen Fehler zu korrigieren) oder der Suchmodus beendet werden.
 	EN	You can choose how the LEFT button on the remote control behaves when entering search text. LEFT can either delete the last character entered (eg to correct a mistake), or can exit the search mode altogether.
 	ES	Se puede elegir como se comportará el boton IZQUIERDA del control remoto cuando se ingresa texto. IZQUIERDA puede o bien borrar el último caracter ingresado (por ej, para corregir un error), o bien puede abandonar el modo búsqueda.
+	DA	Du kan vælge hvordan VESTRE-knappen på fjernbetjæningen opfører sig når man trykker en søgetekst. VESTRE kan enten slette det sidst tastet tegn (for at rette en fejl), eller forlade søgeningen.
 
 SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_CHOOSE
 	DE	Drücken der LINKS-Taste während einer Suche:
 	EN	Pressing LEFT while entering a search:
 	ES	Presionando IZQUIERDA mientras se ingresa una búsqueda:
+	DA	Ved tryk på VENSTRE under søgning:
 
 SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_CHANGE
 	DE	Drücken der LINKS-Taste wurde geändert in:
 	EN	Pressing LEFT changed to:
 	ES	Presionando IZQUIERDA cambió a:
+	DA	Tyk VENSTRE for at:
 
 SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_0
 	DE	Beendet den Suchmodus
 	EN	Exits the search mode
 	ES	Abandona el modo búsqueda
+	DA	Forlade søgning
 
 SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_1
 	DE	Löscht das zuletzt eingegebene Zeichen
 	EN	Deletes the last character entered
 	ES	Borra los últimos caracteres ingresados
+	DA	Slette det sidst tastede tegn
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON
 	DE	Verhalten der SEARCH-Taste
 	EN	SEARCH Button Behaviour
 	ES	Comportamiento del Botón SEARCH
+	DA	SEARCH-knap opførsel
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_DESC
 	DE	Mit dieser Einstellung kann die SEARCH-Taste auf der Squeezebox/Transporter-Fernbedienung mit der <i>Faulpelz-Suche</i> statt mit der <i>Originalsuche</i> belegt werden. Durch Aktivieren dieser Einstellung kann diese Taste entsprechend umbelegt werden, ohne die Dateien <i>Default.map</i> oder <i>Custom.map</i> ändern zu müssen. Hinweis: Änderungen an dieser Einstellung werden erst nach einem erneuten Start des Plugins wirksam (z.B. bei einem Neustart des SlimServers).
 	EN	This setting allows the SEARCH button on the Squeezebox/Transporter remote control to be remapped to the <i>lazy search music</i> function instead of the original <i>search music</i> function. Enabling this setting allows this button remapping to be performed without editing the <i>Default.map</i> or <i>Custom.map</i> files. Note that changes to this setting do not take effect until the plugin is reloaded (eg by restarting SlimServer).
 	ES	Esta configuración permite reasignar el boton SEARCH del control remoto de Squeezebox/Transporter a la función de <i>búsqueda laxa de música</i>, en lugar de la función de <i>búsqueda de música</i> original. Habilitando esto se logra que la reasignación del botón sea realizada sin editar los archivos <i>Default.map</i> o <i>Custom.map</i>. Notar que los cambios no tendrán efecto hasta que el plugin sea recargado (por ej. al reiniciar SlimServer).
+	DA	Denne indstilling giver mulighed for at SEARCH knappen på Squeezebox/Transporter fjernbetjæningen benyttes til at aktivere <i>Lazy Search Music</i> funktionen i stedet for den orginale <i>søg</i> funktion. Det er ikke nødvendigt at rette i <i>Default.map</i> eller <i>Custom.map filerne. Bemærk, denne indstilling slår ikke igennem før plugin'et er genindløst (f.eks. ved at genstarte SlimServer).
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_CHOOSE
 	DE	Drücken der SEARCH-Taste auf der Squeezebox/Transporter-Fernbedienung:
 	EN	Pressing SEARCH on the Squeezebox/Transporter remote control:
 	ES	Presionando SEARCH en el remoto de Squeezebox/Transporter:
+	DA	Tryk på SEARCH knappen på Squeezebox/Transporter fjernbetjæningen:
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_CHANGE
 	DE	Drücken der SEARCH-Taste wurde geändert in:
 	EN	Pressing SEARCH changed to:
 	ES	Presionando SEARCH cambió a:
+	DA	Tryk på SEARCH går til:
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_0
 	DE	Zeigt das Menü der Standardsuche an
 	EN	Accesses the standard search music menu
 	ES	Accede al menú de búsqueda musical estándar
+	DA	Standard søgning
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_1
 	DE	Zeigt das Menü der Faulpelz-Suche an
 	EN	Accesses the lazy search music menu
 	ES	Accede al menú de búsqueda musical laxa
+	DA	Lazy Serach menuen.
 
 SCAN_IN_PROGRESS
 	DE	Hinweis: Die Musikdatenbank wird gerade durchsucht
 	EN	Note: music library scan in progress
 	ES	Nota: se está recopilando la colección musical
+	DA	Note: dit musik biblioteket bliver lige nu scannet.
 
 SCAN_IN_PROGRESS_DBL
 	DE	Hinweis: Suche läuft
 	EN	Note: scanning
 	ES	Nota: recopilando
+	DA	Note: scanner
 
 SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW
 	DE	Indexerzeugung für die Faulpelz-Suche
 	EN	Force Lazy Search Index Build
 	ES	Forzar Creación de Índice para Búsqueda Laxa
+	DA	Gennemtving opbygningen af Lazy Seach indexet
 
 SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_DESC
 	DE	Das Plugin erzeugt den Index für die Faulpelz-Suche, wenn dies erforderlich ist. Normalerweise ist daher keine extra Pflege der Datenbank notwendig. Falls Sie sichergehen wollen, dass der Index der Faulpelz-Suche korrekt erzeugt wurde, können Sie die folgende Schaltfläche anklicken. Aber in Anbetracht dessen, dass dies nie erforderlich sein sollte, ist dies in erster Linie eine Hilfe für die Fehlersuche.
 	EN	The plugin is designed to build the lazy search index whenever required and so, under normal circumstances, no extra database maintenance is required. If you wish to ensure that the lazy search index has been correctly built you can press the following button, but given that it should never be necessary this is primarily a debugging aid.
 	ES	El plugin se ha diseñado para construir el índice de búsqueda laxa cuando sea que se requiera. Por lo tanto, en circunstancias normales, no se requiere mantenimiento extra de la base de datos. Si se quiere estar seguro que el índice de búsqueda laxa ha sido construido correctamente, se puede presionar el siguiente botón (aunque dado que nunca debería ser necesario reconstruirlo manualmente se lo incluye aquí simplemente como una ayuda para la depuración).
+	DA	Dette plugin er lavet til at vedligeholde Lazy Search indexet når det er nødvendigt. Derfor er det ikke, under normale omstændigheder, nødvendigt at tivnge re-index igennem. Du kan dog, hvis du vil være sikker på at indexet er opbygget korrekt, trykke denne knap. Dette er primært en debug funktion.
 
 SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_CHANGE
 	DE	Die Erzeugung des Index für die Faulpelz-Suche hat begonnen
 	EN	Lazy search index build has been started
 	ES	La creación del índice para búsqueda laxa ha comenzado
+	DA	Lazy Search indexet bliver du genopbygget
 
 SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_BUTTON
 	DE	Jetzt den Index für die Faulpelz-Suche erzeugen
 	EN	Build Lazy Search Index Now
 	ES	Crear Índice de Búsqueda Laxa Ahora
+	DA	Start opbygning af Lazy Search indexet
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_HEAD
 	EN	Keyword Search
+	DA	Keyword søgning
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_OPTIONS_DESC
 	EN	Keyword search allows searching across multiple categories, finding albums, artists and songs that match one or more <i>keywords</i> within their titles. This may be useful, for example, with classical music collections which can have artists, composers and performers included in the song titles as well as in the album artist and song artist because it lets you search and find your music no matter how the tracks were tagged. The following settings allow you to specify which categories will be included in keyword searches. If all categories are disabled then the keyword search option won\'t appear in the player\'s Lazy Search menu at all.<br/><br/><b>Note</b> that this change will only take effect once a complete database clear and rescan has been performed.
+	DA	Keyword søgning giver mulighed for at søge mellem flere kategorier, og på den måde finde albums, kunstnere og sangtitler som matcher et eller flere <i>keywords</i> i deres titel. Dette kan være brugbart, f.eks. med klassisk musik samlinger som både kan have kunster, forfatter og udøver inkluderet i sangtitlen og albumkunstneren eller sangkunstneren idet funktionen giver mulighed for at søge ligegyldigt hvordan sangens tags er opbygget. Følgende indstillinger giver dig mulighed for at specificere hvilke kategorier der bliver inkluderet i keyword søgningen. Hvis alle kattegorier er slået fra, vil keyword søgnings muligheden ikke optræde i afspillerens Lazy Search menu.<br/><br/><b>Bemærk</b> at denne indstilling vil først slå igennem efter en komplet genscanning af databasen er foretaget.
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_CHOOSE
 	EN	Keyword search for artists:
+	DA	Keyword søgning efter kunstner:
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_CHANGE
 	EN	Keyword search for artists changed to:
+	DA	Keyword søgning for kunstner rettet til:
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_HEAD
 	EN	Keyword Search for Albums
+	DA	Keyword søgning efter Album
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_CHOOSE
 	EN	Keyword search for albums:
+	DA	Keyword søgning efter album:
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_CHANGE
 	EN	Keyword search for albums changed to:
+	DA	Keyword søgning for album rettet til:
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_HEAD
 	EN	Keyword Search for Tracks
+	DA	Keyword søgning efter sangtitel:
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_CHOOSE
 	EN	Keyword search for tracks:
+	DA	Keyword søgning efter sangtitel:
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_CHANGE
 	EN	Keyword search for tracks changed to:
+	DA	Keyword søgning for sangtitel rettet til:
 
 KEYWORD_MENU_ITEM
 	EN	Keywords
+	DA	Keywords
 
 LINE1_BROWSE_KEYWORDS_EMPTY
 	EN	Lazy Search by Keywords
+	DA	Lazy Search efter Keywords
 
 LINE2_ENTER_MORE_KEYWORDS
 	EN	Enter Keyword Search
+	DA	Indtast Keyword Søgning
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD
 	EN	Minimum Keyword Search Length
+	DA	Minimum længde for keyword søgning
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD_CHOOSE
 	EN	Minimum length for keyword search (2-9 characters):
+	DA	Minimum længde for keyword søgning (2-9 tegn):
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD_CHANGE
 	EN	Minimum length for keyword search changed to:
+	DA	Minimum længde for keyword søgning rettet til:
 ';
 }
 
