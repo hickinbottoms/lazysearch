@@ -31,9 +31,6 @@ use Slim::Utils::Text;
 use Slim::Utils::Timers;
 use Time::HiRes;
 
-# @@TODO@@ - removeme
-use Data::Dumper;
-
 # Name of this plugin - used for various global things to prevent clashes with
 # other plugins.
 use constant PLUGIN_NAME => 'PLUGIN_LAZYSEARCH2';
@@ -49,7 +46,7 @@ use constant SEARCH_TYPE_KEYWORD => 'Keyword';
 use constant LAZYSEARCH_TOP_MODE           => 'PLUGIN_LAZYSEARCH2.topmode';
 use constant LAZYSEARCH_CATEGORY_MENU_MODE => 'PLUGIN_LAZYSEARCH2.categorymenu';
 use constant LAZYBROWSE_MODE               => 'PLUGIN_LAZYSEARCH2.browsemode';
-use constant LAZYBROWSE_KEYWORD_MODE	   => 'PLUGIN_LAZYSEARCH2.keywordbrowse';
+use constant LAZYBROWSE_KEYWORD_MODE => 'PLUGIN_LAZYSEARCH2.keywordbrowse';
 
 # Preference ranges and defaults.
 use constant LAZYSEARCH_MINLENGTH_MIN             => 2;
@@ -183,7 +180,7 @@ sub setMode {
 	# The menu items shown depend on whether keyword search is enabled or
 	# not.
 	my @topMenuItems = (qw({ARTISTS} {ALBUMS} {GENRES} {SONGS}));
-	if (keywordSearchEnabled()) {
+	if ( keywordSearchEnabled() ) {
 		push @topMenuItems, '{KEYWORD_MENU_ITEM}';
 	}
 
@@ -213,7 +210,7 @@ sub setMode {
 
 			if ( $item eq '{ARTISTS}' ) {
 				$clientMode{$client}{search_type}  = 'Contributor';
-				$clientMode{$client}{side} 		   = 0;
+				$clientMode{$client}{side}         = 0;
 				$clientMode{$client}{text_col}     = 'name';
 				$clientMode{$client}{all_entry}    = '{ALL_ARTISTS}';
 				$clientMode{$client}{player_title} = '{LINE1_BROWSE_ARTISTS}';
@@ -224,12 +221,12 @@ sub setMode {
 				$clientMode{$client}{min_search_length} =
 				  Slim::Utils::Prefs::get(
 					'plugin-lazysearch2-minlength-artist');
-				$clientMode{$client}{onright} = \&rightIntoArtist;
+				$clientMode{$client}{onright}       = \&rightIntoArtist;
 				$clientMode{$client}{search_tracks} = \&searchTracksForArtist;
 				setSearchBrowseMode( $client, $item, 0 );
 			} elsif ( $item eq '{ALBUMS}' ) {
 				$clientMode{$client}{search_type}  = 'Album';
-				$clientMode{$client}{side} 		   = 0;
+				$clientMode{$client}{side}         = 0;
 				$clientMode{$client}{text_col}     = 'title';
 				$clientMode{$client}{all_entry}    = '{ALL_ALBUMS}';
 				$clientMode{$client}{player_title} = '{LINE1_BROWSE_ALBUMS}';
@@ -239,12 +236,12 @@ sub setMode {
 				  'LINE2_ENTER_MORE_ALBUMS';
 				$clientMode{$client}{min_search_length} =
 				  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-album');
-				$clientMode{$client}{onright} = \&rightIntoAlbum;
+				$clientMode{$client}{onright}       = \&rightIntoAlbum;
 				$clientMode{$client}{search_tracks} = \&searchTracksForAlbum;
 				setSearchBrowseMode( $client, $item, 0 );
 			} elsif ( $item eq '{GENRES}' ) {
 				$clientMode{$client}{search_type}  = 'Genre';
-				$clientMode{$client}{side} 		   = 0;
+				$clientMode{$client}{side}         = 0;
 				$clientMode{$client}{text_col}     = 'name';
 				$clientMode{$client}{all_entry}    = undef;
 				$clientMode{$client}{player_title} = '{LINE1_BROWSE_GENRES}';
@@ -254,12 +251,12 @@ sub setMode {
 				  'LINE2_ENTER_MORE_GENRES';
 				$clientMode{$client}{min_search_length} =
 				  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-genre');
-				$clientMode{$client}{onright} = \&rightIntoGenre;
+				$clientMode{$client}{onright}       = \&rightIntoGenre;
 				$clientMode{$client}{search_tracks} = \&searchTracksForGenre;
 				setSearchBrowseMode( $client, $item, 0 );
 			} elsif ( $item eq '{SONGS}' ) {
 				$clientMode{$client}{search_type}  = 'Track';
-				$clientMode{$client}{side} 		   = 1;
+				$clientMode{$client}{side}         = 1;
 				$clientMode{$client}{text_col}     = 'title';
 				$clientMode{$client}{all_entry}    = '{ALL_SONGS}';
 				$clientMode{$client}{player_title} = '{LINE1_BROWSE_TRACKS}';
@@ -269,12 +266,12 @@ sub setMode {
 				  'LINE2_ENTER_MORE_TRACKS';
 				$clientMode{$client}{min_search_length} =
 				  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-track');
-				$clientMode{$client}{onright} = \&rightIntoTrack;
+				$clientMode{$client}{onright}       = \&rightIntoTrack;
 				$clientMode{$client}{search_tracks} = \&searchTracksForTrack;
 				setSearchBrowseMode( $client, $item, 0 );
 			} elsif ( $item eq '{KEYWORD_MENU_ITEM}' ) {
 				$clientMode{$client}{search_type}  = SEARCH_TYPE_KEYWORD;
-				$clientMode{$client}{side} 		   = 2;
+				$clientMode{$client}{side}         = 2;
 				$clientMode{$client}{text_col}     = undef;
 				$clientMode{$client}{all_entry}    = undef;
 				$clientMode{$client}{player_title} = '{LINE1_BROWSE_ARTISTS}';
@@ -285,7 +282,7 @@ sub setMode {
 				$clientMode{$client}{min_search_length} =
 				  Slim::Utils::Prefs::get(
 					'plugin-lazysearch2-minlength-keyword');
-				$clientMode{$client}{onright} = \&keywordOnRightHandler;
+				$clientMode{$client}{onright}       = \&keywordOnRightHandler;
 				$clientMode{$client}{search_tracks} = undef;
 				setSearchBrowseMode( $client, $item, 0 );
 			}
@@ -335,7 +332,7 @@ sub searchTracksForArtist($) {
 		'track', undef,
 		{
 			'order_by' =>
-'track.album, track.disc, track.tracknum, track.titlesort'
+			  'track.album, track.disc, track.tracknum, track.titlesort'
 		}
 		)->all;
 }
@@ -355,13 +352,14 @@ sub searchTracksForAlbum($) {
 # PLAY/INSERT/ADD is pressed on one of those items.
 sub searchTracksForGenre($) {
 	my $id = shift;
-	return Slim::Schema->search( 'GenreTrack',
-		{ 'me.genre' => $id } )->search_related(
+	return Slim::Schema->search( 'GenreTrack', { 'me.genre' => $id } )
+	  ->search_related(
 		'track', undef,
 		{
-			'order_by' => 'track.album, track.disc, track.tracknum, track.titlesort'
+			'order_by' =>
+			  'track.album, track.disc, track.tracknum, track.titlesort'
 		}
-		)->all;
+	  )->all;
 }
 
 # Return a result set that contain the given track, for when PLAY/INSERT/ADD is
@@ -374,7 +372,7 @@ sub searchTracksForTrack($) {
 # Browse into a particular artist.
 sub rightIntoArtist($$) {
 	my $client = shift;
-	my $item = shift;
+	my $item   = shift;
 
 	# Browse albums by this artist.
 	Slim::Buttons::Common::pushModeLeft(
@@ -383,8 +381,7 @@ sub rightIntoArtist($$) {
 		{
 			'hierarchy'    => 'contributor,album,track',
 			'level'        => 1,
-			'findCriteria' =>
-			  { 'contributor.id' => $item->{'value'} },
+			'findCriteria' => { 'contributor.id' => $item->{'value'} },
 		}
 	);
 }
@@ -392,7 +389,7 @@ sub rightIntoArtist($$) {
 # Browse into a particular album.
 sub rightIntoAlbum($$) {
 	my $client = shift;
-	my $item = shift;
+	my $item   = shift;
 
 	# Browse tracks for this album.
 	Slim::Buttons::Common::pushModeLeft(
@@ -404,13 +401,13 @@ sub rightIntoAlbum($$) {
 			'findCriteria' => { 'album.id' => $item->{'value'} },
 		}
 	);
-						
+
 }
 
 # Browse into a particular genre.
 sub rightIntoGenre($$) {
 	my $client = shift;
-	my $item = shift;
+	my $item   = shift;
 
 	# Browse artists by this genre.
 	Slim::Buttons::Common::pushModeLeft(
@@ -427,11 +424,10 @@ sub rightIntoGenre($$) {
 # Browse into a particular track.
 sub rightIntoTrack($$) {
 	my $client = shift;
-	my $item = shift;
+	my $item   = shift;
 
 	# Push into the trackinfo mode for this one track.
-	my $track =
-	  Slim::Schema->rs('Track')->find( $item->{'value'} );
+	my $track = Slim::Schema->rs('Track')->find( $item->{'value'} );
 	Slim::Buttons::Common::pushModeLeft( $client, 'trackinfo',
 		{ 'track' => $track->url } );
 }
@@ -549,24 +545,24 @@ sub initPlugin() {
 	# The mode that is used to show keyword results once the user has entered
 	# one of the returned categories.
 	my %chFunctions2 = %{ Slim::Buttons::Input::Choice::getFunctions() };
-	$chFunctions2{'play'}         = \&onPlayHandler;
-	$chFunctions2{'addSingle'}    = \&onAddHandler;
-	$chFunctions2{'addHold'}      = \&onInsertHandler;
-	$chFunctions2{'forceSearch'}  = \&lazyForceSearch;
+	$chFunctions2{'play'}        = \&onPlayHandler;
+	$chFunctions2{'addSingle'}   = \&onAddHandler;
+	$chFunctions2{'addHold'}     = \&onInsertHandler;
+	$chFunctions2{'forceSearch'} = \&lazyForceSearch;
 	Slim::Buttons::Common::addMode( LAZYBROWSE_KEYWORD_MODE, \%chFunctions2,
 		\&Slim::Buttons::Input::Choice::setMode );
 
 	# Our input map for the new keyword browse mode, based on the default map
 	# contents for INPUT.Choice.
 	my %keywordInputMap = (
-		'arrow_left'      => 'exit_left',
-		'arrow_right'     => 'exit_right',
-		'play'            => 'play',
-		'pause.single'    => 'pause',
-		'pause.hold'      => 'stop',
-		'add.single'      => 'addSingle',
-		'add.hold'        => 'addHold',
-		'search'          => 'forceSearch',
+		'arrow_left'   => 'exit_left',
+		'arrow_right'  => 'exit_right',
+		'play'         => 'play',
+		'pause.single' => 'pause',
+		'pause.hold'   => 'stop',
+		'add.single'   => 'addSingle',
+		'add.hold'     => 'addHold',
+		'search'       => 'forceSearch',
 	);
 	for my $buttonPressMode (qw{repeat hold hold_release single double}) {
 		$keywordInputMap{ 'play.' . $buttonPressMode }   = 'dead';
@@ -582,8 +578,8 @@ sub initPlugin() {
 	# is useful because the user might shut down the server during the scan
 	# and we would otherwise have a part filled database that couldn't be
 	# lazy searched.
-	Slim::Utils::Timers::setTimer( undef, Time::HiRes::time() +
-		LAZYSEARCH_INITIAL_LAZIFY_DELAY,
+	Slim::Utils::Timers::setTimer( undef,
+		Time::HiRes::time() + LAZYSEARCH_INITIAL_LAZIFY_DELAY,
 		\&scanDoneCallback );
 
 	$::d_plugins
@@ -678,7 +674,7 @@ sub setupGroup {
 			'validate'     => \&Slim::Utils::Validate::isInt,
 			'validateArgs' =>
 			  [ LAZYSEARCH_MINLENGTH_MIN, LAZYSEARCH_MINLENGTH_MAX ],
-			'PrefHead'   => string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD'),
+			'PrefHead' => string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD'),
 			'PrefChoose' =>
 			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD_CHOOSE'),
 			'changeIntro' =>
@@ -713,7 +709,8 @@ sub setupGroup {
 		},
 		'plugin-lazysearch2-keyword-artists-enabled' => {
 			'validate' => \&Slim::Utils::Validate::trueFalse,
-			'PrefHead' => string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_HEAD'),
+			'PrefHead' =>
+			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_HEAD'),
 			'PrefDesc' =>
 			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_OPTIONS_DESC'),
 			'PrefChoose' =>
@@ -727,7 +724,8 @@ sub setupGroup {
 		},
 		'plugin-lazysearch2-keyword-albums-enabled' => {
 			'validate' => \&Slim::Utils::Validate::trueFalse,
-			'PrefHead' => string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_HEAD'),
+			'PrefHead' =>
+			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_HEAD'),
 			'PrefChoose' =>
 			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_CHOOSE'),
 			'changeIntro' =>
@@ -739,7 +737,8 @@ sub setupGroup {
 		},
 		'plugin-lazysearch2-keyword-tracks-enabled' => {
 			'validate' => \&Slim::Utils::Validate::trueFalse,
-			'PrefHead' => string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_HEAD'),
+			'PrefHead' =>
+			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_HEAD'),
 			'PrefChoose' =>
 			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_CHOOSE'),
 			'changeIntro' =>
@@ -802,10 +801,9 @@ sub setSearchBrowseMode {
 	my $searchText = $clientMode{$client}{search_text};
 	my $searchType = $clientMode{$client}{search_type};
 	if ( ( length $searchText ) > 0 ) {
-		$headerString =
-		    $clientMode{$client}{player_title} . ' ';
-		if ($searchType eq SEARCH_TYPE_KEYWORD) {
-			$headerString .= '\'' . keywordMatchText($client, 0) . '\'';
+		$headerString = $clientMode{$client}{player_title} . ' ';
+		if ( $searchType eq SEARCH_TYPE_KEYWORD ) {
+			$headerString .= '\'' . keywordMatchText( $client, 0 ) . '\'';
 		} else {
 			$headerString .= '\'' . $searchText . '\'';
 		}
@@ -815,7 +813,7 @@ sub setSearchBrowseMode {
 
 	# If we've actually performed a search then the title also includes
 	# the item number/total items as per normal browse modes.
-	if ( length($clientMode{$client}{search_performed}) > 0 ) {
+	if ( length( $clientMode{$client}{search_performed} ) > 0 ) {
 		$itemsRef = $clientMode{$client}{search_items};
 		$headerString .= ' {count}';
 	} else {
@@ -846,7 +844,10 @@ sub setSearchBrowseMode {
 		onPlay => sub {
 			my ( $client, $item, $addMode ) = @_;
 
-			$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: lazyOnPlay called for normal category search result\n");
+			$::d_plugins
+			  && Slim::Utils::Misc::msg(
+"LazySearch2: lazyOnPlay called for normal category search result\n"
+			  );
 
 			# Start playing the item selected (in the correct mode - play, add
 			# or insert).
@@ -867,12 +868,14 @@ sub setSearchBrowseMode {
 			}
 
 			# See if there might be an overlay on line 2.
-			if ( (length($clientMode{$client}{search_performed}) > 0)
+			if (   ( length( $clientMode{$client}{search_performed} ) > 0 )
 				&& ( scalar(@$listRef) != 0 ) )
 			{
 
 				# 'All' items don't have an arrow; the others do.
-				if ( defined($item->{result_set}) || ($item->{value} != RESULT_ENTRY_ID_ALL ) ) {
+				if ( defined( $item->{result_set} )
+					|| ( $item->{value} != RESULT_ENTRY_ID_ALL ) )
+				{
 					$l2 = Slim::Display::Display::symbol('rightarrow');
 				}
 			}
@@ -881,7 +884,10 @@ sub setSearchBrowseMode {
 		},
 	);
 
-	$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: setSearchBrowseMode called with mode \'LAZYBROWSE_MODE:$searchType:$searchText\'\n");
+	$::d_plugins
+	  && Slim::Utils::Misc::msg(
+"LazySearch2: setSearchBrowseMode called with mode \'LAZYBROWSE_MODE:$searchType:$searchText\'\n"
+	  );
 
 	# Use the new mode defined by INPUT.Choice and let it do all the hard work
 	# of displaying the list, moving it up and down, etc, etc. We have a silent
@@ -902,14 +908,14 @@ sub setSearchBrowseMode {
 sub lazyGetText {
 	my ( $client, $item ) = @_;
 
-	if ( length($clientMode{$client}{search_performed}) == 0 ) {
+	if ( length( $clientMode{$client}{search_performed} ) == 0 ) {
 		return $client->string( $clientMode{$client}{enter_more_prompt} );
 	} else {
 		my $listRef = $client->param('listRef');
 		if ( scalar(@$listRef) == 0 ) {
 			return $client->string('EMPTY');
 		} else {
-			return $item->get_column($clientMode{$client}{text_col});
+			return $item->get_column( $clientMode{$client}{text_col} );
 		}
 	}
 }
@@ -925,10 +931,24 @@ sub lazyForceSearch {
 	# has been entered of at least one character and a search has not yet been
 	# performed.
 	my $searchText = $clientMode{$client}{search_text};
-$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: lazyForceSearch - search_text=\'$searchText\' search_performed=\'" . $clientMode{$client}{search_performed} . "\'\n");
-	if ( (($clientMode{$client}{search_type} eq SEARCH_TYPE_KEYWORD) && (minKeywordLength($searchText) < $clientMode{$client}{min_search_length}) && (minKeywordLength($searchText) > 1) && (keywordMatchText($client, 0, $searchText) ne $clientMode{$client}{search_performed})) ||
-		(($clientMode{$client}{search_type} ne SEARCH_TYPE_KEYWORD) && (length($clientMode{$client}{search_performed}) == 0)
-		&& ( length($searchText) > 1 ) ) )
+	$::d_plugins
+	  && Slim::Utils::Misc::msg(
+"LazySearch2: lazyForceSearch - search_text=\'$searchText\' search_performed=\'"
+		  . $clientMode{$client}{search_performed}
+		  . "\'\n" );
+	if (
+		(
+			( $clientMode{$client}{search_type} eq SEARCH_TYPE_KEYWORD )
+			&& ( minKeywordLength($searchText) <
+				$clientMode{$client}{min_search_length} )
+			&& ( minKeywordLength($searchText) > 1 )
+			&& ( keywordMatchText( $client, 0, $searchText ) ne
+				$clientMode{$client}{search_performed} )
+		)
+		|| (   ( $clientMode{$client}{search_type} ne SEARCH_TYPE_KEYWORD )
+			&& ( length( $clientMode{$client}{search_performed} ) == 0 )
+			&& ( length($searchText) > 1 ) )
+	  )
 	{
 		$::d_plugins
 		  && Slim::Utils::Misc::msg("LazySearch2: Forcing short text search\n");
@@ -1014,7 +1034,7 @@ sub lazyOnRight {
 	} else {
 
 		# Only allow right if we've performed a search.
-		if ( (length($clientMode{$client}{search_performed}) > 0)
+		if (   ( length( $clientMode{$client}{search_performed} ) > 0 )
 			&& ( $item->{value} != RESULT_ENTRY_ID_ALL ) )
 		{
 
@@ -1051,22 +1071,28 @@ sub lazyOnPlay {
 	# user has not entered enough text yet, then ignore the
 	# command.
 	my $listRef = $client->param('listRef');
-	if ( length($clientMode{$client}{search_performed}) == 0 ) {
+	if ( length( $clientMode{$client}{search_performed} ) == 0 ) {
 		return;
 	}
 
 	# If we're on the keyword hierarchy then the function is dependent on the
 	# level of the item we're on.
-	if ($clientMode{$client}{search_type} eq SEARCH_TYPE_KEYWORD) {
+	if ( $clientMode{$client}{search_type} eq SEARCH_TYPE_KEYWORD ) {
 		my $level = $item->{'level'};
-		if ($level == 1) {
-			$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: lazyOnPlay called for keyword artist\n");
+		if ( $level == 1 ) {
+			$::d_plugins
+			  && Slim::Utils::Misc::msg(
+				"LazySearch2: lazyOnPlay called for keyword artist\n");
 			$searchTracksFunction = \&searchTracksForArtist;
-		} elsif ($level == 2) {
-			$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: lazyOnPlay called for keyword album\n");
+		} elsif ( $level == 2 ) {
+			$::d_plugins
+			  && Slim::Utils::Misc::msg(
+				"LazySearch2: lazyOnPlay called for keyword album\n");
 			$searchTracksFunction = \&searchTracksForAlbum;
 		} else {
-			$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: lazyOnPlay called for keyword track\n");
+			$::d_plugins
+			  && Slim::Utils::Misc::msg(
+				"LazySearch2: lazyOnPlay called for keyword track\n");
 			$searchTracksFunction = \&searchTracksForTrack;
 		}
 	}
@@ -1239,7 +1265,8 @@ sub onFindTimer() {
 	$clientMode{$client}{search_forced} = $forceSearch;
 
 	# Whether this is a keyword search.
-	my $keywordSearch = ($clientMode{$client}{search_type} eq SEARCH_TYPE_KEYWORD);
+	my $keywordSearch =
+	  ( $clientMode{$client}{search_type} eq SEARCH_TYPE_KEYWORD );
 
 	my $listIndex = $client->param('listIndex');
 	my $items     = $client->param('listRef');
@@ -1250,10 +1277,19 @@ sub onFindTimer() {
 
 	# Perform lazy search, if a minimum length of search text is provided.
 	my $itemsRef = $clientMode{$client}{search_items};
-	if ( (!$keywordSearch && ( length $clientMode{$client}{search_text} ) >=
-			$clientMode{$client}{min_search_length}) ||
-		($keywordSearch && (maxKeywordLength($clientMode{$client}{search_text}) >= $clientMode{$client}{min_search_length})) ||
-		$forceSearch )
+	if (
+		(
+			!$keywordSearch
+			&& ( length $clientMode{$client}{search_text} ) >=
+			$clientMode{$client}{min_search_length}
+		)
+		|| (
+			$keywordSearch
+			&& ( maxKeywordLength( $clientMode{$client}{search_text} ) >=
+				$clientMode{$client}{min_search_length} )
+		)
+		|| $forceSearch
+	  )
 	{
 		$client->showBriefly(
 			{
@@ -1268,8 +1304,9 @@ sub onFindTimer() {
 		# non-keyword searches.
 		my $searchPerformedText = $clientMode{$client}{search_text};
 		if ($keywordSearch) {
-			performTimedKeywordSearch($client, $forceSearch);
-			$searchPerformedText =  keywordMatchText($client, 1, $searchPerformedText);
+			performTimedKeywordSearch( $client, $forceSearch );
+			$searchPerformedText =
+			  keywordMatchText( $client, 1, $searchPerformedText );
 		} else {
 			performTimedItemSearch($client);
 		}
@@ -1292,11 +1329,11 @@ sub onFindTimer() {
 # Find the longest keyword within a multiple-keyword search term.
 sub maxKeywordLength($) {
 	my $keywordString = shift;
-	my @keywords = split(lazyEncode(' '), $keywordString);
-	my $maxLength = 0;
+	my @keywords      = split( lazyEncode(' '), $keywordString );
+	my $maxLength     = 0;
 	foreach my $keyword (@keywords) {
 		my $keywordLength = length($keyword);
-		if ($keywordLength > $maxLength) {
+		if ( $keywordLength > $maxLength ) {
 			$maxLength = $keywordLength;
 		}
 	}
@@ -1307,11 +1344,11 @@ sub maxKeywordLength($) {
 # Find the shortest keyword within a multiple-keyword search term.
 sub minKeywordLength($) {
 	my $keywordString = shift;
-	my @keywords = split(lazyEncode(' '), $keywordString);
-	my $minLength = -1;
+	my @keywords      = split( lazyEncode(' '), $keywordString );
+	my $minLength     = -1;
 	foreach my $keyword (@keywords) {
 		my $keywordLength = length($keyword);
-		if (($minLength == -1) || ($keywordLength < $minLength)) {
+		if ( ( $minLength == -1 ) || ( $keywordLength < $minLength ) ) {
 			$minLength = $keywordLength;
 		}
 	}
@@ -1325,9 +1362,13 @@ sub performTimedItemSearch($) {
 	my $client = shift;
 
 	my $searchResults =
-	  Slim::Schema->resultset( $clientMode{$client}{search_type} )
-	  ->search_like(
-		{ customsearch => buildFind( $clientMode{$client}{search_text}, $clientMode{$client}{side} ) },
+	  Slim::Schema->resultset( $clientMode{$client}{search_type} )->search_like(
+		{
+			customsearch => buildFind(
+				$clientMode{$client}{search_text},
+				$clientMode{$client}{side}
+			)
+		},
 		{
 			columns => [ 'id', "$clientMode{$client}{text_col}" ],
 			order_by => $clientMode{$client}{text_col}
@@ -1338,14 +1379,13 @@ sub performTimedItemSearch($) {
 	# This is true for artists, albums and tracks.
 	my @searchItems = ();
 	while ( my $searchItem = $searchResults->next ) {
-		my $text =
-		  $searchItem->get_column( $clientMode{$client}{text_col} );
-		my $id = $searchItem->id;
+		my $text = $searchItem->get_column( $clientMode{$client}{text_col} );
+		my $id   = $searchItem->id;
 		push @searchItems, { name => $text, value => $id };
 	}
 
 	# If there are multiple results, show the 'all X' choice.
-	if (( scalar(@searchItems) > 1 )
+	if ( ( scalar(@searchItems) > 1 )
 		&& defined( $clientMode{$client}{all_entry} ) )
 	{
 		push @searchItems,
@@ -1364,18 +1404,22 @@ sub performTimedItemSearch($) {
 # database lazification will have put all candidate text within the
 # customsearch column).
 sub performTimedKeywordSearch($$) {
-	my $client = shift;
+	my $client      = shift;
 	my $forceSearch = shift;
 
-	$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: About to perform timed keyword search\n");
+	$::d_plugins
+	  && Slim::Utils::Misc::msg(
+		"LazySearch2: About to perform timed keyword search\n");
 
 	# Perform the search. The search will always be an unconstrained one
 	# because it is at the top level (we've not yet pushed into contributor
 	# or album to constrain the results).
-	my $searchItems = doKeywordSearch($client, $clientMode{$client}{search_text}, $forceSearch, 1, undef, undef);
+	my $searchItems =
+	  doKeywordSearch( $client, $clientMode{$client}{search_text},
+		$forceSearch, 1, undef, undef );
 
 	# Make these items available to the results-listing mode.
-	$clientMode{$client}{search_items} = $searchItems;
+	$clientMode{$client}{search_items}             = $searchItems;
 	$clientMode{$client}{lazysearch_keyword_level} = 1;
 	delete $clientMode{$client}{lazysearch_keyword_contributor};
 	delete $clientMode{$client}{lazysearch_keyword_album};
@@ -1384,26 +1428,22 @@ sub performTimedKeywordSearch($$) {
 # Actually perform the keyword search. This supports all levels of searching
 # and will filter on contributor or album as requested.
 sub doKeywordSearch($$$$$$) {
-	my $client = shift;
-	my $searchText = shift;
-	my $forceSearch = shift;
-	my $level = shift;
+	my $client                = shift;
+	my $searchText            = shift;
+	my $forceSearch           = shift;
+	my $level                 = shift;
 	my $contributorConstraint = shift;
-	my $albumConstraint = shift;
+	my $albumConstraint       = shift;
 	my @items;
 
-	$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: doing keyword search, level=$level, contributorConstraint=$contributorConstraint, albumConstraint=$albumConstraint\n");
+	$::d_plugins
+	  && Slim::Utils::Misc::msg(
+"LazySearch2: doing keyword search, level=$level, contributorConstraint=$contributorConstraint, albumConstraint=$albumConstraint\n"
+	  );
 
 	# Keyword searches are separate 'keywords' separated by a space (lazy
 	# encoded). We split those out here.
-	my @keywordParts = split(lazyEncode(' '), $searchText);
-
-	#@@TODO@@ remove this test code
-#	$level = 3;
-#	my @keywordParts = ( '9255' );
-#	$keywordParts = \@keywordParts;
-#	$albumConstraint=275;
-#	$contributorConstraint=556;
+	my @keywordParts = split( lazyEncode(' '), $searchText );
 
 	# Build the WHERE clause for the query, containing multiple AND clauses
 	# and LIKE searches.
@@ -1411,58 +1451,78 @@ sub doKeywordSearch($$$$$$) {
 	foreach my $keyword (@keywordParts) {
 
 		# We don't include zero-length keywords.
-		next if (length($keyword) == 0);
+		next if ( length($keyword) == 0 );
 
 		# We don't include short keywords unless the search is forced.
-		next if (!$forceSearch && (length($keyword) < $clientMode{$client}{min_search_length}));
+		next
+		  if ( !$forceSearch
+			&& ( length($keyword) < $clientMode{$client}{min_search_length} ) );
 
 		# Otherwise, here's the search term for this one keyword.
 		push @andClause, 'me.customsearch';
-		push @andClause, { 'like', buildFind( $keyword, $clientMode{$client}{side} ) };
+		push @andClause,
+		  { 'like', buildFind( $keyword, $clientMode{$client}{side} ) };
 	}
 
 	# Bail out here if we've not found any keywords we're interested
 	# in searching. This can happen because the outer minimum length is
 	# based on the whole string, not the maximum individual keyword.
-	return if (@andClause == 0);
+	return if ( @andClause == 0 );
 
 	# Perform the search, depending on the level.
 	my $textColumn;
 	my $results;
-	if ($level == 1) {
-		$results = Slim::Schema->resultset('Track')->search({ -and => [ @andClause ] }, { order_by => 'namesort', distinct => 1 })->search_related('contributorTracks')->search_related('contributor');
+	if ( $level == 1 ) {
+		$results =
+		  Slim::Schema->resultset('Track')->search( { -and => [@andClause] },
+			{ order_by => 'namesort', distinct => 1 } )
+		  ->search_related('contributorTracks')->search_related('contributor');
 		$textColumn = 'name';
 
-		#@@TODO@@ - removeme
-		while (my $item = $results->next) {
-			$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: id=" . $item->id . ", item=\'" . $item->name . "\'\n");
-		}
-		$results->reset;
+	} elsif ( $level == 2 ) {
 
-	} elsif ($level == 2) {
-
-		$results = Slim::Schema->resultset('Track')->search({ -and => [ @andClause, 'contributorTracks.contributor' => { '=', $contributorConstraint } ] }, { order_by => 'titlesort', distinct => 1, join => 'contributorTracks' })->search_related('album');
+		$results = Slim::Schema->resultset('Track')->search(
+			{
+				-and => [
+					@andClause,
+					'contributorTracks.contributor' =>
+					  { '=', $contributorConstraint }
+				]
+			},
+			{
+				order_by => 'titlesort',
+				distinct => 1,
+				join     => 'contributorTracks'
+			}
+		)->search_related('album');
 		$textColumn = 'title';
 
-		#@@TODO@@ - removeme
-		while (my $item = $results->next) {
-			$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: id=" . $item->id . ", item=\'" . $item->title . "\'\n");
-		}
-		$results->reset;
-	} elsif ($level == 3) {
-		$results = Slim::Schema->resultset('Track')->search({ -and => [ @andClause, 'contributorTracks.contributor' => { '=', $contributorConstraint }, 'album' => { '=', $albumConstraint } ] }, { join => 'contributorTracks', order_by => 'disc,tracknum,titlesort' });
+	} elsif ( $level == 3 ) {
+		$results = Slim::Schema->resultset('Track')->search(
+			{
+				-and => [
+					@andClause,
+					'contributorTracks.contributor' =>
+					  { '=', $contributorConstraint },
+					'album' => { '=', $albumConstraint }
+				]
+			},
+			{
+				join     => 'contributorTracks',
+				order_by => 'disc,tracknum,titlesort'
+			}
+		);
 		$textColumn = 'title';
-
-		#@@TODO@@ - removeme
-		while (my $item = $results->next) {
-			$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: id=" . $item->id . ", item=\'" . $item->title . "\'\n");
-		}
-		$results->reset;
 	}
 
 	# Build up the item array.
-	while (my $item = $results->next) {
-		push @items, { name => $item->get_column($textColumn), value => $item->id, level => $level };
+	while ( my $item = $results->next ) {
+		push @items,
+		  {
+			name  => $item->get_column($textColumn),
+			value => $item->id,
+			level => $level
+		  };
 	}
 
 	return \@items;
@@ -1474,9 +1534,9 @@ sub doKeywordSearch($$$$$$) {
 # An optional flag can be passed to constrain the search to either the left (1)
 # or the right (2) hand-side of the customsearch value.
 sub buildFind($) {
-	my $searchText       = shift;
-	my $side			 = shift || 0;
-	my $searchSubstring  = ( Slim::Utils::Prefs::get('searchSubString') );
+	my $searchText      = shift;
+	my $side            = shift || 0;
+	my $searchSubstring = ( Slim::Utils::Prefs::get('searchSubString') );
 	my $searchReturn;
 
 	if ($searchSubstring) {
@@ -1490,8 +1550,8 @@ sub buildFind($) {
 	}
 
 	# Constrain for one side or the other, if specified.
-	$searchReturn .= '|%' if $side == 1; # Left-hand side
-	$searchReturn = ('%|' . $searchReturn) if $side == 2; # Right-hand side
+	$searchReturn .= '|%' if $side == 1;    # Left-hand side
+	$searchReturn = ( '%|' . $searchReturn ) if $side == 2;    # Right-hand side
 
 	return $searchReturn;
 }
@@ -1637,7 +1697,8 @@ sub checkDefaults {
 			LAZYSEARCH_MINLENGTH_TRACK_DEFAULT
 		);
 	}
-	if ( !Slim::Utils::Prefs::isDefined('plugin-lazysearch2-minlength-keyword') )
+	if (
+		!Slim::Utils::Prefs::isDefined('plugin-lazysearch2-minlength-keyword') )
 	{
 		Slim::Utils::Prefs::set(
 			'plugin-lazysearch2-minlength-keyword',
@@ -1659,17 +1720,35 @@ sub checkDefaults {
 		Slim::Utils::Prefs::set( 'plugin-lazysearch2-allentries',
 			LAZYSEARCH_ALLENTRIES_DEFAULT );
 	}
-	if ( !Slim::Utils::Prefs::isDefined('plugin-lazysearch2-keyword-artists-enabled') ) {
-		Slim::Utils::Prefs::set( 'plugin-lazysearch2-keyword-artists-enabled',
-			LAZYSEARCH_KEYWORD_ARTISTS_DEFAULT );
+	if (
+		!Slim::Utils::Prefs::isDefined(
+			'plugin-lazysearch2-keyword-artists-enabled')
+	  )
+	{
+		Slim::Utils::Prefs::set(
+			'plugin-lazysearch2-keyword-artists-enabled',
+			LAZYSEARCH_KEYWORD_ARTISTS_DEFAULT
+		);
 	}
-	if ( !Slim::Utils::Prefs::isDefined('plugin-lazysearch2-keyword-albums-enabled') ) {
-		Slim::Utils::Prefs::set( 'plugin-lazysearch2-keyword-albums-enabled',
-			LAZYSEARCH_KEYWORD_ALBUMS_DEFAULT );
+	if (
+		!Slim::Utils::Prefs::isDefined(
+			'plugin-lazysearch2-keyword-albums-enabled')
+	  )
+	{
+		Slim::Utils::Prefs::set(
+			'plugin-lazysearch2-keyword-albums-enabled',
+			LAZYSEARCH_KEYWORD_ALBUMS_DEFAULT
+		);
 	}
-	if ( !Slim::Utils::Prefs::isDefined('plugin-lazysearch2-keyword-tracks-enabled') ) {
-		Slim::Utils::Prefs::set( 'plugin-lazysearch2-keyword-tracks-enabled',
-			LAZYSEARCH_KEYWORD_TRACKS_DEFAULT );
+	if (
+		!Slim::Utils::Prefs::isDefined(
+			'plugin-lazysearch2-keyword-tracks-enabled')
+	  )
+	{
+		Slim::Utils::Prefs::set(
+			'plugin-lazysearch2-keyword-tracks-enabled',
+			LAZYSEARCH_KEYWORD_TRACKS_DEFAULT
+		);
 	}
 }
 
@@ -1743,17 +1822,23 @@ sub lazifyColumn {
 # Those it finds are added to a global hash that is later worked through from
 # the background task.
 sub lazifyDatabaseType {
-	my $type        = shift;
-	my $sourceAttr = shift;
+	my $type                  = shift;
+	my $sourceAttr            = shift;
 	my $considerKeywordArtist = shift;
-	my $considerKeywordAlbum = shift;
-	my $considerKeywordTrack = shift;
+	my $considerKeywordAlbum  = shift;
+	my $considerKeywordTrack  = shift;
 
 	# Include keywords in the lazified version if the caller asked for it and
 	# the user preference says they want it.
-	my $includeKeywordArtist = $considerKeywordArtist && Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-artists-enabled');
-	my $includeKeywordAlbum = $considerKeywordAlbum && Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-albums-enabled');
-	my $includeKeywordTrack = $considerKeywordTrack && Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-tracks-enabled');
+	my $includeKeywordArtist =
+	  $considerKeywordArtist
+	  && Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-artists-enabled');
+	my $includeKeywordAlbum =
+	  $considerKeywordAlbum
+	  && Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-albums-enabled');
+	my $includeKeywordTrack =
+	  $considerKeywordTrack
+	  && Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-tracks-enabled');
 
 	# If adding keywords for album titles then we need to join to the album
 	# table, to.
@@ -1764,10 +1849,14 @@ sub lazifyDatabaseType {
 	# in case that column was previously lazified before keywords were
 	# introduced.
 	my $whereClause;
-	if ($considerKeywordArtist || $considerKeywordAlbum || $considerKeywordTrack) {
-		$whereClause = { -or => [
-			'me.customsearch' => { 'not like', '%|%' },
-			'me.customsearch' => undef
+	if (   $considerKeywordArtist
+		|| $considerKeywordAlbum
+		|| $considerKeywordTrack )
+	{
+		$whereClause = {
+			-or => [
+				'me.customsearch' => { 'not like', '%|%' },
+				'me.customsearch' => undef
 			]
 		};
 	} else {
@@ -1775,8 +1864,14 @@ sub lazifyDatabaseType {
 	}
 
 	# Find all entries that are not yet converted.
-	my $rs = Slim::Schema->resultset($type)->search( $whereClause,
-		{ columns => [ 'id', $sourceAttr, 'me.customsearch' ], join => $extraJoins, prefetch => $extraJoins } );
+	my $rs = Slim::Schema->resultset($type)->search(
+		$whereClause,
+		{
+			columns  => [ 'id', $sourceAttr, 'me.customsearch' ],
+			join     => $extraJoins,
+			prefetch => $extraJoins
+		}
+	);
 	my $rsCount = $rs->count;
 
 	$::d_plugins
@@ -1786,14 +1881,13 @@ sub lazifyDatabaseType {
 	# Store the unlazified item IDs; later, we'll work on these in chunks from
 	# within a task.
 	if ( $rsCount > 0 ) {
-		my %typeHash =
-		  (
-			  rs => $rs,
-			  source_attr => $sourceAttr,
-			  keyword_artist => $includeKeywordArtist,
-			  keyword_album => $includeKeywordAlbum,
-			  keyword_track => $includeKeywordTrack,
-		  );
+		my %typeHash = (
+			rs             => $rs,
+			source_attr    => $sourceAttr,
+			keyword_artist => $includeKeywordArtist,
+			keyword_album  => $includeKeywordAlbum,
+			keyword_track  => $includeKeywordTrack,
+		);
 		$encodeQueues{$type} = \%typeHash;
 	}
 }
@@ -1819,14 +1913,14 @@ sub encodeTask {
 
 	# Get a single type hash from the encode queue. It doesn't matter on the
 	# order they come out of the hash.
-	my $type        = ( keys %encodeQueues )[0];
-	my $typeHashRef = $encodeQueues{$type};
-	my %typeHash    = %$typeHashRef;
-	my $rs          = $typeHash{rs};
-	my $sourceAttr = $typeHash{source_attr};
+	my $type          = ( keys %encodeQueues )[0];
+	my $typeHashRef   = $encodeQueues{$type};
+	my %typeHash      = %$typeHashRef;
+	my $rs            = $typeHash{rs};
+	my $sourceAttr    = $typeHash{source_attr};
 	my $keywordArtist = $typeHash{keyword_artist};
-	my $keywordAlbum = $typeHash{keyword_album};
-	my $keywordTrack = $typeHash{keyword_track};
+	my $keywordAlbum  = $typeHash{keyword_album};
+	my $keywordTrack  = $typeHash{keyword_track};
 
 	$::d_plugins
 	  && Slim::Utils::Misc::msg( 'LazySearch2: EncodeTask - '
@@ -1848,27 +1942,28 @@ sub encodeTask {
 
 			# Update the search text for this one row and write it back to the
 			# database.
-			my $customSearch = lazifyColumn( $obj->get_column($sourceAttr));
+			my $customSearch = lazifyColumn( $obj->get_column($sourceAttr) );
 
 			# If keyword searching is enabled then add keywords.
-			if ($keywordArtist || $keywordAlbum || $keywordTrack) {
+			if ( $keywordArtist || $keywordAlbum || $keywordTrack ) {
 				my $encodedArtist = '';
-				my $encodedAlbum = '';
-				my $encodedTrack = '';
+				my $encodedAlbum  = '';
+				my $encodedTrack  = '';
 
 				if ($keywordTrack) {
-					$encodedTrack = lazifyColumn( $obj->get_column($sourceAttr));
+					$encodedTrack =
+					  lazifyColumn( $obj->get_column($sourceAttr) );
 				}
 
 				if ($keywordArtist) {
 					my $contributors = $obj->contributors;
-					while (my $contributor = $contributors->next) {
-						$encodedArtist .= lazifyColumn($contributor->name);
+					while ( my $contributor = $contributors->next ) {
+						$encodedArtist .= lazifyColumn( $contributor->name );
 					}
 				}
 
 				if ($keywordAlbum) {
-					$encodedAlbum = lazifyColumn($obj->album->title);
+					$encodedAlbum = lazifyColumn( $obj->album->title );
 				}
 
 				# Add this to the custom search column.
@@ -1876,16 +1971,14 @@ sub encodeTask {
 			}
 
 			# Get the custom search added to the database.
-			$obj->set_column( 'customsearch', $customSearch);
+			$obj->set_column( 'customsearch', $customSearch );
 			$obj->update;
 
 			$rowsDone++;
 		}
-	  } while (
-		$obj
+	  } while ( $obj
 		&& ( ( Time::HiRes::time() - $startTime ) <
-			LAZYSEARCH_ENCODE_MAX_QUANTA )
-	  );
+			LAZYSEARCH_ENCODE_MAX_QUANTA ) );
 
 	my $endTime = Time::HiRes::time();
 
@@ -1959,9 +2052,9 @@ tr/ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 /2223334445556667777888999912345678900/;
 # Determines whether keyword searching is enabled. It's enabled if at least one
 # of the keyword search categories is enabled.
 sub keywordSearchEnabled {
-	return Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-artists-enabled') ||
-		Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-albums-enabled') ||
-		Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-tracks-enabled');
+	return Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-artists-enabled')
+	  || Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-albums-enabled')
+	  || Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-tracks-enabled');
 }
 
 # Handler when RIGHT is pressed on the top-level keyword search results mode.
@@ -1976,90 +2069,114 @@ sub keywordOnRightHandler {
 	} else {
 
 		# Only allow right if we've performed a search.
-		if ( (length($clientMode{$client}{search_performed}) > 0)
+		if (   ( length( $clientMode{$client}{search_performed} ) > 0 )
 			&& ( $item->{value} != RESULT_ENTRY_ID_ALL ) )
 		{
-			my $name = $item->{name};
-			my $value = $item->{value};
-			my $level = $item->{level};
-			my $contributorConstraint = $clientMode{$client}{contributor_constraint};
+			my $name                  = $item->{name};
+			my $value                 = $item->{value};
+			my $level                 = $item->{level};
+			my $contributorConstraint =
+			  $clientMode{$client}{contributor_constraint};
 			my $albumConstraint = $clientMode{$client}{album_constraint};
-			$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: level=$level keyword results OnRight, value=$value, name=\'$name\', contributorConstraint=$contributorConstraint, albumConstraint=$albumConstraint\n");
+			$::d_plugins
+			  && Slim::Utils::Misc::msg(
+"LazySearch2: level=$level keyword results OnRight, value=$value, name=\'$name\', contributorConstraint=$contributorConstraint, albumConstraint=$albumConstraint\n"
+			  );
 
 			# Cancel any pending timer.
 			cancelPendingSearch($client);
 
 			# Track details are a special case.
-			if ($level < 3) {
+			if ( $level < 3 ) {
 				my $line1BrowseText;
-				if ($level == 1) {
+				if ( $level == 1 ) {
+
 					# Current item provides contributor constraint.
 					$contributorConstraint = $value;
-					$line1BrowseText = '{LINE1_BROWSE_ALBUMS}';
-				} elsif ($level == 2) {
+					$line1BrowseText       = '{LINE1_BROWSE_ALBUMS}';
+				} elsif ( $level == 2 ) {
+
 					# Current item provides album constraint.
 					$albumConstraint = $value;
 					$line1BrowseText = '{LINE1_BROWSE_TRACKS}';
 				}
 
 				# Remember these consraints in the mode.
-				$clientMode{$client}{contributor_constraint} = $contributorConstraint;
+				$clientMode{$client}{contributor_constraint} =
+				  $contributorConstraint;
 				$clientMode{$client}{album_constraint} = $albumConstraint;
 
 				# The current unique text to make the mode unique.
-				my $searchText = $clientMode{$client}{search_text};
+				my $searchText  = $clientMode{$client}{search_text};
 				my $forceSearch = $clientMode{$client}{search_forced};
 
 				# Do the next level of keyword search.
-				my $items = doKeywordSearch($client, $searchText, $forceSearch, ($level + 1), $contributorConstraint, $albumConstraint);
+				my $items =
+				  doKeywordSearch( $client, $searchText, $forceSearch,
+					( $level + 1 ),
+					$contributorConstraint, $albumConstraint );
 
-				# Use INPUT.Choice to display the results for this selected keyword search
-				# category.
+	  # Use INPUT.Choice to display the results for this selected keyword search
+	  # category.
 				my %params = (
 
 					# The header (first line) to display whilst in this mode.
-					header => $line1BrowseText . ' \'' . keywordMatchText($client, 1) . '\' {count}',
+					header => $line1BrowseText . ' \''
+					  . keywordMatchText( $client, 1 )
+					  . '\' {count}',
 
 					# A reference to the list of items to display.
 					listRef => $items,
 
-					# A unique name for this mode that won't actually get displayed
-					# anywhere.
+				 # A unique name for this mode that won't actually get displayed
+				 # anywhere.
 					modeName => "LAZYBROWSE_KEYWORD_MODE:$level:$searchText",
 
-					# An anonymous function that is called every time the user presses the
-					# RIGHT button.
+		  # An anonymous function that is called every time the user presses the
+		  # RIGHT button.
 					onRight => \&keywordOnRightHandler,
 
-					# A handler that manages play/add/insert (differentiated by the
-					# last parameter).
+				 # A handler that manages play/add/insert (differentiated by the
+				 # last parameter).
 					onPlay => sub {
 						my ( $client, $item, $addMode ) = @_;
 
-						$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: lazyOnPlay called for keyword search result\n");
+						$::d_plugins
+						  && Slim::Utils::Misc::msg(
+"LazySearch2: lazyOnPlay called for keyword search result\n"
+						  );
 
-						# Start playing the item selected (in the correct mode - play, add
-						# or insert).
+			  # Start playing the item selected (in the correct mode - play, add
+			  # or insert).
 						lazyOnPlay( $client, $item, $addMode );
 					},
 
 					# These are all menu items and so have a right-arrow overlay
 					overlayRef => sub {
-						return [ undef, Slim::Display::Display::symbol('rightarrow') ];
+						return [
+							undef, Slim::Display::Display::symbol('rightarrow')
+						];
 					},
 				);
 
-				$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: setSearchBrowseMode called with mode \'LAZYBROWSE_KEYWORD_MODE:$level:$searchText\'\n");
+				$::d_plugins
+				  && Slim::Utils::Misc::msg(
+"LazySearch2: setSearchBrowseMode called with mode \'LAZYBROWSE_KEYWORD_MODE:$level:$searchText\'\n"
+				  );
 
-				# Use our INPUT.Choice-derived mode to show the menu and let it do all the
-				# hard work of displaying the list, moving it up and down, etc, etc.
-				Slim::Buttons::Common::pushModeLeft( $client, LAZYBROWSE_KEYWORD_MODE, \%params );
+	  # Use our INPUT.Choice-derived mode to show the menu and let it do all the
+	  # hard work of displaying the list, moving it up and down, etc, etc.
+				Slim::Buttons::Common::pushModeLeft( $client,
+					LAZYBROWSE_KEYWORD_MODE, \%params );
 			} else {
+
 				# We're currently at the track level so push into track info
 				# browse mode (which needs the track URL to be looked-up).
-				my $track =
-				  Slim::Schema->rs('Track')->find($value);
-				$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: going into trackinfo mode for track URL=$track\n");
+				my $track = Slim::Schema->rs('Track')->find($value);
+				$::d_plugins
+				  && Slim::Utils::Misc::msg(
+"LazySearch2: going into trackinfo mode for track URL=$track\n"
+				  );
 				Slim::Buttons::Common::pushModeLeft( $client, 'trackinfo',
 					{ 'track' => $track } );
 			}
@@ -2070,8 +2187,9 @@ sub keywordOnRightHandler {
 }
 
 sub keywordMatchText($$$) {
-	my $client = shift;
+	my $client       = shift;
 	my $hideShorties = shift;
+
 	# Search text is an optional parameter; if not specified it is taken
 	# from the current player status.
 	my $searchText = shift || $clientMode{$client}{search_text};
@@ -2083,12 +2201,15 @@ sub keywordMatchText($$$) {
 	# Split and add each separate 'keyword' to our string. We optionally don't
 	# output any that are too short since we've not actually searched for them.
 	my $text = '';
-	my @keywordParts = split(lazyEncode(' '), $searchText);
+	my @keywordParts = split( lazyEncode(' '), $searchText );
 	foreach my $keyword (@keywordParts) {
-		next if (length($keyword) == 0);
-		next if (!$searchForced && $hideShorties && (length($keyword) < $clientMode{$client}{min_search_length}));
+		next if ( length($keyword) == 0 );
+		next
+		  if ( !$searchForced
+			&& $hideShorties
+			&& ( length($keyword) < $clientMode{$client}{min_search_length} ) );
 
-		if (length($text) == 0) {
+		if ( length($text) == 0 ) {
 			$text .= "$keyword";
 		} else {
 			$text .= ",$keyword";
@@ -2097,7 +2218,10 @@ sub keywordMatchText($$$) {
 
 	# If we're not hiding short keywords (ie the user is entering the search)
 	# we add a trailing ',' if the last key entry was the separator.
-	if (!$hideShorties && (substr($searchText, length($searchText) - 1) == lazyEncode(' '))) {
+	if ( !$hideShorties
+		&& ( substr( $searchText, length($searchText) - 1 ) == lazyEncode(' ') )
+	  )
+	{
 		$text .= ',';
 	}
 
