@@ -1830,14 +1830,11 @@ sub lazifyDatabaseType {
 
 	# Include keywords in the lazified version if the caller asked for it and
 	# the user preference says they want it.
-	my $includeKeywordArtist =
-	  $considerKeywordArtist
+	my $includeKeywordArtist = $considerKeywordArtist
 	  && Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-artists-enabled');
-	my $includeKeywordAlbum =
-	  $considerKeywordAlbum
+	my $includeKeywordAlbum = $considerKeywordAlbum
 	  && Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-albums-enabled');
-	my $includeKeywordTrack =
-	  $considerKeywordTrack
+	my $includeKeywordTrack = $considerKeywordTrack
 	  && Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-tracks-enabled');
 
 	# If adding keywords for album titles then we need to join to the album
