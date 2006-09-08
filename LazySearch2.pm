@@ -4,7 +4,7 @@
 #
 # This code is derived from code with the following copyright message:
 #
-# SlimServer Copyright (c) 2001-2005 Sean Adams, Slim Devices Inc.
+# SlimServer Copyright (c) 2001-2006 Sean Adams, Slim Devices Inc.
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License,
 # version 2.
@@ -18,7 +18,7 @@
 # remote control.
 #
 # For further details see:
-# http://hickinbottom.demon.co.uk/SlimServer/lazy_searching2.htm
+# http://hickinbottom.demon.co.uk/lazysearch
 
 use strict;
 use warnings;
@@ -2472,7 +2472,7 @@ SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_DESC
 	DE	Mit dieser Einstellung kann die SEARCH-Taste auf der Squeezebox/Transporter-Fernbedienung mit der <i>Faulpelz-Suche</i> statt mit der <i>Originalsuche</i> belegt werden. Durch Aktivieren dieser Einstellung kann diese Taste entsprechend umbelegt werden, ohne die Dateien <i>Default.map</i> oder <i>Custom.map</i> ändern zu müssen. Hinweis: Änderungen an dieser Einstellung werden erst nach einem erneuten Start des Plugins wirksam (z.B. bei einem Neustart des SlimServers).
 	EN	This setting allows the SEARCH button on the Squeezebox/Transporter remote control to be remapped to the <i>lazy search music</i> function instead of the original <i>search music</i> function. Enabling this setting allows this button remapping to be performed without editing the <i>Default.map</i> or <i>Custom.map</i> files. Note that changes to this setting do not take effect until the plugin is reloaded (eg by restarting SlimServer).
 	ES	Esta configuración permite reasignar el boton SEARCH del control remoto de Squeezebox/Transporter a la función de <i>búsqueda laxa de música</i>, en lugar de la función de <i>búsqueda de música</i> original. Habilitando esto se logra que la reasignación del botón sea realizada sin editar los archivos <i>Default.map</i> o <i>Custom.map</i>. Notar que los cambios no tendrán efecto hasta que el plugin sea recargado (por ej. al reiniciar SlimServer).
-	DA	Denne indstilling giver mulighed for at SEARCH knappen på Squeezebox/Transporter fjernbetjæningen benyttes til at aktivere <i>Lazy Search Music</i> funktionen i stedet for den orginale <i>søg</i> funktion. Det er ikke nødvendigt at rette i <i>Default.map</i> eller <i>Custom.map filerne. Bemærk, denne indstilling slår ikke igennem før plugin'et er genindløst (f.eks. ved at genstarte SlimServer).
+	DA	Denne indstilling giver mulighed for at SEARCH knappen på Squeezebox/Transporter fjernbetjæningen benyttes til at aktivere <i>Lazy Search Music</i> funktionen i stedet for den orginale <i>søg</i> funktion. Det er ikke nødvendigt at rette i <i>Default.map</i> eller <i>Custom.map filerne. Bemærk, denne indstilling slår ikke igennem før plugin\'et er genindløst (f.eks. ved at genstarte SlimServer).
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_CHOOSE
 	DE	Drücken der SEARCH-Taste auf der Squeezebox/Transporter-Fernbedienung:
