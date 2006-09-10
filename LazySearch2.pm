@@ -25,11 +25,13 @@ use warnings;
 
 package Plugins::LazySearch2;
 
+use utf8;
 use Slim::Utils::Strings qw (string);
 use Slim::Utils::Misc;
 use Slim::Utils::Text;
 use Slim::Utils::Timers;
 use Time::HiRes;
+use Text::Unidecode;
 
 # Name of this plugin - used for various global things to prevent clashes with
 # other plugins.
@@ -1773,16 +1775,16 @@ sub lazifyDatabase {
 	%encodeQueues = ();
 
 	# Convert the albums table.
-	lazifyDatabaseType( 'Album', 'titlesearch', 0, 0, 0 );
+	lazifyDatabaseType( 'Album', 'title', 0, 0, 0 );
 
 	# Convert the artists (contributors) table.
-	lazifyDatabaseType( 'Contributor', 'namesearch, 0, 0, 0' );
+	lazifyDatabaseType( 'Contributor', 'name', 0, 0, 0 );
 
 	# Convert the genres table.
-	lazifyDatabaseType( 'Genre', 'namesearch', 0, 0, 0 );
+	lazifyDatabaseType( 'Genre', 'name', 0, 0, 0 );
 
 	# Convert the songs (tracks) table.
-	lazifyDatabaseType( 'Track', 'titlesearch', 1, 1, 1 );
+	lazifyDatabaseType( 'Track', 'title', 1, 1, 1 );
 
 	# If there are any items to encode then initialise a background task that
 	# will do that work in chunks.
@@ -2039,9 +2041,16 @@ sub lazyEncode($) {
 	# characters. Note that space maps to zero.
 	# We do all this on an upper case version, since upper case is all the user
 	# can enter through the remote control.
-	$out_string = uc $in_string;
+	$out_string = uc unidecode($in_string);
 	$out_string =~
 tr/ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 /2223334445556667777888999912345678900/;
+
+	# Now, if there's any punctuation left in we remove that to aid searching.
+	# We do that by calling the SlimServer method that transforms all
+	# punctuation to spaces, then we remove all spaces (since we've already
+	# lazified real spaces to '0's they'll be OK and not removed).
+	$out_string = Slim::Utils::Text::ignorePunct($out_string);
+	$out_string =~ s/ //go;
 
 	return $out_string;
 }
