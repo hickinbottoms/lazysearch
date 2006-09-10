@@ -2532,66 +2532,82 @@ SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_BUTTON
 	DA	Start opbygning af Lazy Search indexet
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_HEAD
+	DE	Stichwort-Suche
 	EN	Keyword Search
 	DA	Keyword søgning
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_OPTIONS_DESC
+	DE	Die Stichwort-Suche ermöglicht die Suche über mehrere Kategorien gleichzeitig, d.h. man kann Alben, Interpreten und Lieder finden, die ein oder mehrere <i>Stichworte</i> enthalten. Dies ist z.B. bei klassischen Musiksammlungen hilfreich, bei denen Interpreten, Komponisten und Dirigenten in den Liedertiteln, im Album-Interpret oder im Lied-Interpret enthalten sind, weil du deine Musik suchen und finden kannst unabhängig davon, wie die Lieder mit "Tags" versehen sind. Mit den folgenden Optionen kannst du einstellen, welche Kategorien in die Stichwort-Suche einbezogen werden. Wenn keine Kategorien ausgewählt ist, erscheint die Anzeige der Stichwort-Suche nicht im Faulpelz-Menü am Player.<br/><br/><b>Hinweis</b>: Änderungen werden erst wirksam, wenn die Datenbank einmal komplett gelöscht und neu aufgebaut wurde.
 	EN	Keyword search allows searching across multiple categories, finding albums, artists and songs that match one or more <i>keywords</i> within their titles. This may be useful, for example, with classical music collections which can have artists, composers and performers included in the song titles as well as in the album artist and song artist because it lets you search and find your music no matter how the tracks were tagged. The following settings allow you to specify which categories will be included in keyword searches. If all categories are disabled then the keyword search option won\'t appear in the player\'s Lazy Search menu at all.<br/><br/><b>Note</b> that this change will only take effect once a complete database clear and rescan has been performed.
 	DA	Keyword søgning giver mulighed for at søge mellem flere kategorier, og på den måde finde albums, kunstnere og sangtitler som matcher et eller flere <i>keywords</i> i deres titel. Dette kan være brugbart, f.eks. med klassisk musik samlinger som både kan have kunster, forfatter og udøver inkluderet i sangtitlen og albumkunstneren eller sangkunstneren idet funktionen giver mulighed for at søge ligegyldigt hvordan sangens tags er opbygget. Følgende indstillinger giver dig mulighed for at specificere hvilke kategorier der bliver inkluderet i keyword søgningen. Hvis alle kattegorier er slået fra, vil keyword søgnings muligheden ikke optræde i afspillerens Lazy Search menu.<br/><br/><b>Bemærk</b> at denne indstilling vil først slå igennem efter en komplet genscanning af databasen er foretaget.
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_CHOOSE
+	DE	Stichwort-Suche nach Interpreten:
 	EN	Keyword search for artists:
 	DA	Keyword søgning efter kunstner:
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_CHANGE
+	DE	Stichwort-Suche nach Interpreten wurde geändert in:
 	EN	Keyword search for artists changed to:
 	DA	Keyword søgning for kunstner rettet til:
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_HEAD
+	DE	Stichwort-Suche nach Alben
 	EN	Keyword Search for Albums
 	DA	Keyword søgning efter Album
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_CHOOSE
+	DE	Stichwort-Suche nach Alben:
 	EN	Keyword search for albums:
 	DA	Keyword søgning efter album:
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_CHANGE
+	DE	Stichwort-Suche nach Alben wurde geändert in:
 	EN	Keyword search for albums changed to:
 	DA	Keyword søgning for album rettet til:
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_HEAD
+	DE	Stichwort-Suche nach Liedern
 	EN	Keyword Search for Tracks
 	DA	Keyword søgning efter sangtitel:
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_CHOOSE
+	DE	Stichwort-Suche nach Liedern:
 	EN	Keyword search for tracks:
 	DA	Keyword søgning efter sangtitel:
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_CHANGE
+	DE	Stichwort-Suche nach Liedern wurde geändert in:
 	EN	Keyword search for tracks changed to:
 	DA	Keyword søgning for sangtitel rettet til:
 
 KEYWORD_MENU_ITEM
+	DE	Stichwörter
 	EN	Keywords
 	DA	Keywords
 
 LINE1_BROWSE_KEYWORDS_EMPTY
+	DE	Faulpelz-Suche nach Stichwörtern
 	EN	Lazy Search by Keywords
 	DA	Lazy Search efter Keywords
 
 LINE2_ENTER_MORE_KEYWORDS
+	DE	Stichwörter eingeben
 	EN	Enter Keyword Search
 	DA	Indtast Keyword Søgning
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD
+	DE	Mindestlänge für die Stichwort-Suche
 	EN	Minimum Keyword Search Length
 	DA	Minimum længde for keyword søgning
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD_CHOOSE
+	DE	Mindestlänge für die Stichwort-Suche (2-9 Zeichen):
 	EN	Minimum length for keyword search (2-9 characters):
 	DA	Minimum længde for keyword søgning (2-9 tegn):
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD_CHANGE
+	DE	Mindestlänge für die Stichwort-Suche wurde geändert in:
 	EN	Minimum length for keyword search changed to:
 	DA	Minimum længde for keyword søgning rettet til:
 ';
