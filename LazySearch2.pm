@@ -1293,11 +1293,18 @@ sub onFindTimer() {
 		|| $forceSearch
 	  )
 	{
+		# The search text is shown with word separators for keyword searches.
+		my $searchText = $clientMode{$client}{search_text};
+		my $searchType = $clientMode{$client}{search_type};
+		if ( $searchType eq SEARCH_TYPE_KEYWORD ) {
+			$searchText = keywordMatchText( $client, 0 , $searchText);
+		}
+
 		$client->showBriefly(
 			{
 				'line1' => sprintf(
 					$client->string('LINE1_SEARCHING'),
-					$clientMode{$client}{search_text}
+					$searchText
 				)
 			}
 		);
@@ -2049,8 +2056,10 @@ tr/ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 /2223334445556667777888999912345678900/;
 	# We do that by calling the SlimServer method that transforms all
 	# punctuation to spaces, then we remove all spaces (since we've already
 	# lazified real spaces to '0's they'll be OK and not removed).
-	$out_string = Slim::Utils::Text::ignorePunct($out_string);
-	$out_string =~ s/ //go;
+	if ($out_string ne '0') {
+		$out_string = Slim::Utils::Text::ignorePunct($out_string);
+		$out_string =~ s/ //go;
+	}
 
 	return $out_string;
 }
@@ -2238,6 +2247,7 @@ sub keywordMatchText($$$) {
 # following for the translations:
 # 	DE	Dieter (dieterp@patente.de)
 # 	ES	Néstor (nspedalieri@gmail.com)
+#	DA	Jacob Bang (jacob@phonden.dk)
 sub strings {
 	return '
 PLUGIN_LAZYSEARCH2
