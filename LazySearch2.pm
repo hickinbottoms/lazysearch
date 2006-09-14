@@ -73,6 +73,10 @@ use constant LAZYSEARCH_INITIAL_LAZIFY_DELAY => 5;
 # search results list.
 use constant RESULT_ENTRY_ID_ALL => -1;
 
+# The character used to separate individual words of a keyword search
+# string.
+use constant KEYWORD_SEPARATOR_CHARACTER => ',';
+
 # Export the version to the server (as a subversion keyword).
 use vars qw($VERSION);
 $VERSION = 'trunk-6.5-r@@REVISION@@';
@@ -521,10 +525,12 @@ sub initPlugin() {
 	$chFunctions{'leftSingle'}   = \&onDelCharHandler;
 	$chFunctions{'leftHold'}     = \&onDelAllHandler;
 	$chFunctions{'forceSearch'}  = \&lazyForceSearch;
+	$chFunctions{'zeroButton'}   = \&zeroButtonHandler;
+	$chFunctions{'keywordSep'}   = \&keywordSepHandler;
 	Slim::Buttons::Common::addMode( LAZYBROWSE_MODE, \%chFunctions,
 		\&Slim::Buttons::Input::Choice::setMode );
 
-	# Our input map for the new lazy browse mode, based on thd default map
+	# Our input map for the new lazy browse mode, based on the default map
 	# contents for INPUT.Choice.
 	my %lazyInputMap = (
 		'arrow_left'      => 'leftSingle',
@@ -536,6 +542,12 @@ sub initPlugin() {
 		'add.single'      => 'addSingle',
 		'add.hold'        => 'addHold',
 		'search'          => 'forceSearch',
+		'0.single'        => 'zeroButton',
+		'0.hold'          => 'keywordSep',
+		'0'               => 'dead',
+		'0.repeat'        => 'dead',
+		'0.hold_release'  => 'dead',
+		'0.double'        => 'dead',
 	);
 	for my $buttonPressMode (qw{repeat hold hold_release single double}) {
 		$lazyInputMap{ 'play.' . $buttonPressMode }   = 'dead';
@@ -1189,7 +1201,25 @@ sub lazyKeyHandler {
 	# Map the scroll number (the method invoked by the INPUT.Choice button
 	# the lazy browse mode is based on), to a real number character.
 	my $numberKey = $numberScrollMap{$method};
-	$clientMode{$client}{search_text} .= $numberKey;
+
+#@@TODO: REMOVEME@@
+$::d_plugins && Slim::Utils::Misc::msg( "LazySearch2: lazyKeyHandler method='$method' numberKey='$numberKey'\n");
+
+	# We ignore zero here since we need to differentiate between a normal
+	# zero button press and a zero button press-and-hold. That is done by
+	# handling the two types of zero button press in keywordSepHandler and
+	# zeroButtonHandler.
+	if ($numberKey ne '0') {
+		addLazySearchCharacter($client, $item, $numberKey);
+	}
+}
+
+# Adds a single character to the current search defined for that player.
+sub addLazySearchCharacter {
+	my ($client, $item, $character) = @_;
+
+	# Add this character to our search string.
+	$clientMode{$client}{search_text} .= $character;
 
 	# Cancel any pending search and schedule another, so search happens
 	# n seconds after the last button press.
@@ -1198,6 +1228,48 @@ sub lazyKeyHandler {
 	# Update the display.
 	updateLazyEntry( $client, $item );
 }
+
+# Adds a keyword separator character to the search string, if the player
+# is currently in a keyword search mode.
+sub keywordSepHandler {
+	my ( $client, $method) = @_;
+
+	my $listIndex = $client->param('listIndex');
+	my $items     = $client->param('listRef');
+	my $item      = $items->[$listIndex];
+
+	# Whether this is a keyword search.
+	my $keywordSearch =
+	  ( $clientMode{$client}{search_type} eq SEARCH_TYPE_KEYWORD );
+
+	if ($keywordSearch) {
+		# Add the separator character to the search string.
+		addLazySearchCharacter($client, $item, KEYWORD_SEPARATOR_CHARACTER);
+	} else {
+		# We're not in a keyword search so handle it as the normal zero
+		# character.
+		zeroButtonHandler($client, $method);
+	}
+
+$::d_plugins && Slim::Utils::Misc::msg( "LazySearch2: in keywordSepHandler\n");
+}
+
+# Adds a zero to the search string for the player. This is separate to all
+# the other number handlers because it's the only way we can tell the
+# difference between a normal press and a press-n-hold.
+sub zeroButtonHandler {
+	my ( $client, $method, $x, $y ) = @_; #@@REMOVE $x
+
+	my $listIndex = $client->param('listIndex');
+	my $items     = $client->param('listRef');
+	my $item      = $items->[$listIndex];
+
+$::d_plugins && Slim::Utils::Misc::msg( "LazySearch2: in zeroButtonHandler\n");
+
+	# Simply add a zero to the end.
+	addLazySearchCharacter($client, $item, '0');
+}
+
 
 # Update the display during lazy search entry. This is used on change of the
 # lazy search text (ie add character or delete character).
@@ -1338,7 +1410,7 @@ sub onFindTimer() {
 # Find the longest keyword within a multiple-keyword search term.
 sub maxKeywordLength($) {
 	my $keywordString = shift;
-	my @keywords      = split( lazyEncode(' '), $keywordString );
+	my @keywords      = split( KEYWORD_SEPARATOR_CHARACTER, $keywordString );
 	my $maxLength     = 0;
 	foreach my $keyword (@keywords) {
 		my $keywordLength = length($keyword);
@@ -1353,7 +1425,7 @@ sub maxKeywordLength($) {
 # Find the shortest keyword within a multiple-keyword search term.
 sub minKeywordLength($) {
 	my $keywordString = shift;
-	my @keywords      = split( lazyEncode(' '), $keywordString );
+	my @keywords      = split( KEYWORD_SEPARATOR_CHARACTER, $keywordString );
 	my $minLength     = -1;
 	foreach my $keyword (@keywords) {
 		my $keywordLength = length($keyword);
@@ -1452,7 +1524,7 @@ sub doKeywordSearch($$$$$$) {
 
 	# Keyword searches are separate 'keywords' separated by a space (lazy
 	# encoded). We split those out here.
-	my @keywordParts = split( lazyEncode(' '), $searchText );
+	my @keywordParts = split( KEYWORD_SEPARATOR_CHARACTER, $searchText );
 
 	# Build the WHERE clause for the query, containing multiple AND clauses
 	# and LIKE searches.
@@ -2216,7 +2288,7 @@ sub keywordMatchText($$$) {
 	# Split and add each separate 'keyword' to our string. We optionally don't
 	# output any that are too short since we've not actually searched for them.
 	my $text = '';
-	my @keywordParts = split( lazyEncode(' '), $searchText );
+	my @keywordParts = split( KEYWORD_SEPARATOR_CHARACTER, $searchText );
 	foreach my $keyword (@keywordParts) {
 		next if ( length($keyword) == 0 );
 		next
@@ -2234,7 +2306,7 @@ sub keywordMatchText($$$) {
 	# If we're not hiding short keywords (ie the user is entering the search)
 	# we add a trailing ',' if the last key entry was the separator.
 	if ( !$hideShorties
-		&& ( substr( $searchText, length($searchText) - 1 ) == lazyEncode(' ') )
+		&& ( substr( $searchText, length($searchText) - 1 ) eq KEYWORD_SEPARATOR_CHARACTER )
 	  )
 	{
 		$text .= ',';
