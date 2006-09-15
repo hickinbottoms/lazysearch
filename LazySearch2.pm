@@ -2114,6 +2114,30 @@ sub lazyEncode($) {
 	my $in_string = shift;
 	my $out_string;
 
+	# There are a few aims to the following process - understanding them
+	# will explain why it's not just a simple 'tr'...
+	#  1. there are a lot of accented characters and I didn't want to have
+	#     to list them all (I'd probably miss some). Hence, unidecode is used
+	#     to turn them back into non-accented versions. That's fine for
+	#     searching purposes since those non-accented versions are never
+	#     displayed.
+	#  2. To save listing every upper and lower-case character we turn the
+	#     character to upper case - from that point on we only have to expect
+	#     upper case characters in the string.
+	#  3. We ignore punctuation (except spaces - see later), since the user
+	#     cannot easily search for it with the remote control. So we want to
+	#     treat "I'VE" as "IVE", "DON'T" as "DONT" and "RADIO #1" as "RADIO 1"
+	#     etc. Note that this can introduce runs of spaces - eg "1 - 1" would
+	#     become "1   1", so we instead encode spaces as X's before we drop
+	#     the punctuation, leaving us with "1XX1".
+	#  4. We want to remove runs of multiple spaces - they might have existed
+	#     in the tags in the first place, but the user might not spot it and
+	#     so would only enter a single space in the query. Also, they might
+	#     have been introduced through the above discarding of punctuation,
+	#     so in the "1 - 1" case we'd be left with "1XX1", so we turn any
+	#     multiple X's into single 0's (the lazy encoding of spaces). So,
+	#     we correctly end up with "101" as the lazy encoding.
+
 	# This translates each searchable character into the number of the key that
 	# shares that letter on the remote. Thus, this tells us what keys the user
 	# will enter if he doesn't bother to multi-tap to get at the later
@@ -2122,15 +2146,21 @@ sub lazyEncode($) {
 	# can enter through the remote control.
 	$out_string = uc unidecode($in_string);
 	$out_string =~
-tr/ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 /2223334445556667777888999912345678900/;
+tr/ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 /222333444555666777788899991234567890X/;
 
 	# Now, if there's any punctuation left in we remove that to aid searching.
 	# We do that by calling the SlimServer method that transforms all
-	# punctuation to spaces, then we remove all spaces (since we've already
-	# lazified real spaces to '0's they'll be OK and not removed).
+	# punctuation to spaces, then remove those spaces (since the original
+	# spaces are temporarily turned to X's.
 	if ($out_string ne '0') {
 		$out_string = Slim::Utils::Text::ignorePunct($out_string);
 		$out_string =~ s/ //go;
+	}
+
+	# Finally, turn any X's back into spaces, collapse them down to a single
+	# space, then turn those spaces to their correct lazy encoding.
+	if ($out_string ne '0') {
+		$out_string =~ s/X+/0/go;
 	}
 
 	return $out_string;
