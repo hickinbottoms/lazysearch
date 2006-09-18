@@ -872,7 +872,7 @@ sub setSearchBrowseMode {
 		# but if the list is empty then there is never an overlay.
 		overlayRef => sub {
 			my ( $client, $item ) = @_;
-			my $listRef = $client->param('listRef');
+			my $listRef = $client->modeParam('listRef');
 			my $l1      = undef;
 			my $l2      = undef;
 
@@ -925,7 +925,7 @@ sub lazyGetText {
 	if ( length( $clientMode{$client}{search_performed} ) == 0 ) {
 		return $client->string( $clientMode{$client}{enter_more_prompt} );
 	} else {
-		my $listRef = $client->param('listRef');
+		my $listRef = $client->modeParam('listRef');
 		if ( scalar(@$listRef) == 0 ) {
 			return $client->string('EMPTY');
 		} else {
@@ -1042,7 +1042,7 @@ sub lazyOnRight {
 	my ( $client, $item ) = @_;
 
 	# If the list is empty then don't push into browse mode
-	my $listRef = $client->param('listRef');
+	my $listRef = $client->modeParam('listRef');
 	if ( scalar(@$listRef) == 0 ) {
 		$client->bumpRight();
 	} else {
@@ -1084,7 +1084,7 @@ sub lazyOnPlay {
 	# If no list loaded (eg search returned nothing), or
 	# user has not entered enough text yet, then ignore the
 	# command.
-	my $listRef = $client->param('listRef');
+	my $listRef = $client->modeParam('listRef');
 	if ( length( $clientMode{$client}{search_performed} ) == 0 ) {
 		return;
 	}
@@ -1194,8 +1194,8 @@ sub lazyOnPlay {
 sub lazyKeyHandler {
 	my ( $client, $method ) = @_;
 
-	my $listIndex = $client->param('listIndex');
-	my $items     = $client->param('listRef');
+	my $listIndex = $client->modeParam('listIndex');
+	my $items     = $client->modeParam('listRef');
 	my $item      = $items->[$listIndex];
 
 	# Map the scroll number (the method invoked by the INPUT.Choice button
@@ -1234,8 +1234,8 @@ sub addLazySearchCharacter {
 sub keywordSepHandler {
 	my ( $client, $method) = @_;
 
-	my $listIndex = $client->param('listIndex');
-	my $items     = $client->param('listRef');
+	my $listIndex = $client->modeParam('listIndex');
+	my $items     = $client->modeParam('listRef');
 	my $item      = $items->[$listIndex];
 
 	# Whether this is a keyword search.
@@ -1260,8 +1260,8 @@ $::d_plugins && Slim::Utils::Misc::msg( "LazySearch2: in keywordSepHandler\n");
 sub zeroButtonHandler {
 	my ( $client, $method, $x, $y ) = @_; #@@REMOVE $x
 
-	my $listIndex = $client->param('listIndex');
-	my $items     = $client->param('listRef');
+	my $listIndex = $client->modeParam('listIndex');
+	my $items     = $client->modeParam('listRef');
 	my $item      = $items->[$listIndex];
 
 $::d_plugins && Slim::Utils::Misc::msg( "LazySearch2: in zeroButtonHandler\n");
@@ -1342,8 +1342,8 @@ sub onFindTimer() {
 	my $keywordSearch =
 	  ( $clientMode{$client}{search_type} eq SEARCH_TYPE_KEYWORD );
 
-	my $listIndex = $client->param('listIndex');
-	my $items     = $client->param('listRef');
+	my $listIndex = $client->modeParam('listIndex');
+	my $items     = $client->modeParam('listRef');
 	my $item      = $items->[$listIndex];
 
 	# No longer a pending search for this client.
@@ -1641,10 +1641,10 @@ sub buildFind($) {
 # which function is actually needed).
 sub onPlayHandler {
 	my ( $client, $method ) = @_;
-	my $onAdd = $client->param('onPlay');
+	my $onAdd = $client->modeParam('onPlay');
 
-	my $listIndex = $client->param('listIndex');
-	my $items     = $client->param('listRef');
+	my $listIndex = $client->modeParam('listIndex');
+	my $items     = $client->modeParam('listRef');
 	my $item      = $items->[$listIndex];
 
 	&$onAdd( $client, $item, 0 );
@@ -1654,10 +1654,10 @@ sub onPlayHandler {
 # which function is actually needed).
 sub onAddHandler {
 	my ( $client, $method ) = @_;
-	my $onAdd = $client->param('onPlay');
+	my $onAdd = $client->modeParam('onPlay');
 
-	my $listIndex = $client->param('listIndex');
-	my $items     = $client->param('listRef');
+	my $listIndex = $client->modeParam('listIndex');
+	my $items     = $client->modeParam('listRef');
 	my $item      = $items->[$listIndex];
 
 	&$onAdd( $client, $item, 1 );
@@ -1667,10 +1667,10 @@ sub onAddHandler {
 # which function is actually needed).
 sub onInsertHandler {
 	my ( $client, $method ) = @_;
-	my $onAdd = $client->param('onPlay');
+	my $onAdd = $client->modeParam('onPlay');
 
-	my $listIndex = $client->param('listIndex');
-	my $items     = $client->param('listRef');
+	my $listIndex = $client->modeParam('listIndex');
+	my $items     = $client->modeParam('listRef');
 	my $item      = $items->[$listIndex];
 
 	&$onAdd( $client, $item, 2 );
@@ -1682,8 +1682,8 @@ sub onInsertHandler {
 sub onDelCharHandler {
 	my ( $client, $method ) = @_;
 
-	my $listIndex = $client->param('listIndex');
-	my $items     = $client->param('listRef');
+	my $listIndex = $client->modeParam('listIndex');
+	my $items     = $client->modeParam('listRef');
 	my $item      = $items->[$listIndex];
 
 	my $currentText = $clientMode{$client}{search_text};
@@ -1727,8 +1727,8 @@ sub onDelCharHandler {
 sub onDelAllHandler {
 	my ( $client, $method ) = @_;
 
-	my $listIndex = $client->param('listIndex');
-	my $items     = $client->param('listRef');
+	my $listIndex = $client->modeParam('listIndex');
+	my $items     = $client->modeParam('listRef');
 	my $item      = $items->[$listIndex];
 
 	my $currentText = $clientMode{$client}{search_text};
@@ -2178,7 +2178,7 @@ sub keywordOnRightHandler {
 	my ( $client, $item ) = @_;
 
 	# If the list is empty then don't push into browse mode
-	my $listRef = $client->param('listRef');
+	my $listRef = $client->modeParam('listRef');
 	if ( scalar(@$listRef) == 0 ) {
 		$client->bumpRight();
 	} else {
