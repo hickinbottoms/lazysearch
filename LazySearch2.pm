@@ -50,6 +50,11 @@ use constant LAZYSEARCH_CATEGORY_MENU_MODE => 'PLUGIN_LAZYSEARCH2.categorymenu';
 use constant LAZYBROWSE_MODE               => 'PLUGIN_LAZYSEARCH2.browsemode';
 use constant LAZYBROWSE_KEYWORD_MODE => 'PLUGIN_LAZYSEARCH2.keywordbrowse';
 
+# Search button behaviour options.
+use constant LAZYSEARCH_SEARCHBUTTON_STANDARD => 0;
+use constant LAZYSEARCH_SEARCHBUTTON_MENU => 1;
+use constant LAZYSEARCH_SEARCHBUTTON_KEYWORD => 2;
+
 # Preference ranges and defaults.
 use constant LAZYSEARCH_MINLENGTH_MIN             => 2;
 use constant LAZYSEARCH_MINLENGTH_MAX             => 9;
@@ -59,7 +64,7 @@ use constant LAZYSEARCH_MINLENGTH_GENRE_DEFAULT   => 3;
 use constant LAZYSEARCH_MINLENGTH_TRACK_DEFAULT   => 4;
 use constant LAZYSEARCH_MINLENGTH_KEYWORD_DEFAULT => 4;
 use constant LAZYSEARCH_LEFTDELETES_DEFAULT       => 1;
-use constant LAZYSEARCH_HOOKSEARCHBUTTON_DEFAULT  => 1;
+use constant LAZYSEARCH_HOOKSEARCHBUTTON_DEFAULT  => LAZYSEARCH_SEARCHBUTTON_MENU;
 use constant LAZYSEARCH_ALLENTRIES_DEFAULT        => 1;
 use constant LAZYSEARCH_KEYWORD_ARTISTS_DEFAULT   => 1;
 use constant LAZYSEARCH_KEYWORD_ALBUMS_DEFAULT    => 1;
@@ -708,7 +713,8 @@ sub setupGroup {
 			},
 		},
 		'plugin-lazysearch2-hooksearchbutton' => {
-			'validate' => \&Slim::Utils::Validate::trueFalse,
+			'validate' => \&Slim::Utils::Validate::inList,
+			'validateArgs' => [0, 1, 2],
 			'PrefHead' => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON'),
 			'PrefDesc' =>
 			  string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_DESC'),
@@ -717,8 +723,9 @@ sub setupGroup {
 			'changeIntro' =>
 			  string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_CHANGE'),
 			'options' => {
-				'1' => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_1'),
-				'0' => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_0')
+				0 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_0'),
+				1 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_1'),
+				2 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_2')
 			},
 		},
 		'plugin-lazysearch2-keyword-artists-enabled' => {
@@ -988,34 +995,60 @@ sub lazyOnSearch {
 	  || ( $mode eq LAZYBROWSE_MODE )
 	  || 0;
 	my $inSearch = 0;    #@@TODO@@@
-	my $gotoLazy;
+	my $gotoLazy = 0;
+	my $gotoKeyword = 0;
+
+	my $searchBehaviour = Slim::Utils::Prefs::get('plugin-lazysearch2-hooksearchbutton');
+
+	#@@REMOVEME@@
+	$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: searchBehaviour=$searchBehaviour inLazySearch=$inLazySearch inSearch=$inSearch\n");
 
 	if ( !$initialised ) {
 
 		# We never intercept SEARCH if the plugin isn't initialised.
 		$gotoLazy = 0;
-	} elsif ( Slim::Utils::Prefs::get('plugin-lazysearch2-hooksearchbutton') ) {
+	} elsif ( ($searchBehaviour == LAZYSEARCH_SEARCHBUTTON_MENU ) || !keywordSearchEnabled()) {
+
+		$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: menu SEARCH behaviour\n");
 
 		# Normal operation - enter lazy search as long as we're not already
 		# in it, in which case we go to original search (allows double-search
 		# to get back to the old mode).
 		$gotoLazy = !$inLazySearch || 0;
-	} elsif ($inSearch) {
+	} elsif ($searchBehaviour == LAZYSEARCH_SEARCHBUTTON_STANDARD) {
+		$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: standard SEARCH button behaviour\n");
 
-		# If in original search mode we always enter lazy search.
-		$gotoLazy = 1;
+		if ($inSearch) {
+
+			# If in original search mode we always enter lazy search.
+			$gotoLazy = 1;
+		} else {
+
+			# Go into the standard search.
+			$gotoLazy = 0;
+		}
 	} else {
+		$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: keyword SEARCH button behaviour\n");
 
-		# Go into the standard search.
-		$gotoLazy = 0;
+		$gotoKeyword = 1;
 	}
 
-	if ($gotoLazy) {
-		enterCategoryMenu($client);
-	} else {
+	#@@REMOVEME@@
+	$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: gotoKeyword=$gotoKeyword gotoLazy=$gotoLazy\n");
 
-		# Into the normal search menu.
-		Slim::Buttons::Home::jumpToMenu( $client, "SEARCH" );
+	if ($gotoKeyword) {
+		#@@TODO@@
+		$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: jumping to KEYWORD search\n");
+		# @@TODO: Add keyword-shortcut handling here@@
+
+	} else {
+		if ($gotoLazy) {
+			enterCategoryMenu($client);
+		} else {
+
+			# Into the normal search menu.
+			Slim::Buttons::Home::jumpToMenu( $client, "SEARCH" );
+		}
 	}
 }
 
@@ -2644,7 +2677,7 @@ SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_DESC
 	DA	Denne indstilling giver mulighed for at SEARCH knappen på Squeezebox/Transporter fjernbetjæningen benyttes til at aktivere <i>Lazy Search Music</i> funktionen i stedet for den orginale <i>søg</i> funktion. Det er ikke nødvendigt at rette i <i>Default.map</i> eller <i>Custom.map filerne. Bemærk, denne indstilling slår ikke igennem før plugin\'et er genindløst (f.eks. ved at genstarte SlimServer).
 	DE	Mit dieser Einstellung kann die SEARCH-Taste auf der Squeezebox/Transporter-Fernbedienung mit der <i>Faulpelz-Suche</i> statt mit der <i>Originalsuche</i> belegt werden. Durch Aktivieren dieser Einstellung kann diese Taste entsprechend umbelegt werden, ohne die Dateien <i>Default.map</i> oder <i>Custom.map</i> ändern zu müssen. Hinweis: Änderungen an dieser Einstellung werden erst nach einem erneuten Start des Plugins wirksam (z.B. bei einem Neustart des SlimServers).
-	EN	This setting allows the SEARCH button on the Squeezebox/Transporter remote control to be remapped to the <i>lazy search music</i> function instead of the original <i>search music</i> function. Enabling this setting allows this button remapping to be performed without editing the <i>Default.map</i> or <i>Custom.map</i> files. Note that changes to this setting do not take effect until the plugin is reloaded (eg by restarting SlimServer).
+	EN	This setting allows the SEARCH button on the Squeezebox/Transporter remote control to be remapped to the <i>lazy search music</i> function instead of the original <i>search music</i> function. A further option allows the SEARCH button to immediately enter a keyword search, which saves more time if that\'s the type of search you prefer to use most often.
 	ES	Esta configuración permite reasignar el boton SEARCH del control remoto de Squeezebox/Transporter a la función de <i>búsqueda laxa de música</i>, en lugar de la función de <i>búsqueda de música</i> original. Habilitando esto se logra que la reasignación del botón sea realizada sin editar los archivos <i>Default.map</i> o <i>Custom.map</i>. Notar que los cambios no tendrán efecto hasta que el plugin sea recargado (por ej. al reiniciar SlimServer).
 	FI	Tällä asetuksella voit muuttaa miten Squeezeboxin / Transporterin kaukosäätimen HAKU-nappi toimii. Painamalla sitä voit joko päästä <i>laiska musiikin haku</i>-valikkoon, tai normaalin <i>haku</i>-valikkoon. Tällä asetuksella voit muuttaa napin toimintaa muuttamatta <i>Default.map</i> tai <i>Custom.map</i> tiedostoja. Huomaa, että asetuksen uusi arvo tulee voimaan, kun laajennus käynnistetään uudelleen (esim. käynnistämällä SlimServer uudelleen).
 
@@ -2675,6 +2708,9 @@ SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_1
 	EN	Accesses the lazy search music menu
 	ES	Accede al menú de búsqueda musical laxa
 	FI	Laiska musiikin haku
+
+SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_2
+	EN	Begins a keyword lazy search
 
 SCAN_IN_PROGRESS
 	DA	Note: dit musik biblioteket bliver lige nu scannet.
