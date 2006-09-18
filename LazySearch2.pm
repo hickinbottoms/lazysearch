@@ -953,15 +953,13 @@ sub lazyForceSearch {
 	if (
 		(
 			( $clientMode{$client}{search_type} eq SEARCH_TYPE_KEYWORD )
-			&& ( minKeywordLength($searchText) <
-				$clientMode{$client}{min_search_length} )
-			&& ( minKeywordLength($searchText) > 1 )
+			&& ( maxKeywordLength($searchText) > LAZYSEARCH_MINLENGTH_MIN)
 			&& ( keywordMatchText( $client, 0, $searchText ) ne
 				$clientMode{$client}{search_performed} )
 		)
 		|| (   ( $clientMode{$client}{search_type} ne SEARCH_TYPE_KEYWORD )
 			&& ( length( $clientMode{$client}{search_performed} ) == 0 )
-			&& ( length($searchText) > 1 ) )
+			&& ( length($searchText) >= LAZYSEARCH_MINLENGTH_MIN ) )
 	  )
 	{
 		$::d_plugins
@@ -1296,21 +1294,33 @@ sub updateLazyEntry {
 # Schedule a new search to occur for the specified client.
 sub addPendingSearch($) {
 	my $client = shift;
+	my $searchText = $clientMode{$client}{search_text};
+	my $minSearchLength = $clientMode{$client}{min_search_length};
 
 	# Schedule a timer. Any existing one is cancelled first as we only allow
 	# one outstanding one for this player.
 	cancelPendingSearch($client);
 
-	Slim::Utils::Timers::setTimer( $client,
-		Time::HiRes::time() + Slim::Utils::Prefs::get("displaytexttimeout"),
-		\&onFindTimer, $client );
+	# Whether this is a keyword search.
+	my $keywordSearch =
+	  ( $clientMode{$client}{search_type} eq SEARCH_TYPE_KEYWORD );
+	my $scheduleSearch = 0;
 
-	# Flag that this client has a pending search (this causes the overlay
-	# hint). We only do that if we've put in the minimum required string
-	# length.
-	if ( ( length $clientMode{$client}{search_text} ) >=
-		$clientMode{$client}{min_search_length} )
-	{
+	if ($keywordSearch) {
+		my $maxKeywordLength = maxKeywordLength($searchText);
+		$scheduleSearch = $maxKeywordLength >= $minSearchLength;
+	} else {
+		$scheduleSearch = ( ( length $searchText) >= $minSearchLength );
+	}
+
+	# If we have a search scheduled then set the timer.
+	if ($scheduleSearch) {
+		Slim::Utils::Timers::setTimer( $client,
+			Time::HiRes::time() + Slim::Utils::Prefs::get("displaytexttimeout"),
+			\&onFindTimer, $client );
+
+		# Flag the client has a pending search (this causes the display
+		# overlay hint).
 		$clientMode{$client}{search_pending} = 1;
 	}
 }
@@ -1517,10 +1527,16 @@ sub doKeywordSearch($$$$$$) {
 	my $albumConstraint       = shift;
 	my @items;
 
+	# Find the minimum length of keyword in the search text.
+	my $maxKeywordLength = maxKeywordLength($searchText);
+
 	$::d_plugins
 	  && Slim::Utils::Misc::msg(
 "LazySearch2: doing keyword search, level=$level, contributorConstraint=$contributorConstraint, albumConstraint=$albumConstraint\n"
 	  );
+
+#@@REMOVEME@@
+$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: searchText=\'$searchText\', maxKeywordLength=$maxKeywordLength\n");
 
 	# Keyword searches are separate 'keywords' separated by a space (lazy
 	# encoded). We split those out here.
@@ -1531,13 +1547,14 @@ sub doKeywordSearch($$$$$$) {
 	my @andClause = ();
 	foreach my $keyword (@keywordParts) {
 
-		# We don't include zero-length keywords.
-		next if ( length($keyword) == 0 );
+		# We don't include very short keywords.
+		next if ( length($keyword) < LAZYSEARCH_MINLENGTH_MIN );
 
-		# We don't include short keywords unless the search is forced.
+		# We don't include short keywords unless the search is forced or
+		# there is at least one that's beyond the minimum.
 		next
 		  if ( !$forceSearch
-			&& ( length($keyword) < $clientMode{$client}{min_search_length} ) );
+			&& ( length($keyword) < $clientMode{$client}{min_search_length} ) && ( $maxKeywordLength < $clientMode{$client}{min_search_length} ) );
 
 		# Otherwise, here's the search term for this one keyword.
 		push @andClause, 'me.customsearch';
