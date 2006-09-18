@@ -2155,11 +2155,9 @@ tr/ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 /222333444555666777788899991234567890X/;
 	if ($out_string ne '0') {
 		$out_string = Slim::Utils::Text::ignorePunct($out_string);
 		$out_string =~ s/ //go;
-	}
 
-	# Finally, turn any X's back into spaces, collapse them down to a single
-	# space, then turn those spaces to their correct lazy encoding.
-	if ($out_string ne '0') {
+		# Finally, turn any X's back into spaces, collapse them down to a single
+		# space, then turn those spaces to their correct lazy encoding.
 		$out_string =~ s/X+/0/go;
 	}
 
