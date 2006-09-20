@@ -11,9 +11,14 @@ applies to you).
 2. Copy LazySearch2.pm to your SlimServer plugins directory.
 Windows: C:\Program Files\SlimServer\Server\Plugins
 Linux: it depends, but something like /usr/local/slimserver/Plugins
-MacOSX: no idea - let me know if you do
+MacOSX: ~/Library/SlimDevices/Plugins (I believe you need to do this
+  as the user that you originally installed SlimServer as.
 
 3. Restart SlimServer to make sure it has seen the new plugin.
+Windows: use the 'services' applet in the control panel, or the SlimServer
+  tray icon in the bottom-right of the screen if you have it running.
+Linux: it depends, but something like '/etc/init.d/slimserver restart'.
+Mac OS X: use the standard OSX 'System Properties' menu.
 
 4. Make sure the plugin is present and ticked on the 'Server Settings/Plugins'
 page on the SlimServer web interface.

@@ -1355,6 +1355,8 @@ sub addPendingSearch($) {
 		# Flag the client has a pending search (this causes the display
 		# overlay hint).
 		$clientMode{$client}{search_pending} = 1;
+	} else {
+		$clientMode{$client}{search_pending} = 0;
 	}
 }
 
