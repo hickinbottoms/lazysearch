@@ -100,6 +100,9 @@ $VERSION = 'trunk-6.5-r@@REVISION@@';
 #						the pipe in the customsearch column or the other.
 #						side=1 searches left, side=2 searches right, anything
 #						else isn't specific.
+#	perform_search:		Function reference to a function that will perform
+#						the actual search. The search text is passed to this
+#						function.
 #	search_performed:	Indicates whether a search has yet been performed
 #						(and hence whether search_items has the search
 #						results). It contains the search text at the time the
@@ -232,6 +235,7 @@ sub setMode {
 				$clientMode{$client}{min_search_length} =
 				  Slim::Utils::Prefs::get(
 					'plugin-lazysearch2-minlength-artist');
+				$clientMode{$client}{perform_search} = \&performArtistSearch;
 				$clientMode{$client}{onright}       = \&rightIntoArtist;
 				$clientMode{$client}{search_tracks} = \&searchTracksForArtist;
 				setSearchBrowseMode( $client, $item, 0 );
@@ -247,6 +251,7 @@ sub setMode {
 				  'LINE2_ENTER_MORE_ALBUMS';
 				$clientMode{$client}{min_search_length} =
 				  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-album');
+				$clientMode{$client}{perform_search} = \&performAlbumSearch;
 				$clientMode{$client}{onright}       = \&rightIntoAlbum;
 				$clientMode{$client}{search_tracks} = \&searchTracksForAlbum;
 				setSearchBrowseMode( $client, $item, 0 );
@@ -262,6 +267,7 @@ sub setMode {
 				  'LINE2_ENTER_MORE_GENRES';
 				$clientMode{$client}{min_search_length} =
 				  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-genre');
+				$clientMode{$client}{perform_search} = \&performGenreSearch;
 				$clientMode{$client}{onright}       = \&rightIntoGenre;
 				$clientMode{$client}{search_tracks} = \&searchTracksForGenre;
 				setSearchBrowseMode( $client, $item, 0 );
@@ -277,6 +283,7 @@ sub setMode {
 				  'LINE2_ENTER_MORE_TRACKS';
 				$clientMode{$client}{min_search_length} =
 				  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-track');
+				$clientMode{$client}{perform_search} = \&performTrackSearch;
 				$clientMode{$client}{onright}       = \&rightIntoTrack;
 				$clientMode{$client}{search_tracks} = \&searchTracksForTrack;
 				setSearchBrowseMode( $client, $item, 0 );
@@ -338,9 +345,18 @@ sub setMode {
 # PLAY/INSERT/ADD is pressed on one of those items.
 sub searchTracksForArtist($) {
 	my $id = shift;
+	my $condition = undef;
+
+	# We restrict the search to include artists related in the roles the
+	# user wants (set through SlimServer preferences).
+	my $roles = Slim::Schema->artistOnlyRoles;
+	if ($roles) {
+		$condition->{'role'} = { 'in' => $roles };
+	}
+
 	return Slim::Schema->search( 'ContributorTrack',
 		{ 'me.contributor' => $id } )->search_related(
-		'track', undef,
+		'track', $condition,
 		{
 			'order_by' =>
 			  'track.album, track.disc, track.tracknum, track.titlesort'
@@ -1482,24 +1498,94 @@ sub minKeywordLength($) {
 	return $minLength;
 }
 
+# Perform the artist search.
+sub performArtistSearch($$) {
+	my $client = shift;
+	my $searchText = shift;
+	my $condition = undef;
+
+	# We restrict the search to include artists related in the roles the
+	# user wants (set through SlimServer preferences).
+	my $roles = Slim::Schema->artistOnlyRoles;
+	if ($roles) {
+		$condition->{'role'} = { 'in' => $roles };
+	}
+	$condition->{'customsearch'} = {'like',buildFind( $searchText, 0) };
+
+	my $searchResults = Slim::Schema->resultset('ContributorAlbum')->search_related('contributor', $condition, 
+		{
+			columns => [ 'id', 'name' ],
+			order_by => 'name'
+		}
+	)->distinct;
+
+	return $searchResults;
+}
+
+# Perform the album search.
+sub performAlbumSearch($$) {
+	my $client = shift;
+	my $searchText = shift;
+
+	my $condition = undef;
+	$condition->{'customsearch'} = {'like',buildFind( $searchText, 0) };
+
+	my $searchResults = Slim::Schema->resultset('Album')->search($condition, 
+		{
+			columns => [ 'id', 'title' ],
+			order_by => 'title'
+		}
+	);
+
+	return $searchResults;
+}
+
+# Perform the genre search.
+sub performGenreSearch($$) {
+	my $client = shift;
+	my $searchText = shift;
+
+	my $condition = undef;
+	$condition->{'customsearch'} = {'like',buildFind( $searchText, 0) };
+
+	my $searchResults = Slim::Schema->resultset('Genre')->search($condition, 
+		{
+			columns => [ 'id', 'name' ],
+			order_by => 'name'
+		}
+	);
+
+	return $searchResults;
+}
+
+# Perform the track search.
+sub performTrackSearch($$) {
+	my $client = shift;
+	my $searchText = shift;
+
+	my $condition = undef;
+	$condition->{'customsearch'} = {'like',buildFind( $searchText, 0) };
+
+	my $searchResults = Slim::Schema->resultset('Track')->search($condition, 
+		{
+			columns => [ 'id', 'title' ],
+			order_by => 'title'
+		}
+	);
+
+	return $searchResults;
+}
+
 # Perform the lazy search for a single item type (artist etc). This will be
 # called from the search timer for non-keyword searches.
 sub performTimedItemSearch($) {
 	my $client = shift;
 
-	my $searchResults =
-	  Slim::Schema->resultset( $clientMode{$client}{search_type} )->search_like(
-		{
-			customsearch => buildFind(
-				$clientMode{$client}{search_text},
-				$clientMode{$client}{side}
-			)
-		},
-		{
-			columns => [ 'id', "$clientMode{$client}{text_col}" ],
-			order_by => $clientMode{$client}{text_col}
-		}
-	  );
+	# Actually perform the search. The method that does the searching is
+	# as defined for the current search mode.
+	my $searchText = $clientMode{$client}{search_text};
+	my $performSearchFunction = $clientMode{$client}{perform_search};
+	my $searchResults = &$performSearchFunction($client, $searchText);
 
 	# Each element of the listRef will be a hash with keys name and value.
 	# This is true for artists, albums and tracks.
@@ -2061,6 +2147,10 @@ sub encodeTask {
 	# Go through and encode each of the identified IDs. To maintain performance
 	# we will bail out if this takes more than a defined time slice.
 
+	# Find what contributor roles we consider as 'artists'. This takes account
+	# of the users' preferences.
+	my $roles = Slim::Schema::artistOnlyRoles();
+
 	my $rowsDone  = 0;
 	my $startTime = Time::HiRes::time();
 	my $obj;
@@ -2086,7 +2176,7 @@ sub encodeTask {
 				}
 
 				if ($keywordArtist) {
-					my $contributors = $obj->contributors;
+					my $contributors = $obj->contributorsOfType(@$roles);
 					while ( my $contributor = $contributors->next ) {
 						$encodedArtist .= lazifyColumn( $contributor->name );
 					}
