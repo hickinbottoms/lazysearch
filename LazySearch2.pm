@@ -1692,10 +1692,17 @@ $::d_plugins && Slim::Utils::Misc::msg("LazySearch2: searchText=\'$searchText\',
 	my $textColumn;
 	my $results;
 	if ( $level == 1 ) {
+		# We restrict the search to include artists related in the roles the
+		# user wants (set through SlimServer preferences).
+		my $roles = Slim::Schema->artistOnlyRoles;
+		my $condition = undef;
+		if ($roles) {
+			$condition->{'role'} = { 'in' => $roles };
+		}
 		$results =
 		  Slim::Schema->resultset('Track')->search( { -and => [@andClause] },
 			{ order_by => 'namesort', distinct => 1 } )
-		  ->search_related('contributorTracks')->search_related('contributor');
+		  ->search_related('contributorTracks', $condition)->search_related('contributor');
 		$textColumn = 'name';
 
 	} elsif ( $level == 2 ) {
