@@ -1564,7 +1564,7 @@ sub performTrackSearch($$) {
 	my $searchText = shift;
 
 	my $condition = undef;
-	$condition->{'customsearch'} = {'like',buildFind( $searchText, 0) };
+	$condition->{'customsearch'} = {'like',buildFind( $searchText, 1) };
 
 	my $searchResults = Slim::Schema->resultset('Track')->search($condition, 
 		{
