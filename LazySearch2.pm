@@ -69,6 +69,7 @@ use constant LAZYSEARCH_ALLENTRIES_DEFAULT        => 1;
 use constant LAZYSEARCH_KEYWORD_ARTISTS_DEFAULT   => 1;
 use constant LAZYSEARCH_KEYWORD_ALBUMS_DEFAULT    => 1;
 use constant LAZYSEARCH_KEYWORD_TRACKS_DEFAULT    => 1;
+use constant LAZYSEARCH_KEYWORD_ALBUMARTISTS_DEFAULT => 0;
 
 # Constants that control the background lazy search database encoding.
 use constant LAZYSEARCH_ENCODE_MAX_QUANTA    => 0.4;
@@ -652,6 +653,7 @@ sub setupGroup {
 			'plugin-lazysearch2-keyword-artists-enabled',
 			'plugin-lazysearch2-keyword-albums-enabled',
 			'plugin-lazysearch2-keyword-tracks-enabled',
+			'plugin-lazysearch2-keyword-return-albumartists',
 			'plugin-lazysearch2-lazifynow'
 		],
 		GroupHead         => string('SETUP_GROUP_PLUGIN_LAZYSEARCH2'),
@@ -783,6 +785,21 @@ sub setupGroup {
 			'options' => {
 				'1' => string('ENABLED'),
 				'0' => string('DISABLED')
+			},
+		},
+		'plugin-lazysearch2-keyword-return-albumartists' => {
+			'validate' => \&Slim::Utils::Validate::trueFalse,
+			'PrefHead' =>
+			  string('SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD'),
+			'PrefDesc' =>
+			  string('SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_DESC'),
+			'PrefChoose' =>
+			  string('SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHOOSE'),
+			'changeIntro' =>
+			  string('SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHANGE'),
+			'options' => {
+				'1' => string('YES'),
+				'0' => string('NO')
 			},
 		},
 		'plugin-lazysearch2-lazifynow' => {
@@ -1694,10 +1711,17 @@ $::d_plugins && Slim::Utils::Misc::msg("LazySearch2: searchText=\'$searchText\',
 	if ( $level == 1 ) {
 		# We restrict the search to include artists related in the roles the
 		# user wants (set through SlimServer preferences).
-		my $roles = Slim::Schema->artistOnlyRoles;
+		my @roles = @{Slim::Schema->artistOnlyRoles};
+
+		# If the user wants, remove the ALBUMARTIST role (ticket:42)
+		if (!Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-return-albumartists')) {
+			my $albumArtistRole = Slim::Schema::Contributor->typeToRole('ALBUMARTIST');
+			@roles = grep {!/^$albumArtistRole$/} @roles;
+		}
+
 		my $condition = undef;
-		if ($roles) {
-			$condition->{'role'} = { 'in' => $roles };
+		if (length(@roles) > 0) {
+			$condition->{'role'} = { 'in' => \@roles };
 		}
 		$results =
 		  Slim::Schema->resultset('Track')->search( { -and => [@andClause] },
@@ -1976,6 +2000,16 @@ sub checkDefaults {
 			LAZYSEARCH_KEYWORD_TRACKS_DEFAULT
 		);
 	}
+	if (
+		!Slim::Utils::Prefs::isDefined(
+			'plugin-lazysearch2-keyword-return-albumartists')
+	  )
+	{
+		Slim::Utils::Prefs::set(
+			'plugin-lazysearch2-keyword-return-albumartists',
+			LAZYSEARCH_KEYWORD_ALBUMARTISTS_DEFAULT
+		);
+	}
 }
 
 # This is called by SlimServer when a scan has finished. We use this to kick
@@ -2156,7 +2190,7 @@ sub encodeTask {
 
 	# Find what contributor roles we consider as 'artists'. This takes account
 	# of the users' preferences.
-	my $roles = Slim::Schema::artistOnlyRoles();
+	my @roles = @{Slim::Schema::artistOnlyRoles()};
 
 	my $rowsDone  = 0;
 	my $startTime = Time::HiRes::time();
@@ -2183,7 +2217,7 @@ sub encodeTask {
 				}
 
 				if ($keywordArtist) {
-					my $contributors = $obj->contributorsOfType(@$roles);
+					my $contributors = $obj->contributorsOfType(@roles);
 					while ( my $contributor = $contributors->next ) {
 						$encodedArtist .= lazifyColumn( $contributor->name );
 					}
@@ -2765,6 +2799,18 @@ SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_1
 	EN	Deletes the last character entered
 	ES	Borra los últimos caracteres ingresados
 	FI	Poista viimeinen kirjain
+
+SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD
+	EN	Keyword searching and artists behaviour
+
+SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_DESC
+	EN	Depending on how you tag your albums you may or may not want your album artists (the ALBUMARTIST tag) to be returned in the list of artists matching a keyword search. For example, if you set the album artist to "Various Artists" for your compilations then you won\'t expect that to be returned in keyword searches because it\'s the individual track artists that you\'re interested in. Not returning album artists is the default behaviour.
+
+SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHOOSE
+	EN	Album artists included in keyword search results:
+
+SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHANGE
+	EN	Album artists returned in keyword searches changed to:
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON
 	DA	SEARCH-knap opførsel
