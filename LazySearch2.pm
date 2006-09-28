@@ -1726,7 +1726,7 @@ $::d_plugins && Slim::Utils::Misc::msg("LazySearch2: searchText=\'$searchText\',
 		$results =
 		  Slim::Schema->resultset('Track')->search( { -and => [@andClause] },
 			{ order_by => 'namesort', distinct => 1 } )
-		  ->search_related('contributorTracks', $condition)->search_related('contributor');
+		  ->search_related('contributorTracks', $condition)->search_related('contributor')->distinct;
 		$textColumn = 'name';
 
 	} elsif ( $level == 2 ) {
@@ -1744,7 +1744,7 @@ $::d_plugins && Slim::Utils::Misc::msg("LazySearch2: searchText=\'$searchText\',
 				distinct => 1,
 				join     => 'contributorTracks'
 			}
-		)->search_related('album');
+		)->search_related('album')->distinct;
 		$textColumn = 'title';
 
 	} elsif ( $level == 3 ) {
@@ -1761,7 +1761,7 @@ $::d_plugins && Slim::Utils::Misc::msg("LazySearch2: searchText=\'$searchText\',
 				join     => 'contributorTracks',
 				order_by => 'disc,tracknum,titlesort'
 			}
-		);
+		)->distinct;
 		$textColumn = 'title';
 	}
 
