@@ -350,7 +350,7 @@ sub searchTracksForArtist($) {
 
 	# We restrict the search to include artists related in the roles the
 	# user wants (set through SlimServer preferences).
-	my $roles = Slim::Schema->artistOnlyRoles;
+	my $roles = Slim::Schema->artistOnlyRoles('TRACKARTIST');
 	if ($roles) {
 		$condition->{'role'} = { 'in' => $roles };
 	}
@@ -362,7 +362,7 @@ sub searchTracksForArtist($) {
 			'order_by' =>
 			  'track.album, track.disc, track.tracknum, track.titlesort'
 		}
-		)->all;
+		)->distinct->all;
 }
 
 # Return a result set that contains all tracks for a given album, for when
@@ -1711,7 +1711,7 @@ $::d_plugins && Slim::Utils::Misc::msg("LazySearch2: searchText=\'$searchText\',
 	if ( $level == 1 ) {
 		# We restrict the search to include artists related in the roles the
 		# user wants (set through SlimServer preferences).
-		my @roles = @{Slim::Schema->artistOnlyRoles};
+		my @roles = @{Slim::Schema->artistOnlyRoles('TRACKARTIST')};
 
 		# If the user wants, remove the ALBUMARTIST role (ticket:42)
 		if (!Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-return-albumartists')) {
@@ -2190,7 +2190,7 @@ sub encodeTask {
 
 	# Find what contributor roles we consider as 'artists'. This takes account
 	# of the users' preferences.
-	my @roles = @{Slim::Schema::artistOnlyRoles()};
+	my @roles = @{Slim::Schema::artistOnlyRoles('TRACKARTIST')};
 
 	my $rowsDone  = 0;
 	my $startTime = Time::HiRes::time();
