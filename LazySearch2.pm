@@ -1767,10 +1767,20 @@ $::d_plugins && Slim::Utils::Misc::msg("LazySearch2: searchText=\'$searchText\',
 
 	# Build up the item array.
 	while ( my $item = $results->next ) {
+		my $name = $item->get_column($textColumn);
+		my $value = $item->id;
+
+		# Special case for tracks - the title is formatted according to
+		# SlimServer's usual policy.
+		if ($level == 3) {
+			my $url = $item->url;
+			$name = Slim::Music::Info::standardTitle($client, $url);
+		}
+
 		push @items,
 		  {
-			name  => $item->get_column($textColumn),
-			value => $item->id,
+			name  => $name,
+			value => $value,
 			level => $level
 		  };
 	}
