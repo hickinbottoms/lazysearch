@@ -53,7 +53,11 @@ use constant LAZYBROWSE_KEYWORD_MODE => 'PLUGIN_LAZYSEARCH2.keywordbrowse';
 # Search button behaviour options.
 use constant LAZYSEARCH_SEARCHBUTTON_STANDARD => 0;
 use constant LAZYSEARCH_SEARCHBUTTON_MENU => 1;
-use constant LAZYSEARCH_SEARCHBUTTON_KEYWORD => 2;
+use constant LAZYSEARCH_SEARCHBUTTON_ARTIST => 2;
+use constant LAZYSEARCH_SEARCHBUTTON_ALBUM => 3;
+use constant LAZYSEARCH_SEARCHBUTTON_GENRE => 4;
+use constant LAZYSEARCH_SEARCHBUTTON_TRACK => 5;
+use constant LAZYSEARCH_SEARCHBUTTON_KEYWORD => 6;
 
 # Preference ranges and defaults.
 use constant LAZYSEARCH_MINLENGTH_MIN             => 2;
@@ -217,94 +221,8 @@ sub setMode {
 		onRight => sub {
 			my ( $client, $item ) = @_;
 
-			# Search term initially empty.
-			$clientMode{$client}{search_text}      = '';
-			$clientMode{$client}{search_items}     = ();
-			$clientMode{$client}{search_performed} = '';
-			$clientMode{$client}{search_pending}   = 0;
-
-			if ( $item eq '{ARTISTS}' ) {
-				$clientMode{$client}{search_type}  = 'Contributor';
-				$clientMode{$client}{side}         = 0;
-				$clientMode{$client}{text_col}     = 'name';
-				$clientMode{$client}{all_entry}    = '{ALL_ARTISTS}';
-				$clientMode{$client}{player_title} = '{LINE1_BROWSE_ARTISTS}';
-				$clientMode{$client}{player_title_empty} =
-				  '{LINE1_BROWSE_ARTISTS_EMPTY}';
-				$clientMode{$client}{enter_more_prompt} =
-				  'LINE2_ENTER_MORE_ARTISTS';
-				$clientMode{$client}{min_search_length} =
-				  Slim::Utils::Prefs::get(
-					'plugin-lazysearch2-minlength-artist');
-				$clientMode{$client}{perform_search} = \&performArtistSearch;
-				$clientMode{$client}{onright}       = \&rightIntoArtist;
-				$clientMode{$client}{search_tracks} = \&searchTracksForArtist;
-				setSearchBrowseMode( $client, $item, 0 );
-			} elsif ( $item eq '{ALBUMS}' ) {
-				$clientMode{$client}{search_type}  = 'Album';
-				$clientMode{$client}{side}         = 0;
-				$clientMode{$client}{text_col}     = 'title';
-				$clientMode{$client}{all_entry}    = '{ALL_ALBUMS}';
-				$clientMode{$client}{player_title} = '{LINE1_BROWSE_ALBUMS}';
-				$clientMode{$client}{player_title_empty} =
-				  '{LINE1_BROWSE_ALBUMS_EMPTY}';
-				$clientMode{$client}{enter_more_prompt} =
-				  'LINE2_ENTER_MORE_ALBUMS';
-				$clientMode{$client}{min_search_length} =
-				  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-album');
-				$clientMode{$client}{perform_search} = \&performAlbumSearch;
-				$clientMode{$client}{onright}       = \&rightIntoAlbum;
-				$clientMode{$client}{search_tracks} = \&searchTracksForAlbum;
-				setSearchBrowseMode( $client, $item, 0 );
-			} elsif ( $item eq '{GENRES}' ) {
-				$clientMode{$client}{search_type}  = 'Genre';
-				$clientMode{$client}{side}         = 0;
-				$clientMode{$client}{text_col}     = 'name';
-				$clientMode{$client}{all_entry}    = undef;
-				$clientMode{$client}{player_title} = '{LINE1_BROWSE_GENRES}';
-				$clientMode{$client}{player_title_empty} =
-				  '{LINE1_BROWSE_GENRES_EMPTY}';
-				$clientMode{$client}{enter_more_prompt} =
-				  'LINE2_ENTER_MORE_GENRES';
-				$clientMode{$client}{min_search_length} =
-				  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-genre');
-				$clientMode{$client}{perform_search} = \&performGenreSearch;
-				$clientMode{$client}{onright}       = \&rightIntoGenre;
-				$clientMode{$client}{search_tracks} = \&searchTracksForGenre;
-				setSearchBrowseMode( $client, $item, 0 );
-			} elsif ( $item eq '{SONGS}' ) {
-				$clientMode{$client}{search_type}  = 'Track';
-				$clientMode{$client}{side}         = 1;
-				$clientMode{$client}{text_col}     = 'title';
-				$clientMode{$client}{all_entry}    = '{ALL_SONGS}';
-				$clientMode{$client}{player_title} = '{LINE1_BROWSE_TRACKS}';
-				$clientMode{$client}{player_title_empty} =
-				  '{LINE1_BROWSE_TRACKS_EMPTY}';
-				$clientMode{$client}{enter_more_prompt} =
-				  'LINE2_ENTER_MORE_TRACKS';
-				$clientMode{$client}{min_search_length} =
-				  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-track');
-				$clientMode{$client}{perform_search} = \&performTrackSearch;
-				$clientMode{$client}{onright}       = \&rightIntoTrack;
-				$clientMode{$client}{search_tracks} = \&searchTracksForTrack;
-				setSearchBrowseMode( $client, $item, 0 );
-			} elsif ( $item eq '{KEYWORD_MENU_ITEM}' ) {
-				$clientMode{$client}{search_type}  = SEARCH_TYPE_KEYWORD;
-				$clientMode{$client}{side}         = 2;
-				$clientMode{$client}{text_col}     = undef;
-				$clientMode{$client}{all_entry}    = undef;
-				$clientMode{$client}{player_title} = '{LINE1_BROWSE_ARTISTS}';
-				$clientMode{$client}{player_title_empty} =
-				  '{LINE1_BROWSE_KEYWORDS_EMPTY}';
-				$clientMode{$client}{enter_more_prompt} =
-				  'LINE2_ENTER_MORE_KEYWORDS';
-				$clientMode{$client}{min_search_length} =
-				  Slim::Utils::Prefs::get(
-					'plugin-lazysearch2-minlength-keyword');
-				$clientMode{$client}{onright}       = \&keywordOnRightHandler;
-				$clientMode{$client}{search_tracks} = undef;
-				setSearchBrowseMode( $client, $item, 0 );
-			}
+			# Push into a sub-mode for the selected category.
+			enterCategoryItem($client, $item);
 
 			# If rescan is in progress then warn the user.
 			if ( $lazifyingDatabase || Slim::Music::Import->stillScanning() ) {
@@ -340,6 +258,145 @@ sub setMode {
 			\%params );
 		$client->update();
 	}
+}
+
+# Enter the correct search category item.
+sub enterCategoryItem($$) {
+	my $client = shift;
+	my $item = shift;
+
+	# Search term initially empty.
+	$clientMode{$client}{search_text}      = '';
+	$clientMode{$client}{search_items}     = ();
+	$clientMode{$client}{search_performed} = '';
+	$clientMode{$client}{search_pending}   = 0;
+
+	# Dispatch to the correct method.
+	if ( $item eq '{ARTISTS}' ) {
+		enterArtistSearch($client, $item);
+	} elsif ( $item eq '{ALBUMS}' ) {
+		enterAlbumSearch($client, $item);
+	} elsif ( $item eq '{GENRES}' ) {
+		enterGenreSearch($client, $item);
+	} elsif ( $item eq '{SONGS}' ) {
+		enterTrackSearch($client, $item);
+	} elsif ( $item eq '{KEYWORD_MENU_ITEM}' ) {
+		enterKeywordSearch($client, $item);
+	}
+}
+
+# Used when the user starts an artist search from the main category menu.
+sub enterArtistSearch($$) {
+	my $client = shift;
+	my $item = shift;
+
+	$clientMode{$client}{search_type}  = 'Contributor';
+	$clientMode{$client}{side}         = 0;
+	$clientMode{$client}{text_col}     = 'name';
+	$clientMode{$client}{all_entry}    = '{ALL_ARTISTS}';
+	$clientMode{$client}{player_title} = '{LINE1_BROWSE_ARTISTS}';
+	$clientMode{$client}{player_title_empty} =
+	  '{LINE1_BROWSE_ARTISTS_EMPTY}';
+	$clientMode{$client}{enter_more_prompt} =
+	  'LINE2_ENTER_MORE_ARTISTS';
+	$clientMode{$client}{min_search_length} =
+	  Slim::Utils::Prefs::get(
+		'plugin-lazysearch2-minlength-artist');
+	$clientMode{$client}{perform_search} = \&performArtistSearch;
+	$clientMode{$client}{onright}       = \&rightIntoArtist;
+	$clientMode{$client}{search_tracks} = \&searchTracksForArtist;
+	setSearchBrowseMode( $client, $item, 0 );
+}
+
+# Used when the user starts an album search from the main category menu.
+sub enterAlbumSearch($$) {
+	my $client = shift;
+	my $item = shift;
+
+	$clientMode{$client}{search_type}  = 'Album';
+	$clientMode{$client}{side}         = 0;
+	$clientMode{$client}{text_col}     = 'title';
+	$clientMode{$client}{all_entry}    = '{ALL_ALBUMS}';
+	$clientMode{$client}{player_title} = '{LINE1_BROWSE_ALBUMS}';
+	$clientMode{$client}{player_title_empty} =
+	  '{LINE1_BROWSE_ALBUMS_EMPTY}';
+	$clientMode{$client}{enter_more_prompt} =
+	  'LINE2_ENTER_MORE_ALBUMS';
+	$clientMode{$client}{min_search_length} =
+	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-album');
+	$clientMode{$client}{perform_search} = \&performAlbumSearch;
+	$clientMode{$client}{onright}       = \&rightIntoAlbum;
+	$clientMode{$client}{search_tracks} = \&searchTracksForAlbum;
+	setSearchBrowseMode( $client, $item, 0 );
+}
+
+# Used when the user starts a genre search from the main category menu.
+sub enterGenreSearch($$) {
+	my $client = shift;
+	my $item = shift;
+
+	$clientMode{$client}{search_type}  = 'Genre';
+	$clientMode{$client}{side}         = 0;
+	$clientMode{$client}{text_col}     = 'name';
+	$clientMode{$client}{all_entry}    = undef;
+	$clientMode{$client}{player_title} = '{LINE1_BROWSE_GENRES}';
+	$clientMode{$client}{player_title_empty} =
+	  '{LINE1_BROWSE_GENRES_EMPTY}';
+	$clientMode{$client}{enter_more_prompt} =
+	  'LINE2_ENTER_MORE_GENRES';
+	$clientMode{$client}{min_search_length} =
+	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-genre');
+	$clientMode{$client}{perform_search} = \&performGenreSearch;
+	$clientMode{$client}{onright}       = \&rightIntoGenre;
+	$clientMode{$client}{search_tracks} = \&searchTracksForGenre;
+	setSearchBrowseMode( $client, $item, 0 );
+}
+
+# Used when the user starts a track search from the main category menu.
+sub enterTrackSearch($$) {
+	my $client = shift;
+	my $item = shift;
+
+	$clientMode{$client}{search_type}  = 'Track';
+	$clientMode{$client}{side}         = 1;
+	$clientMode{$client}{text_col}     = 'title';
+	$clientMode{$client}{all_entry}    = '{ALL_SONGS}';
+	$clientMode{$client}{player_title} = '{LINE1_BROWSE_TRACKS}';
+	$clientMode{$client}{player_title_empty} =
+	  '{LINE1_BROWSE_TRACKS_EMPTY}';
+	$clientMode{$client}{enter_more_prompt} =
+	  'LINE2_ENTER_MORE_TRACKS';
+	$clientMode{$client}{min_search_length} =
+	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-track');
+	$clientMode{$client}{perform_search} = \&performTrackSearch;
+	$clientMode{$client}{onright}       = \&rightIntoTrack;
+	$clientMode{$client}{search_tracks} = \&searchTracksForTrack;
+	setSearchBrowseMode( $client, $item, 0 );
+}
+
+# Used when the user starts a keyword search from the main category menu.
+sub enterKeywordSearch($$) {
+	my $client = shift;
+	my $item = shift;
+	
+	#@@REMOVEME@@
+	$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: item=$item\n");
+
+	$clientMode{$client}{search_type}  = SEARCH_TYPE_KEYWORD;
+	$clientMode{$client}{side}         = 2;
+	$clientMode{$client}{text_col}     = undef;
+	$clientMode{$client}{all_entry}    = undef;
+	$clientMode{$client}{player_title} = '{LINE1_BROWSE_ARTISTS}';
+	$clientMode{$client}{player_title_empty} =
+	  '{LINE1_BROWSE_KEYWORDS_EMPTY}';
+	$clientMode{$client}{enter_more_prompt} =
+	  'LINE2_ENTER_MORE_KEYWORDS';
+	$clientMode{$client}{min_search_length} =
+	  Slim::Utils::Prefs::get(
+		'plugin-lazysearch2-minlength-keyword');
+	$clientMode{$client}{onright}       = \&keywordOnRightHandler;
+	$clientMode{$client}{search_tracks} = undef;
+	setSearchBrowseMode( $client, $item, 0 );
 }
 
 # Return a result set that contains all tracks for a given artist, for when
@@ -732,7 +789,7 @@ sub setupGroup {
 		},
 		'plugin-lazysearch2-hooksearchbutton' => {
 			'validate' => \&Slim::Utils::Validate::inList,
-			'validateArgs' => [0, 1, 2],
+			'validateArgs' => [0..6],
 			'PrefHead' => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON'),
 			'PrefDesc' =>
 			  string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_DESC'),
@@ -743,7 +800,11 @@ sub setupGroup {
 			'options' => {
 				0 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_0'),
 				1 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_1'),
-				2 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_2')
+				2 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_2'),
+				3 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_3'),
+				4 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_4'),
+				5 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_5'),
+				6 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_6')
 			},
 		},
 		'plugin-lazysearch2-keyword-artists-enabled' => {
@@ -1029,7 +1090,7 @@ sub lazyOnSearch {
 	  || 0;
 	my $inSearch = 0;    #@@TODO@@@
 	my $gotoLazy = 0;
-	my $gotoKeyword = 0;
+	my $gotoCategory = undef;
 
 	my $searchBehaviour = Slim::Utils::Prefs::get('plugin-lazysearch2-hooksearchbutton');
 
@@ -1060,19 +1121,45 @@ sub lazyOnSearch {
 			# Go into the standard search.
 			$gotoLazy = 0;
 		}
-	} else {
+	} elsif ($searchBehaviour == LAZYSEARCH_SEARCHBUTTON_ARTIST) {
+		#@@REMOVEME@@
+		$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: artist SEARCH button behaviour\n");
+
+		$gotoCategory = '{ARTISTS}';
+	} elsif ($searchBehaviour == LAZYSEARCH_SEARCHBUTTON_ALBUM) {
+		#@@REMOVEME@@
+		$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: album SEARCH button behaviour\n");
+
+		$gotoCategory = '{ALBUMS}';
+	} elsif ($searchBehaviour == LAZYSEARCH_SEARCHBUTTON_GENRE) {
+		#@@REMOVEME@@
+		$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: genre SEARCH button behaviour\n");
+
+		$gotoCategory = '{GENRES}';
+	} elsif ($searchBehaviour == LAZYSEARCH_SEARCHBUTTON_TRACK) {
+		#@@REMOVEME@@
+		$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: track SEARCH button behaviour\n");
+
+		$gotoCategory = '{SONGS}';
+	} elsif ($searchBehaviour == LAZYSEARCH_SEARCHBUTTON_KEYWORD) {
+		#@@REMOVEME@@
 		$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: keyword SEARCH button behaviour\n");
 
-		$gotoKeyword = 1;
+		$gotoCategory = '{KEYWORD_MENU_ITEM}';
 	}
 
 	#@@REMOVEME@@
-	$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: gotoKeyword=$gotoKeyword gotoLazy=$gotoLazy\n");
+	$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: gotoCategory=$gotoCategory gotoLazy=$gotoLazy\n");
 
-	if ($gotoKeyword) {
+	if (defined $gotoCategory) {
 		#@@TODO@@
-		$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: jumping to KEYWORD search\n");
-		# @@TODO: Add keyword-shortcut handling here@@
+		$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: jumping to category $gotoCategory\n");
+		
+		# This works by first entering the category menu, then immediately
+		# entering the appropriate search category. This is done so when the
+		# user presses LEFT he gets back to the category menu.
+		enterCategoryMenu($client);
+		enterCategoryItem($client, $gotoCategory);
 
 	} else {
 		if ($gotoLazy) {
@@ -2830,11 +2917,7 @@ SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON
 	FI	HAKU-napin toiminta
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_DESC
-	DA	Denne indstilling giver mulighed for at SEARCH knappen på Squeezebox/Transporter fjernbetjæningen benyttes til at aktivere <i>Lazy Search Music</i> funktionen i stedet for den orginale <i>søg</i> funktion. Det er ikke nødvendigt at rette i <i>Default.map</i> eller <i>Custom.map filerne. Bemærk, denne indstilling slår ikke igennem før plugin\'et er genindløst (f.eks. ved at genstarte SlimServer).
-	DE	Mit dieser Einstellung kann die SEARCH-Taste auf der Squeezebox/Transporter-Fernbedienung mit der <i>Faulpelz-Suche</i> statt mit der <i>Originalsuche</i> belegt werden. Durch Aktivieren dieser Einstellung kann diese Taste entsprechend umbelegt werden, ohne die Dateien <i>Default.map</i> oder <i>Custom.map</i> ändern zu müssen. Hinweis: Änderungen an dieser Einstellung werden erst nach einem erneuten Start des Plugins wirksam (z.B. bei einem Neustart des SlimServers).
-	EN	This setting allows the SEARCH button on the Squeezebox/Transporter remote control to be remapped to the <i>lazy search music</i> function instead of the original <i>search music</i> function. A further option allows the SEARCH button to immediately enter a keyword search, which saves more time if that\'s the type of search you prefer to use most often.
-	ES	Esta configuración permite reasignar el boton SEARCH del control remoto de Squeezebox/Transporter a la función de <i>búsqueda laxa de música</i>, en lugar de la función de <i>búsqueda de música</i> original. Habilitando esto se logra que la reasignación del botón sea realizada sin editar los archivos <i>Default.map</i> o <i>Custom.map</i>. Notar que los cambios no tendrán efecto hasta que el plugin sea recargado (por ej. al reiniciar SlimServer).
-	FI	Tällä asetuksella voit muuttaa miten Squeezeboxin / Transporterin kaukosäätimen HAKU-nappi toimii. Painamalla sitä voit joko päästä <i>laiska musiikin haku</i>-valikkoon, tai normaalin <i>haku</i>-valikkoon. Tällä asetuksella voit muuttaa napin toimintaa muuttamatta <i>Default.map</i> tai <i>Custom.map</i> tiedostoja. Huomaa, että asetuksen uusi arvo tulee voimaan, kun laajennus käynnistetään uudelleen (esim. käynnistämällä SlimServer uudelleen).
+	EN	This setting allows the SEARCH button on the Squeezebox/Transporter remote control to be remapped to the <i>lazy search music</i> function instead of the original <i>search music</i> function. Further options allow the SEARCH button to immediately enter a chosen type of lazy search, which saves time if that\'s the type of search you prefer to use most often.
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_CHOOSE
 	DA	Tryk på SEARCH knappen på Squeezebox/Transporter fjernbetjæningen:
@@ -2865,6 +2948,18 @@ SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_1
 	FI	Laiska musiikin haku
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_2
+	EN	Begins an artist lazy search
+
+SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_3
+	EN	Begins an album lazy search
+
+SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_4
+	EN	Begins a genre lazy search
+
+SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_5
+	EN	Begins a song lazy search
+
+SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_6
 	EN	Begins a keyword lazy search
 
 SCAN_IN_PROGRESS
