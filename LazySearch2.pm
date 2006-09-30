@@ -2899,15 +2899,19 @@ SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_1
 
 SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD
 	EN	Keyword searching and artists behaviour
+	FI	Sana-haku ja esittäjä
 
 SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_DESC
-	EN	Depending on how you tag your albums you may or may not want your album artists (the ALBUMARTIST tag) to be returned in the list of artists matching a keyword search. For example, if you set the album artist to "Various Artists" for your compilations then you won\'t expect that to be returned in keyword searches because it\'s the individual track artists that you\'re interested in. Not returning album artists is the default behaviour.
+	EN	Depending on how you tag your albums you may or may not want your album artists (the ALBUMARTIST tag) to be returned in the list of artists matching a keyword search. For example, if you set the album artist to "Various Artists" for your compilations then you won\'t expect that to be returned in keyword searches because it\'s the individual song artists that you\'re interested in. Not returning album artists is the default behaviour.
+	FI	Riippuen siitä miten olet merkinnyt levysi, niin saatat haluta, että levyn esittäjä (ALBUMARTIST-merkintä) sisällytetään esittäjälistaan sana-haussa. Esimerkiksi, jos määrittelet kokoelmalevyn esittäjäksi "Various Artist", niin et luultavasti halua sisällyttää sitä esittäjälistaan, koska haluat löytää yksittäisen kappaleen esittäjän. Oletusarvo on pois päältä.
 
 SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHOOSE
 	EN	Album artists included in keyword search results:
+	FI	Levyn esittäjän sisällyttäminen sana-hakuun:
 
 SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHANGE
 	EN	Album artists returned in keyword searches changed to:
+	FI	Levyn esittäjän sisällyttäminen sana-hakuun vaihdettu arvoon:
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON
 	DA	SEARCH-knap opførsel
@@ -2918,6 +2922,7 @@ SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_DESC
 	EN	This setting allows the SEARCH button on the Squeezebox/Transporter remote control to be remapped to the <i>lazy search music</i> function instead of the original <i>search music</i> function. Further options allow the SEARCH button to immediately enter a chosen type of lazy search, which saves time if that\'s the type of search you prefer to use most often.
+	FI	Tällä asetuksella voit muuttaa miten Squeezeboxin / Transporterin HAKU-nappi toimii. Painamalla sitä voit joko päästä <i>laiska musiikin haku</i>-valikkoon tai normaalin <i>haku</i>-valikkoon. Vaihtoehtona on myös, että HAKU-nappi aloittaa suoraan halutun laiskan haun tyylin, joka säästää aikaa, jos yleensä käytät juuri sitä hakutyyliä.
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_CHOOSE
 	DA	Tryk på SEARCH knappen på Squeezebox/Transporter fjernbetjæningen:
@@ -2949,18 +2954,23 @@ SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_1
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_2
 	EN	Begins an artist lazy search
+	FI	Aloittaa esittäjän laiskan haun
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_3
 	EN	Begins an album lazy search
+	FI	Aloittaa levyn laiskan haun
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_4
 	EN	Begins a genre lazy search
+	FI	Aloittaa lajin laiskan haun
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_5
 	EN	Begins a song lazy search
+	FI	Aloittaa kappaleen laiskan haun
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_6
 	EN	Begins a keyword lazy search
+	FI	Aloittaa sanan laiskan haun
 
 SCAN_IN_PROGRESS
 	DA	Note: dit musik biblioteket bliver lige nu scannet.
@@ -3013,7 +3023,7 @@ SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_HEAD
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_OPTIONS_DESC
 	DA	Keyword søgning giver mulighed for at søge mellem flere kategorier, og på den måde finde albums, kunstnere og sangtitler som matcher et eller flere <i>keywords</i> i deres titel. Dette kan være brugbart, f.eks. med klassisk musik samlinger som både kan have kunster, forfatter og udøver inkluderet i sangtitlen og albumkunstneren eller sangkunstneren idet funktionen giver mulighed for at søge ligegyldigt hvordan sangens tags er opbygget. Følgende indstillinger giver dig mulighed for at specificere hvilke kategorier der bliver inkluderet i keyword søgningen. Hvis alle kattegorier er slået fra, vil keyword søgnings muligheden ikke optræde i afspillerens Lazy Search menu.<br/><br/><b>Bemærk</b> at denne indstilling vil først slå igennem efter en komplet genscanning af databasen er foretaget.
 	DE	Die Stichwort-Suche ermöglicht die Suche über mehrere Kategorien gleichzeitig, d.h. man kann Alben, Interpreten und Lieder finden, die ein oder mehrere <i>Stichworte</i> enthalten. Dies ist z.B. bei klassischen Musiksammlungen hilfreich, bei denen Interpreten, Komponisten und Dirigenten in den Liedertiteln, im Album-Interpret oder im Lied-Interpret enthalten sind, weil du deine Musik suchen und finden kannst unabhängig davon, wie die Lieder mit "Tags" versehen sind. Mit den folgenden Optionen kannst du einstellen, welche Kategorien in die Stichwort-Suche einbezogen werden. Wenn keine Kategorien ausgewählt ist, erscheint die Anzeige der Stichwort-Suche nicht im Faulpelz-Menü am Player.<br/><br/><b>Hinweis</b>: Änderungen werden erst wirksam, wenn die Datenbank einmal komplett gelöscht und neu aufgebaut wurde.
-	EN	Keyword search allows searching across multiple categories, finding albums, artists and songs that match one or more <i>keywords</i> within their titles. This may be useful, for example, with classical music collections which can have artists, composers and performers included in the song titles as well as in the album artist and song artist because it lets you search and find your music no matter how the tracks were tagged. The following settings allow you to specify which categories will be included in keyword searches. If all categories are disabled then the keyword search option won\'t appear in the player\'s Lazy Search menu at all.<br/><br/><b>Note</b> that this change will only take effect once a complete database clear and rescan has been performed.
+	EN	Keyword search allows searching across multiple categories, finding albums, artists and songs that match one or more <i>keywords</i> within their titles. This may be useful, for example, with classical music collections which can have artists, composers and performers included in the song titles as well as in the album artist and song artist because it lets you search and find your music no matter how the songs were tagged. The following settings allow you to specify which categories will be included in keyword searches. If all categories are disabled then the keyword search option won\'t appear in the player\'s Lazy Search menu at all.<br/><br/><b>Note</b> that this change will only take effect once a complete database clear and rescan has been performed.
 	FI	Sana-haulla voit etsiä samalla kertaa monesta eri kategoriasta. Voit yhdellä haulla etsiä <i>sanoja</i> levyn, esittäjän tai kappaleen nimestä. Tämä on käytännöllistä esimerkiksi klassisessa musiikissa: esittäjä tai säveltäjä voi olla merkitty joko kappaleen, levyn tai esittäjän kohdalle. Sana-haulla voit etsiä niistä kaikista. Seuraavilla asetuksilla voit määritellä mistä asioista haku tehdään. Jos kaikki ovat pois päältä, niin sana-hakua ei näytetä ollenkaan laiskan haun valikossa.<br/><br/><b>Huomaa,</b> että tämä asetus tulee voimaan vasta, kun musiikkikirjasto on ensin tyhjennetty ja luettu musiikkihakemistosta uudelleen.
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_CHOOSE
