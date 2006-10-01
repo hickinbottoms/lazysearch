@@ -863,7 +863,9 @@ sub setupGroup {
 					$::d_plugins
 					  && Slim::Utils::Misc::msg(
 						"LazySearch2: Manual lazification requested\n");
-					lazifyDatabase();
+
+					# Forcibly re-lazify the whole database.
+					lazifyDatabase(1);
 				}
 			},
 			'dontSet'   => 1,
@@ -2040,39 +2042,68 @@ sub checkDefaults {
 			LAZYSEARCH_KEYWORD_ALBUMARTISTS_DEFAULT
 		);
 	}
+
+	# If the revision isn't yet in the preferences we set it to something
+	# that's guaranteed to be different to the revision to force full
+	# lazification.
+	if ( !Slim::Utils::Prefs::isDefined('plugin-lazysearch2-revision') ) {
+		Slim::Utils::Prefs::set( 'plugin-lazysearch2-revision', '-undefined-' );
+	}
 }
 
 # This is called by SlimServer when a scan has finished. We use this to kick
 # off lazification of the database once it's been populated with all music
 # information.
-sub scanDoneCallback {
-
+sub scanDoneCallback($) {
 	$::d_plugins
 	  && Slim::Utils::Misc::msg(
-"LazySearch2: Received notification of end of rescan - lazifying database\n"
-	  );
-	lazifyDatabase();
+		"LazySearch2: Received notification of end of rescan\n" );
+
+	# Check the plugin version that was present when we last lazified - if it
+	# has changed then we're going to rebuild the database lazification in
+	# case this different plugin revision has changed the format.
+	my $force = 0;
+	my $prefRevision =
+	  Slim::Utils::Prefs::get('plugin-lazysearch2-revision');
+	my $pluginRevision = '$Revision$';
+
+	if ( $prefRevision ne $pluginRevision ) {
+		$::d_plugins
+		  && Slim::Utils::Misc::msg(
+"LazySearch2: Re-lazifying (plugin version changed from '$prefRevision' to '$pluginRevision'\n"
+		  );
+		$force = 1;
+		Slim::Utils::Prefs::set( 'plugin-lazysearch2-revision',
+			$pluginRevision );
+	} else {
+		$::d_plugins
+		  && Slim::Utils::Misc::msg(
+			"LazySearch2: Lazifying entries not already done\n");
+	}
+
+	lazifyDatabase($force);
 }
 
 # This function is called when the music database scan has finished. It
 # identifies each artist, track and album that has not yet been encoded into
 # lazy form and schedules a SlimServer background task to encode them.
-sub lazifyDatabase {
+sub lazifyDatabase($) {
+	my $force = shift;
 
 	# Make sure the encode queue is empty.
 	%encodeQueues = ();
 
 	# Convert the albums table.
-	lazifyDatabaseType( 'Album', 'title', 0, 0, 0 );
+	lazifyDatabaseType( 'Album', 'title', $force, 0, 0, 0 );
 
 	# Convert the artists (contributors) table.
-	lazifyDatabaseType( 'Contributor', 'name', 0, 0, 0 );
+	lazifyDatabaseType( 'Contributor', 'name', $force, 0, 0, 0 );
 
 	# Convert the genres table.
-	lazifyDatabaseType( 'Genre', 'name', 0, 0, 0 );
+	lazifyDatabaseType( 'Genre', 'name', $force, 0, 0, 0 );
 
 	# Convert the songs (tracks) table.
-	lazifyDatabaseType( 'Track', 'title', 1, 1, 1 );
+	lazifyDatabaseType( 'Track', 'title', $force, 1, 1, 1 );
 
 	# If there are any items to encode then initialise a background task that
 	# will do that work in chunks.
@@ -2114,6 +2145,7 @@ sub lazifyColumn {
 sub lazifyDatabaseType {
 	my $type                  = shift;
 	my $sourceAttr            = shift;
+	my $force                 = shift;
 	my $considerKeywordArtist = shift;
 	my $considerKeywordAlbum  = shift;
 	my $considerKeywordTrack  = shift;
@@ -2128,7 +2160,7 @@ sub lazifyDatabaseType {
 	  && Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-tracks-enabled');
 
 	# If adding keywords for album titles then we need to join to the album
-	# table, to.
+	# table, too.
 	my $extraJoins;
 	$extraJoins = qw/ album / if $includeKeywordAlbum;
 
@@ -2136,18 +2168,20 @@ sub lazifyDatabaseType {
 	# in case that column was previously lazified before keywords were
 	# introduced.
 	my $whereClause;
-	if (   $considerKeywordArtist
-		|| $considerKeywordAlbum
-		|| $considerKeywordTrack )
-	{
-		$whereClause = {
-			-or => [
-				'me.customsearch' => { 'not like', '%|%' },
-				'me.customsearch' => undef
-			]
-		};
-	} else {
-		$whereClause = { 'me.customsearch' => undef };
+	if ( !$force ) {
+		if (   $considerKeywordArtist
+			|| $considerKeywordAlbum
+			|| $considerKeywordTrack )
+		{
+			$whereClause = {
+				-or => [
+					'me.customsearch' => { 'not like', '%|%' },
+					'me.customsearch' => undef
+				]
+			};
+		} else {
+			$whereClause = { 'me.customsearch' => undef };
+		}
 	}
 
 	# Find all entries that are not yet converted.
@@ -2169,11 +2203,12 @@ sub lazifyDatabaseType {
 	# within a task.
 	if ( $rsCount > 0 ) {
 		my %typeHash = (
-			rs             => $rs,
-			source_attr    => $sourceAttr,
-			keyword_artist => $includeKeywordArtist,
-			keyword_album  => $includeKeywordAlbum,
-			keyword_track  => $includeKeywordTrack,
+			rs              => $rs,
+			source_attr     => $sourceAttr,
+			remaining_items => $rsCount,
+			keyword_artist  => $includeKeywordArtist,
+			keyword_album   => $includeKeywordAlbum,
+			keyword_track   => $includeKeywordTrack,
 		);
 		$encodeQueues{$type} = \%typeHash;
 	}
@@ -2200,18 +2235,19 @@ sub encodeTask {
 
 	# Get a single type hash from the encode queue. It doesn't matter on the
 	# order they come out of the hash.
-	my $type          = ( keys %encodeQueues )[0];
-	my $typeHashRef   = $encodeQueues{$type};
-	my %typeHash      = %$typeHashRef;
-	my $rs            = $typeHash{rs};
-	my $sourceAttr    = $typeHash{source_attr};
-	my $keywordArtist = $typeHash{keyword_artist};
-	my $keywordAlbum  = $typeHash{keyword_album};
-	my $keywordTrack  = $typeHash{keyword_track};
+	my $type           = ( keys %encodeQueues )[0];
+	my $typeHashRef    = $encodeQueues{$type};
+	my %typeHash       = %$typeHashRef;
+	my $rs             = $typeHash{rs};
+	my $sourceAttr     = $typeHash{source_attr};
+	my $remainingItems = $typeHash{remaining_items};
+	my $keywordArtist  = $typeHash{keyword_artist};
+	my $keywordAlbum   = $typeHash{keyword_album};
+	my $keywordTrack   = $typeHash{keyword_track};
 
 	$::d_plugins
 	  && Slim::Utils::Misc::msg( 'LazySearch2: EncodeTask - '
-		  . $rs->count
+		  . $remainingItems
 		  . " $type"
 		  . "s remaining\n" );
 
@@ -2272,6 +2308,8 @@ sub encodeTask {
 			LAZYSEARCH_ENCODE_MAX_QUANTA ) );
 
 	my $endTime = Time::HiRes::time();
+
+	$typeHashRef->{remaining_items} -= $rowsDone;
 
 	# Speedometer
 	my $speed = 0;
