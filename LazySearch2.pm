@@ -1,4 +1,5 @@
-# LazySearch2 Plugin for SlimServer Copyright (c) Stuart Hickinbottom 2004-2006
+# LazySearch2 Plugin for SlimServer
+# Copyright © Stuart Hickinbottom 2004-2006
 #
 # $Id$
 #
@@ -1070,8 +1071,11 @@ sub lazyOnSearch {
 
 		# We never intercept SEARCH if the plugin isn't initialised.
 		$gotoLazy = 0;
-	} elsif ( ( $searchBehaviour == LAZYSEARCH_SEARCHBUTTON_MENU )
-		|| !keywordSearchEnabled() )
+	} elsif (
+		( $searchBehaviour == LAZYSEARCH_SEARCHBUTTON_MENU )
+		|| ( ( $searchBehaviour == LAZYSEARCH_SEARCHBUTTON_KEYWORD )
+			&& !keywordSearchEnabled() )
+	  )
 	{
 
 		# Normal operation - enter lazy search as long as we're not already
@@ -2057,14 +2061,13 @@ sub checkDefaults {
 sub scanDoneCallback($) {
 	$::d_plugins
 	  && Slim::Utils::Misc::msg(
-		"LazySearch2: Received notification of end of rescan\n" );
+		"LazySearch2: Received notification of end of rescan\n");
 
 	# Check the plugin version that was present when we last lazified - if it
 	# has changed then we're going to rebuild the database lazification in
 	# case this different plugin revision has changed the format.
-	my $force = 0;
-	my $prefRevision =
-	  Slim::Utils::Prefs::get('plugin-lazysearch2-revision');
+	my $force          = 0;
+	my $prefRevision   = Slim::Utils::Prefs::get('plugin-lazysearch2-revision');
 	my $pluginRevision = '$Revision$';
 
 	if ( $prefRevision ne $pluginRevision ) {
