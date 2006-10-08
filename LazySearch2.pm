@@ -2861,18 +2861,22 @@ SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_1
 	FI	Poista viimeinen kirjain
 
 SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD
+	DE	Stichwort-Suche und Album-Interpret
 	EN	Keyword searching and artists behaviour
 	FI	Sana-haku ja esittäjä
 
 SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_DESC
+	DE	Je nachdem, wie man seine Alben mit "tags" versieht, kann es erwünscht oder unerwünscht sein, dass Album-Interpreten (der Inhalt des ALBUMARTIST tags) in der Liste der Interpreten, die zu einer Stichwort-Suche passen, angezeigt werden. Wenn man z.B. bei Samplern den Album-Interpreten auf "Various Artist" setzt, dann erwartet man diesen Wert nicht als Ergebnis einer Stichwort-Suche, da man an dem individuellen Interpreten des Liedes interessiert ist. Album-Interpreten nicht anzuzeigen ist die Voreinstellung.
 	EN	Depending on how you tag your albums you may or may not want your album artists (the ALBUMARTIST tag) to be returned in the list of artists matching a keyword search. For example, if you set the album artist to "Various Artists" for your compilations then you won\'t expect that to be returned in keyword searches because it\'s the individual song artists that you\'re interested in. Not returning album artists is the default behaviour.
 	FI	Riippuen siitä miten olet merkinnyt levysi, niin saatat haluta, että levyn esittäjä (ALBUMARTIST-merkintä) sisällytetään esittäjälistaan sana-haussa. Esimerkiksi, jos määrittelet kokoelmalevyn esittäjäksi "Various Artist", niin et luultavasti halua sisällyttää sitä esittäjälistaan, koska haluat löytää yksittäisen kappaleen esittäjän. Oletusarvo on pois päältä.
 
 SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHOOSE
+	DE	Album-Interpreten im Ergebnis der Stichwort-Suche anzeigen:
 	EN	Album artists included in keyword search results:
 	FI	Levyn esittäjän sisällyttäminen sana-hakuun:
 
 SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHANGE
+	DE	Album-Interpreten im Ergebnis der Stichwort-Suche einschließen wurde geändert in:
 	EN	Album artists returned in keyword searches changed to:
 	FI	Levyn esittäjän sisällyttäminen sana-hakuun vaihdettu arvoon:
 
@@ -2884,6 +2888,7 @@ SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON
 	FI	HAKU-napin toiminta
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_DESC
+	DE	Mit dieser Einstellung kann man die SEARCH-Taste auf der Squeezebox/Transporter-Fernbedienung mit der Funktionalität der <i>Faulpelz-Suche</i> anstelle der Funktionalität der originalen <i>Suche</i> belegen. Mit weiteren Optionen kann man festlegen, dass mit der SEARCH-Taste unmittelbar ein gewählter Typ der Faulpelz-Suche ausgewählt wird. Dies spart Zeit, wenn man meistens diesen Typ verwenden möchte.
 	EN	This setting allows the SEARCH button on the Squeezebox/Transporter remote control to be remapped to the <i>lazy search music</i> function instead of the original <i>search music</i> function. Further options allow the SEARCH button to immediately enter a chosen type of lazy search, which saves time if that\'s the type of search you prefer to use most often.
 	FI	Tällä asetuksella voit muuttaa miten Squeezeboxin / Transporterin HAKU-nappi toimii. Painamalla sitä voit joko päästä <i>laiska musiikin haku</i>-valikkoon tai normaalin <i>haku</i>-valikkoon. Vaihtoehtona on myös, että HAKU-nappi aloittaa suoraan halutun laiskan haun tyylin, joka säästää aikaa, jos yleensä käytät juuri sitä hakutyyliä.
 
@@ -2916,22 +2921,27 @@ SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_1
 	FI	Laiska musiikin haku
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_2
+	DE	Startet eine Faulpelz-Suche nach einem Interpret
 	EN	Begins an artist lazy search
 	FI	Aloittaa esittäjän laiskan haun
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_3
+	DE	Startet eine Faulpelz-Suche nach einem Album
 	EN	Begins an album lazy search
 	FI	Aloittaa levyn laiskan haun
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_4
+	DE	Startet eine Faulpelz-Suche nach einer Stilrichtung
 	EN	Begins a genre lazy search
 	FI	Aloittaa lajin laiskan haun
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_5
+	DE	Startet eine Faulpelz-Suche nach einem Lied
 	EN	Begins a song lazy search
 	FI	Aloittaa kappaleen laiskan haun
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_6
+	DE	Startet eine Faulpelz-Suche nach einem Stichwort
 	EN	Begins a keyword lazy search
 	FI	Aloittaa sanan laiskan haun
 
