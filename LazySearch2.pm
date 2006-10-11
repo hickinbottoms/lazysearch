@@ -2392,6 +2392,13 @@ sub lazyEncode($) {
 	#     multiple X's into single 0's (the lazy encoding of spaces). So,
 	#     we correctly end up with "101" as the lazy encoding.
 
+#@@REMOVEME@@
+my $hex = "";
+for my $i (1..length($in_string)) {
+	    $hex .= sprintf "%02x,", ord(substr($in_string, $i-1, 1));
+	}
+$::d_plugins && Slim::Utils::Misc::msg( "LazySearch2: Unidecode v" . $Text::Unidecode::VERSION . " - lazyEncode('" . $in_string . "') - $hex\n");
+
 	# This translates each searchable character into the number of the key that
 	# shares that letter on the remote. Thus, this tells us what keys the user
 	# will enter if he doesn't bother to multi-tap to get at the later
