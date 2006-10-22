@@ -1731,7 +1731,12 @@ sub doKeywordSearch($$$$$$) {
 
 		# We restrict the search to include artists related in the roles the
 		# user wants (set through SlimServer preferences).
-		my @roles = @{ Slim::Schema->artistOnlyRoles('TRACKARTIST') };
+		my $artistOnlyRoles = Slim::Schema->artistOnlyRoles('TRACKARTIST');
+		if (!defined($artistOnlyRoles)) {
+			my @emptyArtists;
+			$artistOnlyRoles = \@emptyArtists;
+		}
+		my @roles = @{ $artistOnlyRoles };
 
 		# If the user wants, remove the ALBUMARTIST role (ticket:42)
 		if (
@@ -1745,7 +1750,7 @@ sub doKeywordSearch($$$$$$) {
 		}
 
 		my $condition = undef;
-		if ( length(@roles) > 0 ) {
+		if ( scalar(@roles) > 0 ) {
 			$condition->{'role'} = { 'in' => \@roles };
 		}
 		$results =
@@ -2391,13 +2396,6 @@ sub lazyEncode($) {
 	#     so in the "1 - 1" case we'd be left with "1XX1", so we turn any
 	#     multiple X's into single 0's (the lazy encoding of spaces). So,
 	#     we correctly end up with "101" as the lazy encoding.
-
-#@@REMOVEME@@
-my $hex = "";
-for my $i (1..length($in_string)) {
-	    $hex .= sprintf "%02x,", ord(substr($in_string, $i-1, 1));
-	}
-$::d_plugins && Slim::Utils::Misc::msg( "LazySearch2: Unidecode v" . $Text::Unidecode::VERSION . " - lazyEncode('" . $in_string . "') - $hex\n");
 
 	# This translates each searchable character into the number of the key that
 	# shares that letter on the remote. Thus, this tells us what keys the user
