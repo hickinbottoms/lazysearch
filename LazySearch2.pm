@@ -33,6 +33,7 @@ use Slim::Utils::Text;
 use Slim::Utils::Timers;
 use Time::HiRes;
 use Text::Unidecode;
+use Scalar::Util qw(blessed);
 
 # Name of this plugin - used for various global things to prevent clashes with
 # other plugins.
@@ -99,8 +100,6 @@ $VERSION = 'trunk-6.5 $Id$';
 # The elements of the second hash are as follows:
 #	search_type:	This is the item type being searched for, and can be one
 #					of Track, Contributor, Album, Genre or Keyword.
-#	text_col:		The column of the search_type row that holds the text that
-#					will be shown on the player as the result of the search.
 #	search_text:	The current search text (ie the number keys on the remote
 #					control).
 #	side:				Allows the search to be constrained to one side of
@@ -120,6 +119,12 @@ $VERSION = 'trunk-6.5 $Id$';
 #	search_pending:		A Boolean flag indicating whether there is a search
 #						scheduled to happen in a short time following the
 #						change of the search_text.
+#	hierarchy:			Hierarchy definition that is passed to the mixer
+#						function when invoking a fix (this is a hack to
+#						allow reuse of BrowseDB's mix invocation function).
+#	level:				Indication of the depth into the current 'hierarchy'
+#						(this is also part of the hack to reuse BrowseDB's
+#						mix function).
 #	all_entry:			This is the string to be used for the 'all' entry at
 #						the end of the list. If this isn't defined then there
 #						won't be an 'all' entry added.
@@ -294,7 +299,8 @@ sub enterArtistSearch($$) {
 
 	$clientMode{$client}{search_type}        = 'Contributor';
 	$clientMode{$client}{side}               = 0;
-	$clientMode{$client}{text_col}           = 'name';
+	$clientMode{$client}{hierarchy}          = 'contributor,album,track';
+	$clientMode{$client}{level}              = 0;
 	$clientMode{$client}{all_entry}          = '{ALL_ARTISTS}';
 	$clientMode{$client}{player_title}       = '{LINE1_BROWSE_ARTISTS}';
 	$clientMode{$client}{player_title_empty} = '{LINE1_BROWSE_ARTISTS_EMPTY}';
@@ -314,7 +320,8 @@ sub enterAlbumSearch($$) {
 
 	$clientMode{$client}{search_type}        = 'Album';
 	$clientMode{$client}{side}               = 0;
-	$clientMode{$client}{text_col}           = 'title';
+	$clientMode{$client}{hierarchy}          = 'album,track';
+	$clientMode{$client}{level}              = 0;
 	$clientMode{$client}{all_entry}          = '{ALL_ALBUMS}';
 	$clientMode{$client}{player_title}       = '{LINE1_BROWSE_ALBUMS}';
 	$clientMode{$client}{player_title_empty} = '{LINE1_BROWSE_ALBUMS_EMPTY}';
@@ -334,7 +341,8 @@ sub enterGenreSearch($$) {
 
 	$clientMode{$client}{search_type}        = 'Genre';
 	$clientMode{$client}{side}               = 0;
-	$clientMode{$client}{text_col}           = 'name';
+	$clientMode{$client}{hierarchy}          = 'genre,track';
+	$clientMode{$client}{level}              = 0;
 	$clientMode{$client}{all_entry}          = undef;
 	$clientMode{$client}{player_title}       = '{LINE1_BROWSE_GENRES}';
 	$clientMode{$client}{player_title_empty} = '{LINE1_BROWSE_GENRES_EMPTY}';
@@ -354,7 +362,8 @@ sub enterTrackSearch($$) {
 
 	$clientMode{$client}{search_type}        = 'Track';
 	$clientMode{$client}{side}               = 1;
-	$clientMode{$client}{text_col}           = 'title';
+	$clientMode{$client}{hierarchy}          = 'track';
+	$clientMode{$client}{level}              = 0;
 	$clientMode{$client}{all_entry}          = '{ALL_SONGS}';
 	$clientMode{$client}{player_title}       = '{LINE1_BROWSE_TRACKS}';
 	$clientMode{$client}{player_title_empty} = '{LINE1_BROWSE_TRACKS_EMPTY}';
@@ -374,8 +383,9 @@ sub enterKeywordSearch($$) {
 
 	$clientMode{$client}{search_type}        = SEARCH_TYPE_KEYWORD;
 	$clientMode{$client}{side}               = 2;
-	$clientMode{$client}{text_col}           = undef;
 	$clientMode{$client}{all_entry}          = undef;
+	$clientMode{$client}{hierarchy}          = 'contributor,album,track';
+	$clientMode{$client}{level}              = 0;
 	$clientMode{$client}{player_title}       = '{LINE1_BROWSE_ARTISTS}';
 	$clientMode{$client}{player_title_empty} = '{LINE1_BROWSE_KEYWORDS_EMPTY}';
 	$clientMode{$client}{enter_more_prompt}  = 'LINE2_ENTER_MORE_KEYWORDS';
@@ -454,7 +464,7 @@ sub rightIntoArtist($$) {
 		{
 			'hierarchy'    => 'contributor,album,track',
 			'level'        => 1,
-			'findCriteria' => { 'contributor.id' => $item->{'value'} },
+			'findCriteria' => { 'contributor.id' => $item->id },
 		}
 	);
 }
@@ -471,7 +481,7 @@ sub rightIntoAlbum($$) {
 		{
 			'hierarchy'    => 'album,track',
 			'level'        => 1,
-			'findCriteria' => { 'album.id' => $item->{'value'} },
+			'findCriteria' => { 'album.id' => $item->id },
 		}
 	);
 
@@ -489,7 +499,7 @@ sub rightIntoGenre($$) {
 		{
 			'hierarchy'    => 'genre,contributor,album,track',
 			'level'        => 1,
-			'findCriteria' => { 'genre.id' => $item->{'value'} },
+			'findCriteria' => { 'genre.id' => $item->id },
 		}
 	);
 }
@@ -500,7 +510,7 @@ sub rightIntoTrack($$) {
 	my $item   = shift;
 
 	# Push into the trackinfo mode for this one track.
-	my $track = Slim::Schema->rs('Track')->find( $item->{'value'} );
+	my $track = Slim::Schema->rs('Track')->find( $item->id );
 	Slim::Buttons::Common::pushModeLeft( $client, 'trackinfo',
 		{ 'track' => $track->url } );
 }
@@ -561,7 +571,7 @@ sub initPlugin() {
 		\&Slim::Buttons::Input::Choice::setMode
 	);
 
-	# Out input map for the new categories menu mode, based on thd default map
+	# Out input map for the new categories menu mode, based on the default map
 	# contents for INPUT.Choice.
 	my %categoryInputMap = (
 		'arrow_left'  => 'exit_left',
@@ -586,7 +596,8 @@ sub initPlugin() {
 	# 'numberScroll').
 	my %chFunctions = %{ Slim::Buttons::Input::Choice::getFunctions() };
 	$chFunctions{'numberScroll'} = \&lazyKeyHandler;
-	$chFunctions{'play'}         = \&onPlayHandler;
+	$chFunctions{'playSingle'}   = \&onPlayHandler;
+	$chFunctions{'playHold'}     = \&onCreateMixHandler;
 	$chFunctions{'addSingle'}    = \&onAddHandler;
 	$chFunctions{'addHold'}      = \&onInsertHandler;
 	$chFunctions{'leftSingle'}   = \&onDelCharHandler;
@@ -603,7 +614,12 @@ sub initPlugin() {
 		'arrow_left'      => 'leftSingle',
 		'arrow_left.hold' => 'leftHold',
 		'arrow_right'     => 'exit_right',
-		'play'            => 'play',
+		'play.single'     => 'playSingle',
+		'play.hold'       => 'playHold',
+		'play'            => 'dead',
+		'play.repeat'     => 'dead',
+		'play.hold_release' => 'dead',
+		'play.double'     => 'dead',
 		'pause.single'    => 'pause',
 		'pause.hold'      => 'stop',
 		'add.single'      => 'addSingle',
@@ -617,7 +633,6 @@ sub initPlugin() {
 		'0.double'        => 'dead',
 	);
 	for my $buttonPressMode (qw{repeat hold hold_release single double}) {
-		$lazyInputMap{ 'play.' . $buttonPressMode }   = 'dead';
 		$lazyInputMap{ 'search.' . $buttonPressMode } = 'dead';
 	}
 	Slim::Hardware::IR::addModeDefaultMapping( LAZYBROWSE_MODE,
@@ -626,7 +641,8 @@ sub initPlugin() {
 	# The mode that is used to show keyword results once the user has entered
 	# one of the returned categories.
 	my %chFunctions2 = %{ Slim::Buttons::Input::Choice::getFunctions() };
-	$chFunctions2{'play'}        = \&onPlayHandler;
+	$chFunctions2{'playSingle'}  = \&onPlayHandler;
+	$chFunctions2{'playHold'}    = \&onCreateMixHandler;
 	$chFunctions2{'addSingle'}   = \&onAddHandler;
 	$chFunctions2{'addHold'}     = \&onInsertHandler;
 	$chFunctions2{'forceSearch'} = \&lazyForceSearch;
@@ -638,7 +654,12 @@ sub initPlugin() {
 	my %keywordInputMap = (
 		'arrow_left'   => 'exit_left',
 		'arrow_right'  => 'exit_right',
-		'play'         => 'play',
+		'play.single'  => 'playSingle',
+		'play.hold'    => 'playHold',
+		'play'         => 'dead',
+		'play.repeat'  => 'dead',
+		'play.hold_release' => 'dead',
+		'play.double'  => 'dead',
 		'pause.single' => 'pause',
 		'pause.hold'   => 'stop',
 		'add.single'   => 'addSingle',
@@ -646,7 +667,6 @@ sub initPlugin() {
 		'search'       => 'forceSearch',
 	);
 	for my $buttonPressMode (qw{repeat hold hold_release single double}) {
-		$keywordInputMap{ 'play.' . $buttonPressMode }   = 'dead';
 		$keywordInputMap{ 'search.' . $buttonPressMode } = 'dead';
 	}
 	Slim::Hardware::IR::addModeDefaultMapping( LAZYBROWSE_KEYWORD_MODE,
@@ -953,34 +973,13 @@ sub setSearchBrowseMode {
 			lazyOnPlay( $client, $item, $addMode );
 		},
 
-		# These are all browsable items and so have a right-arrow overlay,
-		# but if the list is empty then there is never an overlay.
-		overlayRef => sub {
-			my ( $client, $item ) = @_;
-			my $listRef = $client->modeParam('listRef');
-			my $l1      = undef;
-			my $l2      = undef;
+		# What overlays are shown on lines 1 and 2.
+		overlayRef => \&lazyOverlay,
 
-			# If we've a pending search then we have an overlay on line 1.
-			if ( $clientMode{$client}{search_pending} ) {
-				$l1 = '*';
-			}
-
-			# See if there might be an overlay on line 2.
-			if (   ( length( $clientMode{$client}{search_performed} ) > 0 )
-				&& ( scalar(@$listRef) != 0 ) )
-			{
-
-				# 'All' items don't have an arrow; the others do.
-				if ( defined( $item->{result_set} )
-					|| ( $item->{value} != RESULT_ENTRY_ID_ALL ) )
-				{
-					$l2 = Slim::Display::Display::symbol('rightarrow');
-				}
-			}
-
-			return [ $l1, $l2 ];
-		},
+		# To keep BrowseDB's create_mix handler happy.
+		hierarchy => $clientMode{$client}{hierarchy},
+		level => $clientMode{$client}{level},
+		descend => 1,
 	);
 
 	# Use the new mode defined by INPUT.Choice and let it do all the hard work
@@ -996,8 +995,49 @@ sub setSearchBrowseMode {
 	}
 }
 
+# Function to return the overlay information for browse results - this is used
+# for both normal lazy search results as well as for keyword search results.
+sub lazyOverlay {
+	my ( $client, $item ) = @_;
+	my $listRef = $client->modeParam('listRef');
+	my $l1      = undef;
+	my $l2      = undef;
+
+
+	# If we've a pending search then we have an overlay on line 1.
+	if ( $clientMode{$client}{search_pending} ) {
+		$l1 = '*';
+	} elsif (( length( $clientMode{$client}{search_performed} ) > 0 ) && (scalar(@$listRef) != 0)) {
+		# MusicMagic/MoodLogic overlay - pinched from BrowseDB.
+		my $Imports = Slim::Music::Import->importers;
+
+		for my $import (keys %{$Imports}) {
+			if ($import->can('mixable') && $import->mixable($item)) {
+				$l1 = Slim::Display::Display::symbol('mixable');
+			}
+		}
+	}
+
+	# See if there might be an overlay on line 2.
+	if (   ( length( $clientMode{$client}{search_performed} ) > 0 )
+		&& ( scalar(@$listRef) != 0 ) )
+	{
+
+		# 'All' items don't have an arrow; the others do. Since the
+		# 'all' entry is the only one that isn't an object that
+		# makes it a simple test.
+		if ( blessed($item) && ($clientMode{$client}{search_type} eq 'Track')) {
+			$l2 = Slim::Display::Display::symbol('notesymbol');
+		} elsif ( blessed($item)) {
+			$l2 = Slim::Display::Display::symbol('rightarrow');
+		}
+	}
+
+	return [ $l1, $l2 ];
+}
+
 # Subroutine to extract the text to show for the browse/search. Most of this
-# is stock here, we just need to defer to a specific function stored in the
+# is stock here, we just need to identify the actual text column name from the
 # clientMode hash to get the actual text, as that differs for each item class.
 sub lazyGetText {
 	my ( $client, $item ) = @_;
@@ -1009,7 +1049,11 @@ sub lazyGetText {
 		if ( scalar(@$listRef) == 0 ) {
 			return $client->string('EMPTY');
 		} else {
-			return $item->get_column( $clientMode{$client}{text_col} );
+			if ( ref($item) eq 'Slim::Schema::Track' ) {
+				return Slim::Music::Info::standardTitle( $client, $item->url );
+			} else {
+				return $item->name;
+			}
 		}
 	}
 }
@@ -1060,7 +1104,7 @@ sub lazyOnSearch {
 	  || ( $mode eq LAZYSEARCH_CATEGORY_MENU_MODE )
 	  || ( $mode eq LAZYBROWSE_MODE )
 	  || 0;
-	my $inSearch     = 0;       #@@TODO@@@
+	my $inSearch     = 0;       #@@TODO@@
 	my $gotoLazy     = 0;
 	my $gotoCategory = undef;
 
@@ -1151,7 +1195,7 @@ sub lazyOnRight {
 
 		# Only allow right if we've performed a search.
 		if (   ( length( $clientMode{$client}{search_performed} ) > 0 )
-			&& ( $item->{value} != RESULT_ENTRY_ID_ALL ) )
+			&& ( blessed($item) ) )
 		{
 
 			# Cancel any pending timer.
@@ -1192,7 +1236,12 @@ sub lazyOnPlay {
 	# If we're on the keyword hierarchy then the function is dependent on the
 	# level of the item we're on.
 	if ( $clientMode{$client}{search_type} eq SEARCH_TYPE_KEYWORD ) {
-		my $level = $item->{'level'};
+		my $mode = $client->param("modeName");
+		$_ = $mode;
+		my ($level) = /^.*:(.*):.*$/;
+		if (!($level =~ /^-?\d/)) {
+			$level = 1;
+		}
 		if ( $level == 1 ) {
 			$searchTracksFunction = \&searchTracksForArtist;
 		} elsif ( $level == 2 ) {
@@ -1202,11 +1251,6 @@ sub lazyOnPlay {
 		}
 	}
 
-	my $id = $item->{'value'};
-	$::d_plugins
-	  && Slim::Utils::Misc::msg(
-"LazySearch2: PLAY/ADD/INSERT pressed on '$clientMode{$client}{search_type}' search results (id $id), addMode=$addMode\n"
-	  );
 	my ( $line1, $line2, $msg, $cmd );
 
 	if ( $addMode == 1 ) {
@@ -1227,10 +1271,10 @@ sub lazyOnPlay {
 		$line1 = $client->doubleString($msg);
 	} else {
 		$line1 = $client->string($msg);
-		if ( $id != RESULT_ENTRY_ID_ALL ) {
-			$line2 = $item->{'name'};
+		if ( blessed($item) ) {
+			$line2 = $item->name;
 		} else {
-			my $strToken = $item->{'name'};
+			my $strToken = $clientMode{$client}{all_entry};
 			$strToken =~ s/(\{|\})//g;
 			$line2 = $client->string($strToken);
 		}
@@ -1247,7 +1291,14 @@ sub lazyOnPlay {
 	my @playItems = ();
 
 	# Handle 'ALL' entries specially
-	if ( $id != RESULT_ENTRY_ID_ALL ) {
+	if ( blessed($item) ) {
+		my $id = $item->id;
+
+		$::d_plugins
+		  && Slim::Utils::Misc::msg(
+	"LazySearch2: PLAY/ADD/INSERT pressed on '$clientMode{$client}{search_type}' search results (id $id), addMode=$addMode\n"
+		  );
+
 		@playItems = &$searchTracksFunction($id);
 	} else {
 
@@ -1259,10 +1310,10 @@ sub lazyOnPlay {
 		for $item (@$listRef) {
 
 			# Don't try to search for the 'all items' entry.
-			next if $item->{value} == -1;
+			next if !blessed($item);
 
 			# Find the tracks by this artist.
-			my @tracks = &$searchTracksFunction( $item->{value} );
+			my @tracks = &$searchTracksFunction( $item->id );
 
 			# Add these tracks to the list we're building up for the playlist.
 			push @playItems, @tracks;
@@ -1557,7 +1608,7 @@ sub performArtistSearch($$) {
 		'contributor',
 		$condition,
 		{
-			columns  => [ 'id', 'name' ],
+			columns  => [ 'id', 'name', 'moodlogic_mixable', 'musicmagic_mixable' ],
 			order_by => 'name'
 		}
 	  )->distinct;
@@ -1576,7 +1627,7 @@ sub performAlbumSearch($$) {
 	my $searchResults = Slim::Schema->resultset('Album')->search(
 		$condition,
 		{
-			columns  => [ 'id', 'title' ],
+			columns  => [ 'id', 'title', 'musicmagic_mixable' ],
 			order_by => 'title'
 		}
 	);
@@ -1595,7 +1646,7 @@ sub performGenreSearch($$) {
 	my $searchResults = Slim::Schema->resultset('Genre')->search(
 		$condition,
 		{
-			columns  => [ 'id', 'name' ],
+			columns  => [ 'id', 'name', 'moodlogic_mixable', 'musicmagic_mixable' ],
 			order_by => 'name'
 		}
 	);
@@ -1614,7 +1665,7 @@ sub performTrackSearch($$) {
 	my $searchResults = Slim::Schema->resultset('Track')->search(
 		$condition,
 		{
-			columns  => [ 'id', 'title' ],
+			columns  => [ 'id', 'title', 'url', 'moodlogic_mixable', 'musicmagic_mixable' ],
 			order_by => 'title'
 		}
 	);
@@ -1637,9 +1688,7 @@ sub performTimedItemSearch($) {
 	# This is true for artists, albums and tracks.
 	my @searchItems = ();
 	while ( my $searchItem = $searchResults->next ) {
-		my $text = $searchItem->get_column( $clientMode{$client}{text_col} );
-		my $id   = $searchItem->id;
-		push @searchItems, { name => $text, value => $id };
+		push @searchItems, $searchItem;
 	}
 
 	# If there are multiple results, show the 'all X' choice.
@@ -1649,7 +1698,7 @@ sub performTimedItemSearch($) {
 		push @searchItems,
 		  {
 			name  => $clientMode{$client}{all_entry},
-			value => RESULT_ENTRY_ID_ALL
+			value => RESULT_ENTRY_ID_ALL,
 		  };
 	}
 
@@ -1674,9 +1723,6 @@ sub performTimedKeywordSearch($$) {
 
 	# Make these items available to the results-listing mode.
 	$clientMode{$client}{search_items}             = $searchItems;
-	$clientMode{$client}{lazysearch_keyword_level} = 1;
-	delete $clientMode{$client}{lazysearch_keyword_contributor};
-	delete $clientMode{$client}{lazysearch_keyword_album};
 }
 
 # Actually perform the keyword search. This supports all levels of searching
@@ -1685,7 +1731,7 @@ sub doKeywordSearch($$$$$$) {
 	my $client                = shift;
 	my $searchText            = shift;
 	my $forceSearch           = shift;
-	my $level                 = shift;
+	my $level				  = shift;
 	my $contributorConstraint = shift;
 	my $albumConstraint       = shift;
 	my @items;
@@ -1725,7 +1771,6 @@ sub doKeywordSearch($$$$$$) {
 	return if ( @andClause == 0 );
 
 	# Perform the search, depending on the level.
-	my $textColumn;
 	my $results;
 	if ( $level == 1 ) {
 
@@ -1758,7 +1803,6 @@ sub doKeywordSearch($$$$$$) {
 			{ order_by => 'namesort', distinct => 1 } )
 		  ->search_related( 'contributorTracks', $condition )
 		  ->search_related('contributor')->distinct;
-		$textColumn = 'name';
 
 	} elsif ( $level == 2 ) {
 
@@ -1776,7 +1820,6 @@ sub doKeywordSearch($$$$$$) {
 				join     => 'contributorTracks'
 			}
 		)->search_related('album')->distinct;
-		$textColumn = 'title';
 
 	} elsif ( $level == 3 ) {
 		$results = Slim::Schema->resultset('Track')->search(
@@ -1793,27 +1836,16 @@ sub doKeywordSearch($$$$$$) {
 				order_by => 'disc,tracknum,titlesort'
 			}
 		)->distinct;
-		$textColumn = 'title';
 	}
 
 	# Build up the item array.
 	while ( my $item = $results->next ) {
-		my $name  = $item->get_column($textColumn);
-		my $value = $item->id;
-
-		# Special case for tracks - the title is formatted according to
-		# SlimServer's usual policy.
-		if ( $level == 3 ) {
-			my $url = $item->url;
-			$name = Slim::Music::Info::standardTitle( $client, $url );
+		# Choice input mode expects each item to have a value.
+		if (!exists($item->{'value'})) {
+			$item->{'value'} = $item->id;
 		}
 
-		push @items,
-		  {
-			name  => $name,
-			value => $value,
-			level => $level
-		  };
+		push @items, $item;
 	}
 
 	return \@items;
@@ -1851,13 +1883,33 @@ sub buildFind($) {
 # which function is actually needed).
 sub onPlayHandler {
 	my ( $client, $method ) = @_;
-	my $onAdd = $client->modeParam('onPlay');
+	my $onPlay = $client->modeParam('onPlay');
 
 	my $listIndex = $client->modeParam('listIndex');
 	my $items     = $client->modeParam('listRef');
 	my $item      = $items->[$listIndex];
 
-	&$onAdd( $client, $item, 0 );
+	&$onPlay( $client, $item, 0 );
+}
+
+# Create a mix (MusicMagic or MoodLogic) for the current item.
+sub onCreateMixHandler {
+	my ( $client, $method ) = @_;
+
+	my $listIndex = $client->modeParam('listIndex');
+	my $items     = $client->modeParam('listRef');
+	my $item      = $items->[$listIndex];
+
+	$::d_plugins && Slim::Utils::Misc::msg( 'LazySearch2: Creating mix for item ' . $item->id . "\n");
+
+	# Punt on to the implementation in BrowseDB... This is not very elegant
+	# as there shouldn't be any coupling between this and the BrowseDB mode.
+	# However, there isn't another interface easily available so this is
+	# the most straightforward way of avoiding having to duplicate all
+	# the mixing code in the BrowseDB mode. I've raise bug #4451 to try
+	# to address this in a future SlimServer version.
+	my $createMix = Slim::Buttons::BrowseDB::getFunctions()->{'create_mix'};
+	&$createMix($client);
 }
 
 # Call the play/insert/add handler (passing the parameter to differentiate
@@ -2444,14 +2496,22 @@ sub keywordOnRightHandler {
 
 		# Only allow right if we've performed a search.
 		if (   ( length( $clientMode{$client}{search_performed} ) > 0 )
-			&& ( $item->{value} != RESULT_ENTRY_ID_ALL ) )
+			&& ( blessed($item) ) )
 		{
-			my $name                  = $item->{name};
-			my $value                 = $item->{value};
-			my $level                 = $item->{level};
+			my $name                  = $item->name;
+			my $id                    = $item->id;
 			my $contributorConstraint =
 			  $clientMode{$client}{contributor_constraint};
 			my $albumConstraint = $clientMode{$client}{album_constraint};
+			my $hierarchy;
+
+			# The current keyword level is part of the mode name.
+			my $mode = $client->param("modeName");
+			$_ = $mode;
+			my ($level) = /^.*:(.*):.*$/;
+			if (!($level =~ /^-?\d/)) {
+				$level = 1;
+			}
 
 			# Cancel any pending timer.
 			cancelPendingSearch($client);
@@ -2462,13 +2522,17 @@ sub keywordOnRightHandler {
 				if ( $level == 1 ) {
 
 					# Current item provides contributor constraint.
-					$contributorConstraint = $value;
+					$contributorConstraint = $id;
 					$line1BrowseText       = '{LINE1_BROWSE_ALBUMS}';
+					$hierarchy             = 'album,track';
+#					$client->modeParam('search_type') = 'Album';
 				} elsif ( $level == 2 ) {
 
 					# Current item provides album constraint.
-					$albumConstraint = $value;
+					$albumConstraint = $id;
 					$line1BrowseText = '{LINE1_BROWSE_TRACKS}';
+					$hierarchy       = 'track';
+#					$client->modeParam('search_type') = 'Track';
 				}
 
 				# Remember these consraints in the mode.
@@ -2481,10 +2545,10 @@ sub keywordOnRightHandler {
 				my $forceSearch = $clientMode{$client}{search_forced};
 
 				# Do the next level of keyword search.
+				$level++;
 				my $items =
 				  doKeywordSearch( $client, $searchText, $forceSearch,
-					( $level + 1 ),
-					$contributorConstraint, $albumConstraint );
+					$level, $contributorConstraint, $albumConstraint );
 
 	  # Use INPUT.Choice to display the results for this selected keyword search
 	  # category.
@@ -2498,6 +2562,9 @@ sub keywordOnRightHandler {
 					# A reference to the list of items to display.
 					listRef => $items,
 
+					# The function to extract the title of each item.
+					name => \&lazyGetText,
+
 				 # A unique name for this mode that won't actually get displayed
 				 # anywhere.
 					modeName => "LAZYBROWSE_KEYWORD_MODE:$level:$searchText",
@@ -2505,6 +2572,10 @@ sub keywordOnRightHandler {
 		  # An anonymous function that is called every time the user presses the
 		  # RIGHT button.
 					onRight => \&keywordOnRightHandler,
+
+					onLeft => sub {
+						$::d_plugins && Slim::Utils::Misc::msg( "LazySearch2: LEFT\n");
+					},
 
 				 # A handler that manages play/add/insert (differentiated by the
 				 # last parameter).
@@ -2516,12 +2587,13 @@ sub keywordOnRightHandler {
 						lazyOnPlay( $client, $item, $addMode );
 					},
 
-					# These are all menu items and so have a right-arrow overlay
-					overlayRef => sub {
-						return [
-							undef, Slim::Display::Display::symbol('rightarrow')
-						];
-					},
+					# What overlays are shown on lines 1 and 2.
+					overlayRef => \&lazyOverlay,
+
+					# To keep BrowseDB's create_mix handler happy.
+					hierarchy => $hierarchy,
+					level => 0,
+					descend => 1,
 				);
 
 	  # Use our INPUT.Choice-derived mode to show the menu and let it do all the
@@ -2532,13 +2604,12 @@ sub keywordOnRightHandler {
 
 				# We're currently at the track level so push into track info
 				# browse mode (which needs the track URL to be looked-up).
-				my $track = Slim::Schema->rs('Track')->find($value);
 				$::d_plugins
 				  && Slim::Utils::Misc::msg(
-"LazySearch2: going into trackinfo mode for track URL=$track\n"
+"LazySearch2: going into trackinfo mode for track ID=$id url=" . $item->url . "\n"
 				  );
 				Slim::Buttons::Common::pushModeLeft( $client, 'trackinfo',
-					{ 'track' => $track } );
+					{ 'track' => $item } );
 			}
 		} else {
 			$client->bumpRight();
