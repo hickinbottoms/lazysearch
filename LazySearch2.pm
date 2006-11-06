@@ -3204,7 +3204,7 @@ LINE1_BROWSE_KEYWORDS_EMPTY
 LINE2_ENTER_MORE_KEYWORDS
 	DA	Indtast Keyword Søgning
 	DE	Stichwörter eingeben
-	EN	Enter Keyword Search
+	EN	Enter Keyword Search (Press DOWN for Help)
 	FI	Kirjoita hakusana
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD
