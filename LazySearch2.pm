@@ -134,6 +134,9 @@ $VERSION = 'trunk-6.5 $Id$';
 #	player_title_empty:	The line1 text when no search has yet been performed.
 #	enter_more_prompt:	The line2 prompt shown when there is insufficient
 #						search text entered to perform the search.
+#	further_help_prompt: Extra help available to the user by pressing DOWN
+#						 when viewing the prompt to enter characters for that
+#						 search mode.
 #	min_search_length:	The minimum number of characters that must be entered
 #						before the lazy search is performed.
 #	onright:			Function reference to a method that enters a browse
@@ -305,6 +308,7 @@ sub enterArtistSearch($$) {
 	$clientMode{$client}{player_title}       = '{LINE1_BROWSE_ARTISTS}';
 	$clientMode{$client}{player_title_empty} = '{LINE1_BROWSE_ARTISTS_EMPTY}';
 	$clientMode{$client}{enter_more_prompt}  = 'LINE2_ENTER_MORE_ARTISTS';
+	$clientMode{$client}{further_help_prompt} = 'LINE2_BRIEF_HELP';
 	$clientMode{$client}{min_search_length}  =
 	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-artist');
 	$clientMode{$client}{perform_search} = \&performArtistSearch;
@@ -326,6 +330,7 @@ sub enterAlbumSearch($$) {
 	$clientMode{$client}{player_title}       = '{LINE1_BROWSE_ALBUMS}';
 	$clientMode{$client}{player_title_empty} = '{LINE1_BROWSE_ALBUMS_EMPTY}';
 	$clientMode{$client}{enter_more_prompt}  = 'LINE2_ENTER_MORE_ALBUMS';
+	$clientMode{$client}{further_help_prompt} = 'LINE2_BRIEF_HELP';
 	$clientMode{$client}{min_search_length}  =
 	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-album');
 	$clientMode{$client}{perform_search} = \&performAlbumSearch;
@@ -347,6 +352,7 @@ sub enterGenreSearch($$) {
 	$clientMode{$client}{player_title}       = '{LINE1_BROWSE_GENRES}';
 	$clientMode{$client}{player_title_empty} = '{LINE1_BROWSE_GENRES_EMPTY}';
 	$clientMode{$client}{enter_more_prompt}  = 'LINE2_ENTER_MORE_GENRES';
+	$clientMode{$client}{further_help_prompt} = 'LINE2_BRIEF_HELP';
 	$clientMode{$client}{min_search_length}  =
 	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-genre');
 	$clientMode{$client}{perform_search} = \&performGenreSearch;
@@ -368,6 +374,7 @@ sub enterTrackSearch($$) {
 	$clientMode{$client}{player_title}       = '{LINE1_BROWSE_TRACKS}';
 	$clientMode{$client}{player_title_empty} = '{LINE1_BROWSE_TRACKS_EMPTY}';
 	$clientMode{$client}{enter_more_prompt}  = 'LINE2_ENTER_MORE_TRACKS';
+	$clientMode{$client}{further_help_prompt} = 'LINE2_BRIEF_HELP';
 	$clientMode{$client}{min_search_length}  =
 	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-track');
 	$clientMode{$client}{perform_search} = \&performTrackSearch;
@@ -389,6 +396,7 @@ sub enterKeywordSearch($$) {
 	$clientMode{$client}{player_title}       = '{LINE1_BROWSE_ARTISTS}';
 	$clientMode{$client}{player_title_empty} = '{LINE1_BROWSE_KEYWORDS_EMPTY}';
 	$clientMode{$client}{enter_more_prompt}  = 'LINE2_ENTER_MORE_KEYWORDS';
+	$clientMode{$client}{further_help_prompt} = 'LINE2_BRIEF_HELP';
 	$clientMode{$client}{min_search_length}  =
 	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-keyword');
 	$clientMode{$client}{onright}       = \&keywordOnRightHandler;
@@ -943,6 +951,10 @@ sub setSearchBrowseMode {
 	} else {
 		@$itemsRef =
 		  ( $client->string( $clientMode{$client}{enter_more_prompt} ) );
+
+		if (defined($clientMode{$client}{further_help_prompt})) {
+			push @$itemsRef, $client->string($clientMode{$client}{further_help_prompt});
+		}
 	}
 
 	# Parameters for our INPUT.Choice-derived mode.
@@ -1043,7 +1055,7 @@ sub lazyGetText {
 	my ( $client, $item ) = @_;
 
 	if ( length( $clientMode{$client}{search_performed} ) == 0 ) {
-		return $client->string( $clientMode{$client}{enter_more_prompt} );
+		return $item;
 	} else {
 		my $listRef = $client->modeParam('listRef');
 		if ( scalar(@$listRef) == 0 ) {
@@ -2778,7 +2790,7 @@ LINE1_BROWSE_GENRES_EMPTY
 LINE2_ENTER_MORE_ARTISTS
 	DA	Indtast kunstner
 	DE	Interpret eingeben
-	EN	Enter Artist Search
+	EN	Enter Artist Search (Press DOWN for Help)
 	ES	Ingresar Búsqueda de Artista
 	FI	Kirjoita esittäjän nimi
 	NL	Artiest zoekopdracht
@@ -2786,7 +2798,7 @@ LINE2_ENTER_MORE_ARTISTS
 LINE2_ENTER_MORE_ALBUMS
 	DA	Indtast album
 	DE	Album eingeben
-	EN	Enter Album Search
+	EN	Enter Album Search (Press DOWN for Help)
 	ES	Ingresar Búsqueda de Álbumes
 	FI	Kirjoita levyn nimi
 	NL	Album zoekopdracht
@@ -2794,7 +2806,7 @@ LINE2_ENTER_MORE_ALBUMS
 LINE2_ENTER_MORE_TRACKS
 	DA	Indtast sang
 	DE	Titel eingeben
-	EN	Enter Song Search
+	EN	Enter Song Search (Press DOWN for Help)
 	ES	Ingresar Búsqueda de Canciones
 	FI	Kirjoita kappaleen nimi
 	NL	Liedjes zoekopdracht
@@ -2802,10 +2814,13 @@ LINE2_ENTER_MORE_TRACKS
 LINE2_ENTER_MORE_GENRES
 	DA	Indtast genre
 	DE	Stilrichtung eingeben
-	EN	Enter Genre Search
+	EN	Enter Genre Search (Press DOWN for Help)
 	ES	Ingresar Búsqueda de Géneros
 	FI	Kirjoita lajin nimi
 	NL	Genre zoekopdracht
+
+LINE2_BRIEF_HELP
+	EN	Press the number key correponding to each letter you wish to enter - eg "786637" for "STONES". The search is performed automatically after entry.
 
 SETUP_GROUP_PLUGIN_LAZYSEARCH2
 	DA	Lazy Search
