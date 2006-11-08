@@ -2768,7 +2768,7 @@ LINE1_BROWSE_ARTISTS
 LINE1_BROWSE_ARTISTS_EMPTY
 	DA	Lazy Search efter kunstner
 	DE	Faulpelz-Suche nach Interpreten
-	EN	Lazy Search for Artists
+	EN	Lazy Search for Artists (press DOWN for help)
 	ES	Búsqueda Laxa de Artistas
 	FI	Laiska hae esittäjää
 	NL	Lazy Search naar Artiesten
@@ -2784,7 +2784,7 @@ LINE1_BROWSE_ALBUMS
 LINE1_BROWSE_ALBUMS_EMPTY
 	DA	Lazy Search efter Album
 	DE	Faulpelz-Suche nach Alben
-	EN	Lazy Search for Albums
+	EN	Lazy Search for Albums (press DOWN for help)
 	ES	Búsqueda Laxa de Álbumes
 	FI	Laiska hae levyä
 	NL	Lazy Search naar Albums
@@ -2800,7 +2800,7 @@ LINE1_BROWSE_TRACKS
 LINE1_BROWSE_TRACKS_EMPTY
 	DA	Lazy Search efter sange
 	DE	Faulpelz-Suche nach Titel
-	EN	Lazy Search for Songs
+	EN	Lazy Search for Songs (press DOWN for help)
 	ES	Búsqueda Laxa de Canciones
 	FI	Laiska hae kappaletta
 	NL	Lazy Search naar Liedjes
@@ -2816,7 +2816,7 @@ LINE1_BROWSE_GENRES
 LINE1_BROWSE_GENRES_EMPTY
 	DA	Lazy Search efter genre
 	DE	Faulpelz-Suche nach Stilrichtungen
-	EN	Lazy Search for Genres
+	EN	Lazy Search for Genres (press DOWN for help)
 	ES	Búsqueda Laxa de Géneros
 	FI	Laiska hae lajia
 	NL	Lazy Search naar Genres
@@ -2824,7 +2824,7 @@ LINE1_BROWSE_GENRES_EMPTY
 LINE2_ENTER_MORE_ARTISTS
 	DA	Indtast kunstner
 	DE	Interpret eingeben
-	EN	Enter Artist Search (Press DOWN for Help)
+	EN	Enter Artist Search
 	ES	Ingresar Búsqueda de Artista
 	FI	Kirjoita esittäjän nimi
 	NL	Artiest zoekopdracht
@@ -2832,7 +2832,7 @@ LINE2_ENTER_MORE_ARTISTS
 LINE2_ENTER_MORE_ALBUMS
 	DA	Indtast album
 	DE	Album eingeben
-	EN	Enter Album Search (Press DOWN for Help)
+	EN	Enter Album Search
 	ES	Ingresar Búsqueda de Álbumes
 	FI	Kirjoita levyn nimi
 	NL	Album zoekopdracht
@@ -2840,7 +2840,7 @@ LINE2_ENTER_MORE_ALBUMS
 LINE2_ENTER_MORE_TRACKS
 	DA	Indtast sang
 	DE	Titel eingeben
-	EN	Enter Song Search (Press DOWN for Help)
+	EN	Enter Song Search
 	ES	Ingresar Búsqueda de Canciones
 	FI	Kirjoita kappaleen nimi
 	NL	Liedjes zoekopdracht
@@ -2848,7 +2848,7 @@ LINE2_ENTER_MORE_TRACKS
 LINE2_ENTER_MORE_GENRES
 	DA	Indtast genre
 	DE	Stilrichtung eingeben
-	EN	Enter Genre Search (Press DOWN for Help)
+	EN	Enter Genre Search
 	ES	Ingresar Búsqueda de Géneros
 	FI	Kirjoita lajin nimi
 	NL	Genre zoekopdracht
@@ -3232,13 +3232,13 @@ KEYWORD_MENU_ITEM
 LINE1_BROWSE_KEYWORDS_EMPTY
 	DA	Lazy Search efter Keywords
 	DE	Faulpelz-Suche nach Stichwörtern
-	EN	Lazy Search by Keywords
+	EN	Lazy Search for Keywords (press DOWN for help)
 	FI	Laiska hae sanaa
 
 LINE2_ENTER_MORE_KEYWORDS
 	DA	Indtast Keyword Søgning
 	DE	Stichwörter eingeben
-	EN	Enter Keyword Search (Press DOWN for Help)
+	EN	Enter Keyword Search
 	FI	Kirjoita hakusana
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD
