@@ -837,6 +837,7 @@ sub setupGroup {
 				'1' => string('ENABLED'),
 				'0' => string('DISABLED')
 			},
+			'onChange' => \&scheduleForcedRelazify,
 		},
 		'plugin-lazysearch2-keyword-albums-enabled' => {
 			'validate' => \&Slim::Utils::Validate::trueFalse,
@@ -850,6 +851,7 @@ sub setupGroup {
 				'1' => string('ENABLED'),
 				'0' => string('DISABLED')
 			},
+			'onChange' => \&scheduleForcedRelazify,
 		},
 		'plugin-lazysearch2-keyword-tracks-enabled' => {
 			'validate' => \&Slim::Utils::Validate::trueFalse,
@@ -863,6 +865,7 @@ sub setupGroup {
 				'1' => string('ENABLED'),
 				'0' => string('DISABLED')
 			},
+			'onChange' => \&scheduleForcedRelazify,
 		},
 		'plugin-lazysearch2-keyword-return-albumartists' => {
 			'validate' => \&Slim::Utils::Validate::trueFalse,
@@ -993,6 +996,14 @@ sub setSearchBrowseMode {
 		level => $clientMode{$client}{level},
 		descend => 1,
 	);
+
+	# Make sure we pop back to the first result - most useful because of the
+	# second-row help that is included because it might confuse the user to
+	# see that when the re-enter the search mode (SlimServer will try to resume
+	# the mode on the same row that it was last on).
+	if (length($clientMode{$client}{search_performed}) == 0) {
+		$params{initialValue} = $itemsRef->[0];
+	}
 
 	# Use the new mode defined by INPUT.Choice and let it do all the hard work
 	# of displaying the list, moving it up and down, etc, etc. We have a silent
@@ -1486,8 +1497,6 @@ sub addPendingSearch($) {
 sub cancelPendingSearch($) {
 	my $client = shift;
 
-	my $timerName = PLUGIN_NAME . Slim::Player::Client::id($client);
-
 	# This seems tolerant of timers that don't exist, so no need to make sure
 	# we actually have one scheduled.
 	Slim::Utils::Timers::killOneTimer( $client, \&onFindTimer );
@@ -1609,7 +1618,7 @@ sub performArtistSearch($$) {
 
 	# We restrict the search to include artists related in the roles the
 	# user wants (set through SlimServer preferences).
-	my $roles = Slim::Schema->artistOnlyRoles;
+	my $roles = Slim::Schema->artistOnlyRoles('TRACKARTIST');
 	if ($roles) {
 		$condition->{'role'} = { 'in' => $roles };
 	}
@@ -2162,8 +2171,10 @@ sub scanDoneCallback($) {
 sub lazifyDatabase($) {
 	my $force = shift;
 
-	# Make sure the encode queue is empty.
+	# Make sure the encode queue is empty, and cancel any lazification
+	# currently underway.
 	%encodeQueues = ();
+	Slim::Utils::Scheduler::remove_task( \&encodeTask );
 
 	# Convert the albums table.
 	lazifyDatabaseType( 'Album', 'title', $force, 0, 0, 0 );
@@ -2305,6 +2316,12 @@ sub encodeTask {
 		return 0;
 	}
 
+	# Bail out if the encode queue is empty. That can happen if another
+	# lazification has been kicked off before this one has finished.
+	if ((scalar keys %encodeQueues) == 0) {
+		return 0;
+	}
+
 	# Get a single type hash from the encode queue. It doesn't matter on the
 	# order they come out of the hash.
 	my $type           = ( keys %encodeQueues )[0];
@@ -2327,7 +2344,7 @@ sub encodeTask {
 	# we will bail out if this takes more than a defined time slice.
 
 	# Find what contributor roles we consider as 'artists'. This takes account
-	# of the users' preferences.
+	# of the user's preferences.
 	my @roles = @{ Slim::Schema::artistOnlyRoles('TRACKARTIST') };
 
 	my $rowsDone  = 0;
@@ -2672,6 +2689,23 @@ sub keywordMatchText($$$) {
 	}
 
 	return $text;
+}
+
+# Called when one of the plugin preferences that affects the contents of the
+# database has changed - this schedules a forced relazify of the database.
+sub scheduleForcedRelazify {
+	$::d_plugins && Slim::Utils::Misc::msg( "LazySearch2: Scheduling database relazification because of preference changes.\n");
+
+	# Remove any existing scheduled callback.
+	Slim::Utils::Timers::killOneTimer( 1, \&lazifyDatabase );
+			
+	# Schedule a relazification to take place in a short time. We do this
+	# rather than kick it off immediately since this can be called several
+	# times in quick succession if a number of database-affecting preferences
+	# are changed. With this approach that causes a timer to be set and
+	# cleared a few times with the final 'set' actually causing the
+	# relazification to take place.
+	Slim::Utils::Timers::setTimer( 1, Time::HiRes::time() + LAZYSEARCH_INITIAL_LAZIFY_DELAY, \&lazifyDatabase);
 }
 
 # Standard plugin function to return our message catalogue. Many thanks to the
@@ -3136,10 +3170,10 @@ SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_HEAD
 	FI	Sana-haku
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_OPTIONS_DESC
-	DA	Keyword søgning giver mulighed for at søge mellem flere kategorier, og på den måde finde albums, kunstnere og sangtitler som matcher et eller flere <i>keywords</i> i deres titel. Dette kan være brugbart, f.eks. med klassisk musik samlinger som både kan have kunster, forfatter og udøver inkluderet i sangtitlen og albumkunstneren eller sangkunstneren idet funktionen giver mulighed for at søge ligegyldigt hvordan sangens tags er opbygget. Følgende indstillinger giver dig mulighed for at specificere hvilke kategorier der bliver inkluderet i keyword søgningen. Hvis alle kattegorier er slået fra, vil keyword søgnings muligheden ikke optræde i afspillerens Lazy Search menu.<br/><br/><b>Bemærk</b> at denne indstilling vil først slå igennem efter en komplet genscanning af databasen er foretaget.
-	DE	Die Stichwort-Suche ermöglicht die Suche über mehrere Kategorien gleichzeitig, d.h. man kann Alben, Interpreten und Lieder finden, die ein oder mehrere <i>Stichworte</i> enthalten. Dies ist z.B. bei klassischen Musiksammlungen hilfreich, bei denen Interpreten, Komponisten und Dirigenten in den Liedertiteln, im Album-Interpret oder im Lied-Interpret enthalten sind, weil du deine Musik suchen und finden kannst unabhängig davon, wie die Lieder mit "Tags" versehen sind. Mit den folgenden Optionen kannst du einstellen, welche Kategorien in die Stichwort-Suche einbezogen werden. Wenn keine Kategorien ausgewählt ist, erscheint die Anzeige der Stichwort-Suche nicht im Faulpelz-Menü am Player.<br/><br/><b>Hinweis</b>: Änderungen werden erst wirksam, wenn die Datenbank einmal komplett gelöscht und neu aufgebaut wurde.
-	EN	Keyword search allows searching across multiple categories, finding albums, artists and songs that match one or more <i>keywords</i> within their titles. This may be useful, for example, with classical music collections which can have artists, composers and performers included in the song titles as well as in the album artist and song artist because it lets you search and find your music no matter how the songs were tagged. The following settings allow you to specify which categories will be included in keyword searches. If all categories are disabled then the keyword search option won\'t appear in the player\'s Lazy Search menu at all.<br/><br/><b>Note</b> that this change will only take effect once a complete database clear and rescan has been performed.
-	FI	Sana-haulla voit etsiä samalla kertaa monesta eri kategoriasta. Voit yhdellä haulla etsiä <i>sanoja</i> levyn, esittäjän tai kappaleen nimestä. Tämä on käytännöllistä esimerkiksi klassisessa musiikissa: esittäjä tai säveltäjä voi olla merkitty joko kappaleen, levyn tai esittäjän kohdalle. Sana-haulla voit etsiä niistä kaikista. Seuraavilla asetuksilla voit määritellä mistä asioista haku tehdään. Jos kaikki ovat pois päältä, niin sana-hakua ei näytetä ollenkaan laiskan haun valikossa.<br/><br/><b>Huomaa,</b> että tämä asetus tulee voimaan vasta, kun musiikkikirjasto on ensin tyhjennetty ja luettu musiikkihakemistosta uudelleen.
+	DA	Keyword søgning giver mulighed for at søge mellem flere kategorier, og på den måde finde albums, kunstnere og sangtitler som matcher et eller flere <i>keywords</i> i deres titel. Dette kan være brugbart, f.eks. med klassisk musik samlinger som både kan have kunster, forfatter og udøver inkluderet i sangtitlen og albumkunstneren eller sangkunstneren idet funktionen giver mulighed for at søge ligegyldigt hvordan sangens tags er opbygget. Følgende indstillinger giver dig mulighed for at specificere hvilke kategorier der bliver inkluderet i keyword søgningen. Hvis alle kattegorier er slået fra, vil keyword søgnings muligheden ikke optræde i afspillerens Lazy Search menu.
+	DE	Die Stichwort-Suche ermöglicht die Suche über mehrere Kategorien gleichzeitig, d.h. man kann Alben, Interpreten und Lieder finden, die ein oder mehrere <i>Stichworte</i> enthalten. Dies ist z.B. bei klassischen Musiksammlungen hilfreich, bei denen Interpreten, Komponisten und Dirigenten in den Liedertiteln, im Album-Interpret oder im Lied-Interpret enthalten sind, weil du deine Musik suchen und finden kannst unabhängig davon, wie die Lieder mit "Tags" versehen sind. Mit den folgenden Optionen kannst du einstellen, welche Kategorien in die Stichwort-Suche einbezogen werden. Wenn keine Kategorien ausgewählt ist, erscheint die Anzeige der Stichwort-Suche nicht im Faulpelz-Menü am Player.
+	EN	Keyword search allows searching across multiple categories, finding albums, artists and songs that match one or more <i>keywords</i> within their titles. This may be useful, for example, with classical music collections which can have artists, composers and performers included in the song titles as well as in the album artist and song artist because it lets you search and find your music no matter how the songs were tagged. The following settings allow you to specify which categories will be included in keyword searches. If all categories are disabled then the keyword search option won\'t appear in the player\'s Lazy Search menu at all.
+	FI	Sana-haulla voit etsiä samalla kertaa monesta eri kategoriasta. Voit yhdellä haulla etsiä <i>sanoja</i> levyn, esittäjän tai kappaleen nimestä. Tämä on käytännöllistä esimerkiksi klassisessa musiikissa: esittäjä tai säveltäjä voi olla merkitty joko kappaleen, levyn tai esittäjän kohdalle. Sana-haulla voit etsiä niistä kaikista. Seuraavilla asetuksilla voit määritellä mistä asioista haku tehdään. Jos kaikki ovat pois päältä, niin sana-hakua ei näytetä ollenkaan laiskan haun valikossa.
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_CHOOSE
 	DA	Keyword søgning efter kunstner:
