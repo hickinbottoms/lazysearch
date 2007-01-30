@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<extension>
+	<id>a8cab4c9-904c-4f41-877f-276c29e6edea</id>
+	<name>LAZYSEARCH2</name>
+	<module>Slim::Plugin::LazySearch2::Plugin</module>
+	<version>@@VERSION@@</version>
+	<description>PLUGIN_LAZYSEARCH2_DESC</description>
+	<creator>Stuart Hickinbottom</creator>
+	<email>stuart@hickinbottom.demon.co.uk</email>
+
+	<defaultState>enabled</defaultState>
+        
+	<homepageURL>http://hickinbottom.demon.co.uk/lazysearch</homepageURL>
+	<optionsURL>plugins/LazySearch2/settings/basic.html</optionsURL>
+	<type>2</type><!-- type=extension -->
+
+	<targetApplication>
+		<id>SlimServer</id>
+		<minVersion>7.0a</minVersion>
+		<maxVersion>7.0+</maxVersion>
+	</targetApplication>
+</extension>

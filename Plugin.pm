@@ -92,7 +92,7 @@ use constant KEYWORD_SEPARATOR_CHARACTER => ',';
 
 # Export the version to the server (as a subversion keyword).
 use vars qw($VERSION);
-$VERSION = 'trunk-6.5 $Id$';
+$VERSION = 'trunk-7.0 v@@VERSION@@';
 
 # This hash-of-hashes contains state information on the current lazy search for
 # each player. The first hash index is the player (eg $clientMode{$client}),
@@ -210,14 +210,14 @@ sub setMode {
 	# not.
 	my @topMenuItems = (qw({ARTISTS} {ALBUMS} {GENRES} {SONGS}));
 	if ( keywordSearchEnabled() ) {
-		push @topMenuItems, '{KEYWORD_MENU_ITEM}';
+		push @topMenuItems, '{PLUGIN_LAZYSEARCH2_KEYWORD_MENU_ITEM}';
 	}
 
 	# Use INPUT.Choice to display the top-level search menu choices.
 	my %params = (
 
 		# The header (first line) to display whilst in this mode.
-		header => '{LINE1_BROWSE} {count}',
+		header => '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE} {count}',
 
 		# A reference to the list of items to display.
 		listRef => \@topMenuItems,
@@ -242,12 +242,12 @@ sub setMode {
 				if ( $client->linesPerScreen == 1 ) {
 					$client->showBriefly(
 						{
-							'line1' => $client->doubleString('SCAN_IN_PROGRESS')
+							'line1' => $client->doubleString('PLUGIN_LAZYSEARCH2_SCAN_IN_PROGRESS')
 						}
 					);
 				} else {
 					$client->showBriefly(
-						{ 'line1' => string('SCAN_IN_PROGRESS') } );
+						{ 'line1' => string('PLUGIN_LAZYSEARCH2_SCAN_IN_PROGRESS') } );
 				}
 			}
 		},
@@ -290,7 +290,7 @@ sub enterCategoryItem($$) {
 		enterGenreSearch( $client, $item );
 	} elsif ( $item eq '{SONGS}' ) {
 		enterTrackSearch( $client, $item );
-	} elsif ( $item eq '{KEYWORD_MENU_ITEM}' ) {
+	} elsif ( $item eq '{PLUGIN_LAZYSEARCH2_KEYWORD_MENU_ITEM}' ) {
 		enterKeywordSearch( $client, $item );
 	}
 }
@@ -305,10 +305,10 @@ sub enterArtistSearch($$) {
 	$clientMode{$client}{hierarchy}           = 'contributor,album,track';
 	$clientMode{$client}{level}               = 0;
 	$clientMode{$client}{all_entry}           = '{ALL_ARTISTS}';
-	$clientMode{$client}{player_title}        = '{LINE1_BROWSE_ARTISTS}';
-	$clientMode{$client}{player_title_empty}  = '{LINE1_BROWSE_ARTISTS_EMPTY}';
-	$clientMode{$client}{enter_more_prompt}   = 'LINE2_ENTER_MORE_ARTISTS';
-	$clientMode{$client}{further_help_prompt} = 'LINE2_BRIEF_HELP';
+	$clientMode{$client}{player_title}        = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ARTISTS}';
+	$clientMode{$client}{player_title_empty}  = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ARTISTS_EMPTY}';
+	$clientMode{$client}{enter_more_prompt}   = 'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_ARTISTS';
+	$clientMode{$client}{further_help_prompt} = 'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
 	$clientMode{$client}{min_search_length}   =
 	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-artist');
 	$clientMode{$client}{perform_search} = \&performArtistSearch;
@@ -327,10 +327,10 @@ sub enterAlbumSearch($$) {
 	$clientMode{$client}{hierarchy}           = 'album,track';
 	$clientMode{$client}{level}               = 0;
 	$clientMode{$client}{all_entry}           = '{ALL_ALBUMS}';
-	$clientMode{$client}{player_title}        = '{LINE1_BROWSE_ALBUMS}';
-	$clientMode{$client}{player_title_empty}  = '{LINE1_BROWSE_ALBUMS_EMPTY}';
-	$clientMode{$client}{enter_more_prompt}   = 'LINE2_ENTER_MORE_ALBUMS';
-	$clientMode{$client}{further_help_prompt} = 'LINE2_BRIEF_HELP';
+	$clientMode{$client}{player_title}        = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ALBUMS}';
+	$clientMode{$client}{player_title_empty}  = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ALBUMS_EMPTY}';
+	$clientMode{$client}{enter_more_prompt}   = 'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_ALBUMS';
+	$clientMode{$client}{further_help_prompt} = 'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
 	$clientMode{$client}{min_search_length}   =
 	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-album');
 	$clientMode{$client}{perform_search} = \&performAlbumSearch;
@@ -349,10 +349,10 @@ sub enterGenreSearch($$) {
 	$clientMode{$client}{hierarchy}           = 'genre,track';
 	$clientMode{$client}{level}               = 0;
 	$clientMode{$client}{all_entry}           = undef;
-	$clientMode{$client}{player_title}        = '{LINE1_BROWSE_GENRES}';
-	$clientMode{$client}{player_title_empty}  = '{LINE1_BROWSE_GENRES_EMPTY}';
-	$clientMode{$client}{enter_more_prompt}   = 'LINE2_ENTER_MORE_GENRES';
-	$clientMode{$client}{further_help_prompt} = 'LINE2_BRIEF_HELP';
+	$clientMode{$client}{player_title}        = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_GENRES}';
+	$clientMode{$client}{player_title_empty}  = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_GENRES_EMPTY}';
+	$clientMode{$client}{enter_more_prompt}   = 'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_GENRES';
+	$clientMode{$client}{further_help_prompt} = 'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
 	$clientMode{$client}{min_search_length}   =
 	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-genre');
 	$clientMode{$client}{perform_search} = \&performGenreSearch;
@@ -371,10 +371,10 @@ sub enterTrackSearch($$) {
 	$clientMode{$client}{hierarchy}           = 'track';
 	$clientMode{$client}{level}               = 0;
 	$clientMode{$client}{all_entry}           = '{ALL_SONGS}';
-	$clientMode{$client}{player_title}        = '{LINE1_BROWSE_TRACKS}';
-	$clientMode{$client}{player_title_empty}  = '{LINE1_BROWSE_TRACKS_EMPTY}';
-	$clientMode{$client}{enter_more_prompt}   = 'LINE2_ENTER_MORE_TRACKS';
-	$clientMode{$client}{further_help_prompt} = 'LINE2_BRIEF_HELP';
+	$clientMode{$client}{player_title}        = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_TRACKS}';
+	$clientMode{$client}{player_title_empty}  = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_TRACKS_EMPTY}';
+	$clientMode{$client}{enter_more_prompt}   = 'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_TRACKS';
+	$clientMode{$client}{further_help_prompt} = 'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
 	$clientMode{$client}{min_search_length}   =
 	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-track');
 	$clientMode{$client}{perform_search} = \&performTrackSearch;
@@ -393,10 +393,10 @@ sub enterKeywordSearch($$) {
 	$clientMode{$client}{all_entry}           = undef;
 	$clientMode{$client}{hierarchy}           = 'contributor,album,track';
 	$clientMode{$client}{level}               = 0;
-	$clientMode{$client}{player_title}        = '{LINE1_BROWSE_ARTISTS}';
-	$clientMode{$client}{player_title_empty}  = '{LINE1_BROWSE_KEYWORDS_EMPTY}';
-	$clientMode{$client}{enter_more_prompt}   = 'LINE2_ENTER_MORE_KEYWORDS';
-	$clientMode{$client}{further_help_prompt} = 'LINE2_BRIEF_HELP';
+	$clientMode{$client}{player_title}        = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ARTISTS}';
+	$clientMode{$client}{player_title_empty}  = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_KEYWORDS_EMPTY}';
+	$clientMode{$client}{enter_more_prompt}   = 'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_KEYWORDS';
+	$clientMode{$client}{further_help_prompt} = 'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
 	$clientMode{$client}{min_search_length}   =
 	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-keyword');
 	$clientMode{$client}{onright}       = \&keywordOnRightHandler;
@@ -729,8 +729,8 @@ sub setupGroup {
 			'plugin-lazysearch2-keyword-return-albumartists',
 			'plugin-lazysearch2-lazifynow'
 		],
-		GroupHead         => string('SETUP_GROUP_PLUGIN_LAZYSEARCH2'),
-		GroupDesc         => string('SETUP_GROUP_PLUGIN_LAZYSEARCH2_DESC'),
+		GroupHead         => string('SETUP_PLUGIN_LAZYSEARCH2_GROUP_LAZYSEARCH2'),
+		GroupDesc         => string('SETUP_PLUGIN_LAZYSEARCH2_GROUP_LAZYSEARCH2_DESC'),
 		GroupLine         => 1,
 		GroupSub          => 1,
 		Suppress_PrefSub  => 1,
@@ -1173,7 +1173,7 @@ sub lazyOnSearch {
 	} elsif ( $searchBehaviour == LAZYSEARCH_SEARCHBUTTON_TRACK ) {
 		$gotoCategory = '{SONGS}';
 	} elsif ( $searchBehaviour == LAZYSEARCH_SEARCHBUTTON_KEYWORD ) {
-		$gotoCategory = '{KEYWORD_MENU_ITEM}';
+		$gotoCategory = '{PLUGIN_LAZYSEARCH2_KEYWORD_MENU_ITEM}';
 	}
 
 	if ( defined $gotoCategory ) {
@@ -1451,7 +1451,7 @@ sub updateLazyEntry {
 	# feedback.
 	if ( $client->linesPerScreen == 1 ) {
 		my $line =
-		    $client->string('SHOWBRIEFLY_DISPLAY') . ' \''
+		    $client->string('PLUGIN_LAZYSEARCH2_SHOWBRIEFLY_DISPLAY') . ' \''
 		  . $clientMode{$client}{search_text} . '\'';
 		$client->showBriefly( { 'line1' => $line } );
 	}
@@ -1555,7 +1555,7 @@ sub onFindTimer() {
 		$client->showBriefly(
 			{
 				'line1' =>
-				  sprintf( $client->string('LINE1_SEARCHING'), $searchText )
+				  sprintf( $client->string('PLUGIN_LAZYSEARCH2_LINE1_SEARCHING'), $searchText )
 			}
 		);
 
@@ -2566,7 +2566,7 @@ sub keywordOnRightHandler {
 
 					# Current item provides contributor constraint.
 					$contributorConstraint = $id;
-					$line1BrowseText       = '{LINE1_BROWSE_ALBUMS}';
+					$line1BrowseText       = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ALBUMS}';
 					$hierarchy             = 'album,track';
 
 					#					$client->modeParam('search_type') = 'Album';
@@ -2574,7 +2574,7 @@ sub keywordOnRightHandler {
 
 					# Current item provides album constraint.
 					$albumConstraint = $id;
-					$line1BrowseText = '{LINE1_BROWSE_TRACKS}';
+					$line1BrowseText = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_TRACKS}';
 					$hierarchy       = 'track';
 
 					#					$client->modeParam('search_type') = 'Track';
@@ -2729,559 +2729,6 @@ sub scheduleForcedRelazify {
 	Slim::Utils::Timers::setTimer( 1,
 		Time::HiRes::time() + LAZYSEARCH_INITIAL_LAZIFY_DELAY,
 		\&lazifyDatabase );
-}
-
-# Standard plugin function to return our message catalogue. Many thanks to the
-# following for the translations:
-#	DA	Jacob Bang (jacob@phonden.dk)
-# 	DE	Dieter (dieterp@patente.de)
-# 	ES	Néstor (nspedalieri@gmail.com)
-#	FI	Kim B. Heino (b@bbbs.net)
-#	NL	JPdS (jpdesmidt@gmail.com)
-sub strings {
-	return '
-PLUGIN_LAZYSEARCH2
-	DA	Lazy Search Music
-	DE	Faulpelz-Suche
-	EN	Lazy Search Music
-	ES	Búsqueda Laxa de Música
-	FI	Laiska musiikin haku
-	NL	Lazy Search Music
-
-PLUGIN_LAZYSEARCH2_TOPMENU
-	DA	Lazy Search Music
-	DE	Faulpelz-Suche
-	EN	Lazy Search Music
-	ES	Búsqueda Laxa de Música
-	FI	Laiska musiikin haku
-	NL	Lazy Search Music
-
-LINE1_BROWSE
-	DA	Lazy Search
-	DE	Faulpelz-Suche
-	EN	Lazy Search
-	ES	Búsqueda Laxa
-	FI	Laiska haku
-	NL	Lazy Search
-
-LINE1_SEARCHING
-	DA	Søger efter \'%s\' ...
-	DE	Suchen nach \'%s\' ...
-	EN	Searching for \'%s\' ...
-	ES	Buscando \'%s\' ...
-	FI	Haen \'%s\'...
-	NL	Zoekend naar \'%s\' ...
-
-SHOWBRIEFLY_DISPLAY
-	DA	Lazy Search
-	DE	Faulpelz-Suche
-	EN	Lazy Search
-	ES	Búsqueda Laxa
-	FI	Laiska haku
-	NL	Lazy Search
-
-LINE1_BROWSE_ARTISTS
-	DA	Kunstner søgning
-	DE	Passende Interpreten
-	EN	Artists Matching
-	ES	Artistas Coincidentes
-	FI	Esittäjän haku
-	NL	Gevonden Artiesten
-
-LINE1_BROWSE_ARTISTS_EMPTY
-	DA	Lazy Search efter kunstner
-	DE	Faulpelz-Suche nach Interpreten
-	EN	Lazy Search for Artists (press DOWN for help)
-	ES	Búsqueda Laxa de Artistas
-	FI	Laiska hae esittäjää
-	NL	Lazy Search naar Artiesten
-
-LINE1_BROWSE_ALBUMS
-	DA	Matchende albums
-	DE	Passende Alben
-	EN	Albums Matching
-	ES	Álbumes Coincidentes
-	FI	Levyn nimen haku
-	NL	Gevonden Albums
-
-LINE1_BROWSE_ALBUMS_EMPTY
-	DA	Lazy Search efter Album
-	DE	Faulpelz-Suche nach Alben
-	EN	Lazy Search for Albums (press DOWN for help)
-	ES	Búsqueda Laxa de Álbumes
-	FI	Laiska hae levyä
-	NL	Lazy Search naar Albums
-
-LINE1_BROWSE_TRACKS
-	DA	Matchende sange
-	DE	Passende Titel
-	EN	Songs Matching
-	ES	Canciones Coincidentes
-	FI	Kappaleen haku
-	NL	Gevonden Liedjes
-
-LINE1_BROWSE_TRACKS_EMPTY
-	DA	Lazy Search efter sange
-	DE	Faulpelz-Suche nach Titel
-	EN	Lazy Search for Songs (press DOWN for help)
-	ES	Búsqueda Laxa de Canciones
-	FI	Laiska hae kappaletta
-	NL	Lazy Search naar Liedjes
-
-LINE1_BROWSE_GENRES
-	DA	Matchende genre
-	DE	Passende Stilrichtungen
-	EN	Genres Matching
-	ES	Géneros Coincidentes
-	FI	Lajin haku
-	NL	Gevonden Genres
-
-LINE1_BROWSE_GENRES_EMPTY
-	DA	Lazy Search efter genre
-	DE	Faulpelz-Suche nach Stilrichtungen
-	EN	Lazy Search for Genres (press DOWN for help)
-	ES	Búsqueda Laxa de Géneros
-	FI	Laiska hae lajia
-	NL	Lazy Search naar Genres
-
-LINE2_ENTER_MORE_ARTISTS
-	DA	Indtast kunstner
-	DE	Interpret eingeben
-	EN	Enter Artist Search
-	ES	Ingresar Búsqueda de Artista
-	FI	Kirjoita esittäjän nimi
-	NL	Artiest zoekopdracht
-
-LINE2_ENTER_MORE_ALBUMS
-	DA	Indtast album
-	DE	Album eingeben
-	EN	Enter Album Search
-	ES	Ingresar Búsqueda de Álbumes
-	FI	Kirjoita levyn nimi
-	NL	Album zoekopdracht
-
-LINE2_ENTER_MORE_TRACKS
-	DA	Indtast sang
-	DE	Titel eingeben
-	EN	Enter Song Search
-	ES	Ingresar Búsqueda de Canciones
-	FI	Kirjoita kappaleen nimi
-	NL	Liedjes zoekopdracht
-	
-LINE2_ENTER_MORE_GENRES
-	DA	Indtast genre
-	DE	Stilrichtung eingeben
-	EN	Enter Genre Search
-	ES	Ingresar Búsqueda de Géneros
-	FI	Kirjoita lajin nimi
-	NL	Genre zoekopdracht
-
-LINE2_BRIEF_HELP
-	EN	Press the number key correponding to each letter you wish to enter - eg "786637" for "STONES". The search is performed automatically after entry.
-
-SETUP_GROUP_PLUGIN_LAZYSEARCH2
-	DA	Lazy Search
-	DE	Faulpelz-Suche
-	EN	Lazy Search
-	ES	Búsqueda Laxa
-	FI	Laiska haku
-	NL	Lazy Search
-
-SETUP_GROUP_PLUGIN_LAZYSEARCH2_DESC
-	DA	Indstillingen nedenfor styrer ydelsen af lazy search afspillerens interface. Det er anbefalet at <i>Lazy Search Music</i> menuen fra dette plugin bliver tilføjet til en afspiller\'s home menu for at give nem adgang til dette plugin\'s funktioner. (Standard søgefunktionen vil også give adgang til denne funktionalitet).
-	DE	Mit den unten angebenen Einstellungen kann definiert werden, wie sich die Player-Oberfläche der Faulpelz-Suche verhält. Es wird empfohlen, den Plugin-Menüpunkt <i>Faulpelz-Suche</i> zum Hauptmenü des Players hinzuzufügen, um einen einfachen Zugriff auf die Funktionen dieses Plugins zu ermöglichen (die Standard <i>SEARCH</i>-Taste auf der Fernbedienung ermöglicht ebenfalls den Zugang zu dieser Funktionalität).
-	EN	The settings below control how the lazy searching player interface performs. It is suggested that the <i>Lazy Search Music</i> menu item from this plugin is added to a player\'s home menu to provide easy access to this plugin\'s functions (the standard remote <i>search</i> button will also access this functionality).
-	ES	La configuración debajo controla cómo actúa la interface de búsqueda laxa del reproductor. Se sugiere que el item de menú <i>Búsqueda Laxa de Música</i> para este plugin se añada al menú inicial del reproductor para brindar un acceso fácil a las funciones del plugin (el botón <i>search</i> estándar del control remoto tendrá también acceso a esta funcionalidad).
-	FI	Alla olevat asetukset vaikuttavat laiskan haun toimintaan. Kätevin tapa käyttää <i>laiskaa musiikin hakua</i> on lisätä se soittimen päävalikkoon soittimen asetuksista. Laiskaan hakuun pääsee myös painamalla kaukosäätimen <i>hae</i>-nappia.
-	NL	Met de instellingen hieronder kan aangegeven worden hoe de Lazy SEARCH spelerinterface zich gedraagd. Het wordt aanbevolen de <i>Lazy SEARCH Muziek</i> functie aan het hoofdmenu van de speler toe te voegen, om zo een eenvoudige toegang tot de Lazy SEARCH plugin te verkrijgen (de normale <i>ZOEKknop</i> zal tevens deze functionaliteit verkrijgen).
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST
-	DA	Minimum kunstnersøge længde
-	DE	Mindestlänge für die Suche nach Interpreten
-	EN	Minimum Artist Search Length
-	ES	Mínima Longitud para Búsqueda de Artista
-	FI	Esittäjä-haun lyhin pituus
-	NL	Minimum Artiest zoekopdracht lengte
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_DESC
-	DA	Søgning efter kunstner, album, genre eller sang med et kort antal tegn er ikke brugbart i praksis, da det vil resultere i et stort antal resultater. For at undgå at søgningen starter før et mere brugbart antal tegn bliver tastet, kan et minimum antal tegn specificeres her. Der er separate indstillinger for kunstner og album navn, genre og sangtitel. - Det anbefales at bruge 3 for kunstner, album og genre, og 4 for sangtitel.
-	DE	Die Suche nach Interpreten, Alben, Stilrichtungen oder Titel mit einer zu kleinen Zahl von Zeichen ist nicht besonders sinnvoll, da sie zu viele Ergebnisse liefert. Um zu verhindern, dass eine Suche gestartet wird, bevor eine sinnvolle Anzahl von Zeichen eingeben wurde, ist eine Mindestzahl von Zeichen vorgegeben. Es gibt unterschiedliche Einstellungen für Interpretennamen, Albumnamen und Liedertitel - sinnvolle Voreinstellungen sind 3 für Interpreten und Alben und 4 für Lieder.
-	EN	Searching for artists, albums, genres or songs with a short number of characters isn\'t very useful as it will return so many results. To prevent a search being performed until a more useful number of characters have been entered a mininum number of characters is specified here. There are separate settings for artists and album names, genres and song titles - a setting of 3 for artists, albums and genres, and 4 for songs, is a useful default.
-	ES	El buscar artistas, álbumes, géneros o canciones con muy pocos caracteres no es muy útil, ya que retornará demasiados resultados. Para evitar que se efectúe una búsqueda hasta que se hayan ingresado más caracteres, se especifica aquí un número mínimo de ellos. Existen configuraciones individuales para búsqueda por nombre de artistas, nombre de álbumes, y nombre de canciones - valores por defecto apropiados son 3 caracteres para artistas, álbumes y géneros, y 4 caracteres para canciones.
-	FI	Jos haet esittäjää, levyä, lajia tai kappaletta liian lyhyellä sanalla, niin saat usein liian monta vastausta. Alla voit määritellä montako kirjainta pitää kirjoittaa, että laiska haku aloittaa haun. Voit määritellä eri arvon eri hakutavoille. Oletusarvoisesti lyhin kirjainmäärä on esittäjälle, levylle ja lajille kolme, sekä kappaleen nimelle neljä.
-	NL	Zoekend naar artiest, albums, genres of liederen met te weinig tekens is niet heel nuttig omdat het veel resultaten zal opleveren. Om te voorkomen dat een zoektocht verricht wordt voordat een nuttiger aantal tekens is ingevoerd, wordt hier een mininum aantal tekens gespecificeerd. Er zijn afzonderlijke instellingen voor artiest en album naam, genres en lied titels - een instelling van 3 voor artiest, albums en genres en 4 voor liederen, is een nuttige standaardwaarde.
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_CHOOSE
-	DA	Minimum længde for kunstner søgning (2-9 tegn):
-	DE	Mindestlänge für die Suche nach Interpreten (2-9 Zeichen):
-	EN	Minimum length for artist search (2-9 characters):
-	ES	Mínima longitud para búsqueda de artista (2-9 caracteres):
-	FI	Esittäjä-haun lyhin kirjainmäärä (2-9 kirjainta):
-	NL	De minimumlengte voor Artiest zoekopdracht (2-9 tekens):
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_CHANGE
-	DA	Minimum længde for kunstner søgning ændret til:
-	DE	Mindestlänge für die Suche nach Interpreten wurde geändert in:
-	EN	Minimum length for artist search changed to:
-	ES	Mínima longitud para búsqueda de artista cambió a:
-	FI	Esittäjä-haun lyhin kirjainmäärä vaihdettiin arvoon:
-	NL	De minimumlengte voor Artiest zoekopdracht is gewijzigd in:
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ALBUM
-	DA	Minimum længde for album søgning
-	DE	Mindestlänge für die Suche nach Alben
-	EN	Minimum Album Search Length
-	ES	Mínima Longitud para Búsqueda de Álbum
-	FI	Levy-haun lyhin pituus
-	NL	Minimum Album zoekopdracht lengte
-	
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ALBUM_CHOOSE
-	DA	Minimum længde for album søgning (2-9 tegn):
-	DE	Mindestlänge für die Suche nach Alben (2-9 Zeichen):
-	EN	Minimum length for album search (2-9 characters):
-	ES	Mínima longitud para búsqueda de álbum (2-9 caracteres):
-	FI	Levy-haun lyhin kirjainmäärä (2-9 kirjainta):
-	NL	De minimumlengte voor Album zoekopdracht (2-9 tekens):
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ALBUM_CHANGE
-	DA	Minimum længde for album søgning rettet til:
-	DE	Mindestlänge für die Suche nach Alben wurde geändert in:
-	EN	Minimum length for album search changed to:
-	ES	Mínima longitud para búsqueda de álbum cambió a:
-	FI	Lyvy-haun lyhin kirjainmäärä vaihdettiin arvoon:
-	NL	De minimumlengte voor Album zoekopdracht is gewijzigd in:
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK
-	DA	Minimum længde for sang søgning
-	DE	Mindestlänge für die Suche nach Titel
-	EN	Minimum Song Search Length
-	ES	Mínima Longitud para Búsqueda de Canción
-	FI	Kappale-haun lyhin pituus
-	NL	Minimum Liedjes zoekopdracht lengte
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK_CHOOSE
-	DA	Minimum længde for sang søgning (2-9 tegn):
-	DE	Mindestlänge für die Suche nach Titel (2-9 Zeichen):
-	EN	Minimum length for song search (2-9 characters):
-	ES	Mínima longitud para búsqueda de canción (2-9 caracteres):
-	FI	Kappale-haun lyhin kirjainmäärä (2-9 kirjainta):
-	NL	De minimumlengte voor Liedjes zoekopdracht (2-9 tekens):
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK_CHANGE
-	DA	Minimum længde for sang søgning rettet til:
-	DE	Mindestlänge für die Suche nach Titel wurde geändert in:
-	EN	Minimum length for song search changed to:
-	ES	Mínima longitud para búsqueda de canción cambió a:
-	FI	Kappale-haun lyhin kirjainmäärä vaihdettiin arvoon:
-	NL	De minimumlengte voor Liedjes zoekopdracht is gewijzigd in:
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE
-	DA	Minimum længde for sang søgning
-	DE	Mindestlänge für die Suche nach Stilrichtungen
-	EN	Minimum Genre Search Length
-	ES	Mínima Longitud para Búsqueda de Género
-	FI	Laji-haun lyhin pituus
-	NL	Minimum Genre zoekopdracht lengte
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE_CHOOSE
-	DA	Minimum længde for genre søgning (2-9 tegn):
-	DE	Mindestlänge für die Suche nach Stilrichtungen (2-9 Zeichen):
-	EN	Minimum length for genre search (2-9 characters):
-	ES	Mínima longitud para búsqueda de género (2-9 caracteres):
-	FI	Laji-haun lyhin kirjainmäärä (2-9 kirjainta):
-	NL	De minimumlengte voor Genre zoektocht (2-9 tekens):
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE_CHANGE
-	DA	Minimum længde for genre søgning rettet til:
-	DE	Mindestlänge für die Suche nach Stilrichtungen wurde geändert in:
-	EN	Minimum length for genre search changed to:
-	ES	Mínima longitud para búsqueda de género cambió a:
-	FI	Laji-haun lyhin kirjainmäärä vaihdettiin arvoon:
-	NL	De minimumlengte voor Genre zoektocht is gewijzigd in:
-
-SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES
-	DA	VENSTRE-knap opførsel
-	DE	Verhalten der LINKS-Taste
-	EN	LEFT Button Behaviour
-	ES	Comportamiento del Botón IZQUIERDA
-	FI	VASEN-napin toiminta
-	NL	LINKERknop Gedrag
-
-SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_DESC
-	DA	Du kan vælge hvordan VESTRE-knappen på fjernbetjæningen opfører sig når man trykker en søgetekst. VESTRE kan enten slette det sidst tastet tegn (for at rette en fejl), eller forlade søgeningen.
-	DE	Man kann einstellen, wie sich die LINKS-Taste auf der Fernbedienung bei der Eingabe von Suchtext verhält. Mit der LINKS-Taste kann entweder das zuletzt eingegeben Zeichen gelöscht werden (z.B. um einen Fehler zu korrigieren) oder der Suchmodus beendet werden.
-	EN	You can choose how the LEFT button on the remote control behaves when entering search text. LEFT can either delete the last character entered (eg to correct a mistake), or can exit the search mode altogether.
-	ES	Se puede elegir como se comportará el boton IZQUIERDA del control remoto cuando se ingresa texto. IZQUIERDA puede o bien borrar el último caracter ingresado (por ej, para corregir un error), o bien puede abandonar el modo búsqueda.
-	FI	Voit valita miten kaukosäätimen VASEN-nappi toimii kun kirjoitat hakua. VASEN voi olla joko viimeisen kirjaimen pyyhintä (esim. virheen korjaus), tai se voi poistua kokonaan hausta.
-	NL	U kan kiezen hoe de LINKERknop op de afstandsbediening zich gedraagt tijdens het invoeren van een zoektekst. LINKERknop kan het laatst ingevoerde teken (om een fout te verbeteren) schrappen, of kan de zoek modus te verlaten.
-
-SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_CHOOSE
-	DA	Ved tryk på VENSTRE under søgning:
-	DE	Drücken der LINKS-Taste während einer Suche:
-	EN	Pressing LEFT while entering a search:
-	ES	Presionando IZQUIERDA mientras se ingresa una búsqueda:
-	FI	VASEN-napin toiminta hakua kirjoitettaessa:
-	NL	LINKERknop gebruikt in zoekmode:
-
-SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_CHANGE
-	DA	Tyk VENSTRE for at:
-	DE	Drücken der LINKS-Taste wurde geändert in:
-	EN	Pressing LEFT changed to:
-	ES	Presionando IZQUIERDA cambió a:
-	FI	VASEN-napin toiminta muutettu arvoon:
-	NL	LINKERknop gewijzigd in:
-
-SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_0
-	DA	Forlade søgning
-	DE	Beendet den Suchmodus
-	EN	Exits the search mode
-	ES	Abandona el modo búsqueda
-	FI	Poistu hausta
-	NL	Verlaat de zoekmode
-
-SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_1
-	DA	Slette det sidst tastede tegn
-	DE	Löscht das zuletzt eingegebene Zeichen
-	EN	Deletes the last character entered
-	ES	Borra los últimos caracteres ingresados
-	FI	Poista viimeinen kirjain
-	NL	Verwijder het laatst ingevoerde karakter
-
-SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD
-	DE	Stichwort-Suche und Album-Interpret
-	EN	Keyword searching and artists behaviour
-	FI	Sana-haku ja esittäjä
-
-SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_DESC
-	DE	Je nachdem, wie man seine Alben mit "tags" versieht, kann es erwünscht oder unerwünscht sein, dass Album-Interpreten (der Inhalt des ALBUMARTIST tags) in der Liste der Interpreten, die zu einer Stichwort-Suche passen, angezeigt werden. Wenn man z.B. bei Samplern den Album-Interpreten auf "Various Artist" setzt, dann erwartet man diesen Wert nicht als Ergebnis einer Stichwort-Suche, da man an dem individuellen Interpreten des Liedes interessiert ist. Album-Interpreten nicht anzuzeigen ist die Voreinstellung.
-	EN	Depending on how you tag your albums you may or may not want your album artists (the ALBUMARTIST tag) to be returned in the list of artists matching a keyword search. For example, if you set the album artist to "Various Artists" for your compilations then you won\'t expect that to be returned in keyword searches because it\'s the individual song artists that you\'re interested in. Not returning album artists is the default behaviour.
-	FI	Riippuen siitä miten olet merkinnyt levysi, niin saatat haluta, että levyn esittäjä (ALBUMARTIST-merkintä) sisällytetään esittäjälistaan sana-haussa. Esimerkiksi, jos määrittelet kokoelmalevyn esittäjäksi "Various Artist", niin et luultavasti halua sisällyttää sitä esittäjälistaan, koska haluat löytää yksittäisen kappaleen esittäjän. Oletusarvo on pois päältä.
-
-SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHOOSE
-	DE	Album-Interpreten im Ergebnis der Stichwort-Suche anzeigen:
-	EN	Album artists included in keyword search results:
-	FI	Levyn esittäjän sisällyttäminen sana-hakuun:
-
-SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHANGE
-	DE	Album-Interpreten im Ergebnis der Stichwort-Suche einschließen wurde geändert in:
-	EN	Album artists returned in keyword searches changed to:
-	FI	Levyn esittäjän sisällyttäminen sana-hakuun vaihdettu arvoon:
-
-SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON
-	DA	SEARCH-knap opførsel
-	DE	Verhalten der SEARCH-Taste
-	EN	SEARCH Button Behaviour
-	ES	Comportamiento del Botón SEARCH
-	FI	HAKU-napin toiminta
-	NL	ZOEKknop Gedrag
-
-SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_DESC
-	DE	Mit dieser Einstellung kann man die SEARCH-Taste auf der Squeezebox/Transporter-Fernbedienung mit der Funktionalität der <i>Faulpelz-Suche</i> anstelle der Funktionalität der originalen <i>Suche</i> belegen. Mit weiteren Optionen kann man festlegen, dass mit der SEARCH-Taste unmittelbar ein gewählter Typ der Faulpelz-Suche ausgewählt wird. Dies spart Zeit, wenn man meistens diesen Typ verwenden möchte.
-	EN	This setting allows the SEARCH button on the Squeezebox/Transporter remote control to be remapped to the <i>lazy search music</i> function instead of the original <i>search music</i> function. Further options allow the SEARCH button to immediately enter a chosen type of lazy search, which saves time if that\'s the type of search you prefer to use most often.
-	FI	Tällä asetuksella voit muuttaa miten Squeezeboxin / Transporterin HAKU-nappi toimii. Painamalla sitä voit joko päästä <i>laiska musiikin haku</i>-valikkoon tai normaalin <i>haku</i>-valikkoon. Vaihtoehtona on myös, että HAKU-nappi aloittaa suoraan halutun laiskan haun tyylin, joka säästää aikaa, jos yleensä käytät juuri sitä hakutyyliä.
-	NL	Met deze instelling kan de ZOEKknop op de Squeezebox afstandsbediening gewijzigd worden door <i>de Lazy SEARCH muziek</i> functie in plaats van het originele <i>Zoek muziek</i> functie. Door deze instelling te activeren deze ZOEKknop wijzigind doorgevoerd worden zonder wijziging van de <i>Default.map</i> of <i>Custom.map</i>. Merk op dat de veranderingen in van deze instelling niet van kracht wordt totdat de plugin wordt herladen (b.v. door SlimServer opnieuw te starten).
-
-SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_CHOOSE
-	DA	Tryk på SEARCH knappen på Squeezebox/Transporter fjernbetjæningen:
-	DE	Drücken der SEARCH-Taste auf der Squeezebox/Transporter-Fernbedienung:
-	EN	Pressing SEARCH on the Squeezebox/Transporter remote control:
-	ES	Presionando SEARCH en el remoto de Squeezebox/Transporter:
-	FI	Squeezeboxin / Transporterin kaukosäätimen HAKU-nappin toiminta:
-	NL	ZOEKknop op de Squeezebox afstandsbediening:
-
-SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_CHANGE
-	DA	Tryk på SEARCH går til:
-	DE	Drücken der SEARCH-Taste wurde geändert in:
-	EN	Pressing SEARCH changed to:
-	ES	Presionando SEARCH cambió a:
-	FI	HAKU-napin toiminta muutettu arvoon:
-	NL	ZOEKknop gewijzigd in:
-
-SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_0
-	DA	Standard søgning
-	DE	Zeigt das Menü der Standardsuche an
-	EN	Accesses the standard search music menu
-	ES	Accede al menú de búsqueda musical estándar
-	FI	Normaali haku
-	NL	Geeft toegang tot het normale zoek muziek menu
-
-SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_1
-	DA	Lazy Search menuen.
-	DE	Zeigt das Menü der Faulpelz-Suche an
-	EN	Accesses the lazy search music menu
-	ES	Accede al menú de búsqueda musical laxa
-	FI	Laiska musiikin haku
-	NL	Geeft toegang tot het Lazy Search muziek menu
-
-SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_2
-	DE	Startet eine Faulpelz-Suche nach einem Interpret
-	EN	Begins an artist lazy search
-	FI	Aloittaa esittäjän laiskan haun
-
-SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_3
-	DE	Startet eine Faulpelz-Suche nach einem Album
-	EN	Begins an album lazy search
-	FI	Aloittaa levyn laiskan haun
-
-SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_4
-	DE	Startet eine Faulpelz-Suche nach einer Stilrichtung
-	EN	Begins a genre lazy search
-	FI	Aloittaa lajin laiskan haun
-
-SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_5
-	DE	Startet eine Faulpelz-Suche nach einem Lied
-	EN	Begins a song lazy search
-	FI	Aloittaa kappaleen laiskan haun
-
-SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_6
-	DE	Startet eine Faulpelz-Suche nach einem Stichwort
-	EN	Begins a keyword lazy search
-	FI	Aloittaa sanan laiskan haun
-
-SCAN_IN_PROGRESS
-	DA	Note: dit musik biblioteket bliver lige nu scannet
-	DE	Hinweis: Die Musikdatenbank wird gerade durchsucht
-	EN	Note: music library scan in progress
-	ES	Nota: se está recopilando la colección musical
-	FI	Huomautus: Musiikkikirjaston luominen on käynnissä
-	NL	Merk op: muziek bibliotheek wordt nu ingelezen
-
-SCAN_IN_PROGRESS_DBL
-	DA	Note: scanner
-	DE	Hinweis: Suche läuft
-	EN	Note: scanning
-	ES	Nota: recopilando
-	FI	Huomautus: etsin
-	NL	Merk op: Inlezen...
-
-SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW
-	DA	Gennemtving opbygningen af Lazy Seach indexet
-	DE	Indexerzeugung für die Faulpelz-Suche
-	EN	Force Lazy Search Index Build
-	ES	Forzar Creación de Índice para Búsqueda Laxa
-	FI	Käynnistä laiskan haun indeksointi
-	NL	Forceer de Lazy Search Indexering
-
-SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_DESC
-	DA	Dette plugin er lavet til at vedligeholde Lazy Search indexet når det er nødvendigt. Derfor er det ikke, under normale omstændigheder, nødvendigt at tivnge re-index igennem. Du kan dog, hvis du vil være sikker på at indexet er opbygget korrekt, trykke denne knap. Dette er primært en debug funktion.
-	DE	Das Plugin erzeugt den Index für die Faulpelz-Suche, wenn dies erforderlich ist. Normalerweise ist daher keine extra Pflege der Datenbank notwendig. Falls Sie sichergehen wollen, dass der Index der Faulpelz-Suche korrekt erzeugt wurde, können Sie die folgende Schaltfläche anklicken. Aber in Anbetracht dessen, dass dies nie erforderlich sein sollte, ist dies in erster Linie eine Hilfe für die Fehlersuche.
-	EN	The plugin is designed to build the lazy search index whenever required and so, under normal circumstances, no extra database maintenance is required. If you wish to ensure that the lazy search index has been correctly built you can press the following button, but given that it should never be necessary this is primarily a debugging aid.
-	ES	El plugin se ha diseñado para construir el índice de búsqueda laxa cuando sea que se requiera. Por lo tanto, en circunstancias normales, no se requiere mantenimiento extra de la base de datos. Si se quiere estar seguro que el índice de búsqueda laxa ha sido construido correctamente, se puede presionar el siguiente botón (aunque dado que nunca debería ser necesario reconstruirlo manualmente se lo incluye aquí simplemente como una ayuda para la depuración).
-	FI	Normaalisti laiska haku huomaa itse milloin sen pitää luoda hakuindeksi uudelleen. Jos haluat varmistaa, että laiskan haun hakuindeksi on varmasti ajan tasalla, niin voit tehdä sen painamalla alla olevaa nappia. Sitä ei normaalisti tarvitse tehdä koskaan, joten tämä on lähinnä tarkoitettu vian etsintään.
-	NL	De plugin is zo ontworpen dat de Lazy Search index, wanneer het noodzakelijk is aangemaakt wordt, onder normale omstandigheden, is er geen extra  onderhoud vereist. Indien u er zeker van wilt zijn dat de Lazy Search index correct is ingelezen, kan u de volgende knop gebruiken, maar gegeven dat, het zal nooit noodzakelijk deze knop te moeten gebruiken, het is hoofdzakelijk een debugging tool.
-
-SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_CHANGE
-	DA	Lazy Search indexet bliver du genopbygget
-	DE	Die Erzeugung des Index für die Faulpelz-Suche hat begonnen
-	EN	Lazy search index build has been started
-	ES	La creación del índice para búsqueda laxa ha comenzado
-	FI	Laiskan haun indeksointi on käynnistetty
-	NL	Lazy Search indexering is gestart
-
-SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_BUTTON
-	DA	Start opbygning af Lazy Search indexet
-	DE	Jetzt den Index für die Faulpelz-Suche erzeugen
-	EN	Build Lazy Search Index Now
-	ES	Crear Índice de Búsqueda Laxa Ahora
-	FI	Luo laiskan haun indeksi nyt
-	NL	Creëer de Lazy Search Index
-
-SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_HEAD
-	DA	Keyword søgning
-	DE	Stichwort-Suche
-	EN	Keyword Search
-	FI	Sana-haku
-
-SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_OPTIONS_DESC
-	DA	Keyword søgning giver mulighed for at søge mellem flere kategorier, og på den måde finde albums, kunstnere og sangtitler som matcher et eller flere <i>keywords</i> i deres titel. Dette kan være brugbart, f.eks. med klassisk musik samlinger som både kan have kunster, forfatter og udøver inkluderet i sangtitlen og albumkunstneren eller sangkunstneren idet funktionen giver mulighed for at søge ligegyldigt hvordan sangens tags er opbygget. Følgende indstillinger giver dig mulighed for at specificere hvilke kategorier der bliver inkluderet i keyword søgningen. Hvis alle kattegorier er slået fra, vil keyword søgnings muligheden ikke optræde i afspillerens Lazy Search menu.
-	DE	Die Stichwort-Suche ermöglicht die Suche über mehrere Kategorien gleichzeitig, d.h. man kann Alben, Interpreten und Lieder finden, die ein oder mehrere <i>Stichworte</i> enthalten. Dies ist z.B. bei klassischen Musiksammlungen hilfreich, bei denen Interpreten, Komponisten und Dirigenten in den Liedertiteln, im Album-Interpret oder im Lied-Interpret enthalten sind, weil du deine Musik suchen und finden kannst unabhängig davon, wie die Lieder mit "Tags" versehen sind. Mit den folgenden Optionen kannst du einstellen, welche Kategorien in die Stichwort-Suche einbezogen werden. Wenn keine Kategorien ausgewählt ist, erscheint die Anzeige der Stichwort-Suche nicht im Faulpelz-Menü am Player.
-	EN	Keyword search allows searching across multiple categories, finding albums, artists and songs that match one or more <i>keywords</i> within their titles. This may be useful, for example, with classical music collections which can have artists, composers and performers included in the song titles as well as in the album artist and song artist because it lets you search and find your music no matter how the songs were tagged. The following settings allow you to specify which categories will be included in keyword searches. If all categories are disabled then the keyword search option won\'t appear in the player\'s Lazy Search menu at all.
-	FI	Sana-haulla voit etsiä samalla kertaa monesta eri kategoriasta. Voit yhdellä haulla etsiä <i>sanoja</i> levyn, esittäjän tai kappaleen nimestä. Tämä on käytännöllistä esimerkiksi klassisessa musiikissa: esittäjä tai säveltäjä voi olla merkitty joko kappaleen, levyn tai esittäjän kohdalle. Sana-haulla voit etsiä niistä kaikista. Seuraavilla asetuksilla voit määritellä mistä asioista haku tehdään. Jos kaikki ovat pois päältä, niin sana-hakua ei näytetä ollenkaan laiskan haun valikossa.
-
-SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_CHOOSE
-	DA	Keyword søgning efter kunstner:
-	DE	Stichwort-Suche nach Interpreten:
-	EN	Keyword search for artists:
-	FI	Sana-hae esittäjää:
-
-SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_CHANGE
-	DA	Keyword søgning for kunstner rettet til:
-	DE	Stichwort-Suche nach Interpreten wurde geändert in:
-	EN	Keyword search for artists changed to:
-	FI	Sana-hae esittäjää muutettu arvoon:
-
-SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_HEAD
-	DA	Keyword søgning efter Album
-	DE	Stichwort-Suche nach Alben
-	EN	Keyword Search for Albums
-	FI	Sana-hae levyn nimeä
-
-SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_CHOOSE
-	DA	Keyword søgning efter album:
-	DE	Stichwort-Suche nach Alben:
-	EN	Keyword search for albums:
-	FI	Sana-hae levyn nimeä:
-
-SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_CHANGE
-	DA	Keyword søgning for album rettet til:
-	DE	Stichwort-Suche nach Alben wurde geändert in:
-	EN	Keyword search for albums changed to:
-	FI	Sana-hae levyn nimeä vaihdettu arvoon:
-
-SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_HEAD
-	DA	Keyword søgning efter sangtitel
-	DE	Stichwort-Suche nach Liedern
-	EN	Keyword Search for Songs
-	FI	Sana-hae kappaleen nimeä
-
-SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_CHOOSE
-	DA	Keyword søgning efter sangtitel:
-	DE	Stichwort-Suche nach Liedern:
-	EN	Keyword search for songs:
-	FI	Sana-hae kappaleen nimeä:
-
-SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_CHANGE
-	DA	Keyword søgning for sangtitel rettet til:
-	DE	Stichwort-Suche nach Liedern wurde geändert in:
-	EN	Keyword search for songs changed to:
-	FI	Sana-hae kappaleen nimeä muutettu arvoon:
-
-KEYWORD_MENU_ITEM
-	DA	Keywords
-	DE	Stichwörter
-	EN	Keywords
-	FI	Sanat
-
-LINE1_BROWSE_KEYWORDS_EMPTY
-	DA	Lazy Search efter Keywords
-	DE	Faulpelz-Suche nach Stichwörtern
-	EN	Lazy Search for Keywords (press DOWN for help)
-	FI	Laiska hae sanaa
-
-LINE2_ENTER_MORE_KEYWORDS
-	DA	Indtast Keyword Søgning
-	DE	Stichwörter eingeben
-	EN	Enter Keyword Search
-	FI	Kirjoita hakusana
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD
-	DA	Minimum længde for keyword søgning
-	DE	Mindestlänge für die Stichwort-Suche
-	EN	Minimum Keyword Search Length
-	FI	Sana-haun lyhin pituus
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD_CHOOSE
-	DA	Minimum længde for keyword søgning (2-9 tegn):
-	DE	Mindestlänge für die Stichwort-Suche (2-9 Zeichen):
-	EN	Minimum length for keyword search (2-9 characters):
-	FI	Sana-haun lyhin kirjainmäärä (2-9 kirjainta):
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD_CHANGE
-	DA	Minimum længde for keyword søgning rettet til:
-	DE	Mindestlänge für die Stichwort-Suche wurde geändert in:
-	EN	Minimum length for keyword search changed to:
-	FI	Sana-haun lyhin kirjainmäärä vaihdettu arvoon:
-';
 }
 
 1;
