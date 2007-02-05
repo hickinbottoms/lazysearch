@@ -24,13 +24,16 @@
 use strict;
 use warnings;
 
-package Plugins::LazySearch2;
+package Plugins::LazySearch2::Plugin;
+
+use base qw(Slim::Plugin::Base);
 
 use utf8;
 use Slim::Utils::Strings qw (string);
 use Slim::Utils::Misc;
 use Slim::Utils::Text;
 use Slim::Utils::Timers;
+use Slim::Utils::Log;
 use Time::HiRes;
 use Text::Unidecode;
 use Scalar::Util qw(blessed);
@@ -92,7 +95,16 @@ use constant KEYWORD_SEPARATOR_CHARACTER => ',';
 
 # Export the version to the server (as a subversion keyword).
 use vars qw($VERSION);
-$VERSION = 'trunk-7.0 v@@VERSION@@';
+$VERSION = 'v@@VERSION@@ (trunk-7.0)';
+
+# A logger we will use to write plugin-specific messages.
+#@@TODO@@ - change default level to INFO
+my $log = Slim::Utils::Log->addLogCategory({
+		'category' => 'plugin.lazysearch2',
+		'defaultLevel' => 'DEBUG',
+		'description' => 'PLUGIN_LAZYSEARCH2'
+	});
+
 
 # This hash-of-hashes contains state information on the current lazy search for
 # each player. The first hash index is the player (eg $clientMode{$client}),
@@ -194,6 +206,7 @@ my %numberScrollMap = (
 
 # Main mode of this plugin; offers the artist/album/genre/song browse options
 sub setMode {
+	my $class = shift;
 	my $client = shift;
 	my $method = shift || '';
 
@@ -236,9 +249,7 @@ sub setMode {
 
 			# If rescan is in progress then warn the user.
 			if ( $lazifyingDatabase || Slim::Music::Import->stillScanning() ) {
-				$::d_plugins
-				  && Slim::Utils::Misc::msg(
-					"LazySearch2: Entering search while scan in progress\n");
+				$log->info("Entering search while scan in progress");
 				if ( $client->linesPerScreen == 1 ) {
 					$client->showBriefly(
 						{
@@ -254,7 +265,8 @@ sub setMode {
 
 		# These are all menu items and so have a right-arrow overlay
 		overlayRef => sub {
-			return [ undef, Slim::Display::Display::symbol('rightarrow') ];
+			my $client = shift;
+			return [ undef, $client->symbols('rightarrow') ];
 		},
 	);
 
@@ -549,10 +561,14 @@ sub getDisplayName {
 # for database encoding and makes our customised mode that lets us grab and
 # process extra buttons.
 sub initPlugin() {
+
+	my $class = shift;
+
 	return if $initialised;    # don't need to do it twice
 
-	$::d_plugins
-	  && Slim::Utils::Misc::msg("LazySearch2: Initialising $VERSION\n");
+	$log->info("Initialising $VERSION");
+
+	$class->SUPER::initPlugin(@_);
 
 	# Remember we're now initialised. This prevents multiple-initialisation,
 	# which may otherwise cause trouble with duplicate hooks or modes.
@@ -564,14 +580,12 @@ sub initPlugin() {
 
 	# Subscribe so that we are notified when the database has been rescanned;
 	# we use this so that we can apply lazification.
-	Slim::Control::Request::subscribe( \&Plugins::LazySearch2::scanDoneCallback,
+	Slim::Control::Request::subscribe( \&Plugins::LazySearch2::Plugin::scanDoneCallback,
 		[ ['rescan'], ['done'] ] );
 
 	# Top-level menu mode. We register a custom INPUT.Choice mode so that
 	# we can detect when we're in it (for SEARCH button toggle).
-	$::d_plugins
-	  && Slim::Utils::Misc::msg(
-		"LazySearch2: Making custom INPUT.Choice-derived modes\n");
+	$log->debug("Making custom INPUT.Choice-derived modes");
 	Slim::Buttons::Common::addMode( LAZYSEARCH_TOP_MODE, undef, \&setMode );
 	Slim::Buttons::Common::addMode(
 		LAZYSEARCH_CATEGORY_MENU_MODE,
@@ -691,18 +705,17 @@ sub initPlugin() {
 		Time::HiRes::time() + LAZYSEARCH_INITIAL_LAZIFY_DELAY,
 		\&scanDoneCallback );
 
-	$::d_plugins
-	  && Slim::Utils::Misc::msg("LazySearch2: Initialisation completed\n");
+	$log->debug("Initialisation complete");
 }
 
 sub shutdownPlugin() {
 	return if !$initialised;    # don't need to do it twice
 
-	$::d_plugins && Slim::Utils::Misc::msg("LazySearch2: Shutting down\n");
+	$log->debug("Shutting down");
 
 	# Remove the subscription we'd previously registered
 	Slim::Control::Request::unsubscribe(
-		\&Plugins::LazySearch2::scanDoneCallback );
+		\&Plugins::LazySearch2::Plugin::scanDoneCallback );
 
 	# @@TODO@@
 	# Do we need to remove our top-level mode?
@@ -892,9 +905,7 @@ sub setupGroup {
 			  string('SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_BUTTON'),
 			'onChange' => sub {
 				if ( !$lazifyingDatabase ) {
-					$::d_plugins
-					  && Slim::Utils::Misc::msg(
-						"LazySearch2: Manual lazification requested\n");
+						$log->info("Manual lazification requested");
 
 					# Forcibly re-lazify the whole database.
 					lazifyDatabase(1);
@@ -1039,7 +1050,7 @@ sub lazyOverlay {
 
 		for my $import ( keys %{$Imports} ) {
 			if ( $import->can('mixable') && $import->mixable($item) ) {
-				$l1 = Slim::Display::Display::symbol('mixable');
+				$l1 = $client->symbols('mixable');
 			}
 		}
 	}
@@ -1055,9 +1066,9 @@ sub lazyOverlay {
 		if ( blessed($item)
 			&& ( $clientMode{$client}{search_type} eq 'Track' ) )
 		{
-			$l2 = Slim::Display::Display::symbol('notesymbol');
+			$l2 = $client->symbols('notesymbol');
 		} elsif ( blessed($item) ) {
-			$l2 = Slim::Display::Display::symbol('rightarrow');
+			$l2 = $client->symbols('rightarrow');
 		}
 	}
 
@@ -1136,6 +1147,8 @@ sub lazyOnSearch {
 	my $gotoLazy     = 0;
 	my $gotoCategory = undef;
 
+	$log->debug("SEARCH button intercepted");
+
 	my $searchBehaviour =
 	  Slim::Utils::Prefs::get('plugin-lazysearch2-hooksearchbutton');
 
@@ -1178,6 +1191,8 @@ sub lazyOnSearch {
 
 	if ( defined $gotoCategory ) {
 
+		$log->debug("Entering search category menu for '$gotoCategory'");
+
 		# This works by first entering the category menu, then immediately
 		# entering the appropriate search category. This is done so when the
 		# user presses LEFT he gets back to the category menu.
@@ -1186,10 +1201,13 @@ sub lazyOnSearch {
 
 	} else {
 		if ($gotoLazy) {
+			# Go to the top-level category menu for the plugin's search mode.
+			$log->debug("Entering top-level category menu");
 			enterCategoryMenu($client);
 		} else {
 
 			# Into the normal search menu.
+			$log->debug("Entering normal SEARCH menu");
 			Slim::Buttons::Home::jumpToMenu( $client, "SEARCH" );
 		}
 	}
@@ -1204,9 +1222,11 @@ sub enterCategoryMenu {
 	# menu to the lazy item prior to jumping in. It seems to work,
 	# but when existing the mode it doesn't exit to the lazy top
 	# level item
-	Slim::Buttons::Common::setMode( $client, 'home' );
-	Slim::Buttons::Home::jump( $client, LAZYSEARCH_HOME_MENUITEM );
-	Slim::Buttons::Common::pushMode( $client, LAZYSEARCH_TOP_MODE );
+#@@TODO@@ - uncomment
+#	Slim::Buttons::Common::setMode( $client, 'home' );
+#	Slim::Buttons::Home::jump( $client, LAZYSEARCH_HOME_MENUITEM );
+#	Slim::Buttons::Common::pushMode( $client, LAZYSEARCH_TOP_MODE );
+	setMode(undef, $client, 'push');
 }
 
 # Subroutine to perform the 'browse into' RIGHT button handler for lazy search
@@ -1322,18 +1342,12 @@ sub lazyOnPlay {
 	if ( blessed($item) ) {
 		my $id = $item->id;
 
-		$::d_plugins
-		  && Slim::Utils::Misc::msg(
-"LazySearch2: PLAY/ADD/INSERT pressed on '$clientMode{$client}{search_type}' search results (id $id), addMode=$addMode\n"
-		  );
+		$log->debug("PLAY/ADD/INSERT pressed on '$clientMode{$client}{search_type}' search results (id $id), addMode=$addMode");
 
 		@playItems = &$searchTracksFunction($id);
 	} else {
 
-		$::d_plugins
-		  && Slim::Utils::Misc::msg(
-			"LazySearch2: All for '$clientMode{$client}{search_type}' chosen\n"
-		  );
+		$log->debug("All for '$clientMode{$client}{search_type}' chosen");
 
 		for $item (@$listRef) {
 
@@ -1349,9 +1363,7 @@ sub lazyOnPlay {
 	}
 
 	# Now we've built the list of track items, play them.
-	$::d_plugins
-	  && Slim::Utils::Misc::msg(
-		"LazySearch2: About to '$cmd' " . scalar @playItems . " items\n" );
+	$log->debug("About to '$cmd' " . scalar @playItems . " items");
 	$client->execute( [ 'playlist', $cmd, 'listref', \@playItems ] );
 
 	# Not sure why, but we don't need to start the play
@@ -1635,7 +1647,7 @@ sub performArtistSearch($$) {
 		$condition,
 		{
 			columns =>
-			  [ 'id', 'name', 'moodlogic_mixable', 'musicmagic_mixable' ],
+			  [ 'id', 'name', 'musicmagic_mixable' ],
 			order_by => 'name'
 		}
 	  )->distinct;
@@ -1674,7 +1686,7 @@ sub performGenreSearch($$) {
 		$condition,
 		{
 			columns =>
-			  [ 'id', 'name', 'moodlogic_mixable', 'musicmagic_mixable' ],
+			  [ 'id', 'name', 'musicmagic_mixable' ],
 			order_by => 'name'
 		}
 	);
@@ -1695,7 +1707,7 @@ sub performTrackSearch($$) {
 		{
 			columns => [
 				'id',  'title',
-				'url', 'moodlogic_mixable',
+				'url',
 				'musicmagic_mixable'
 			],
 			order_by => 'title'
@@ -1933,9 +1945,7 @@ sub onCreateMixHandler {
 	my $items     = $client->modeParam('listRef');
 	my $item      = $items->[$listIndex];
 
-	$::d_plugins
-	  && Slim::Utils::Misc::msg(
-		'LazySearch2: Creating mix for item ' . $item->id . "\n" );
+	$log->debug('Creating mix for item ' . $item->id);
 
 	# Punt on to the implementation in BrowseDB... This is not very elegant
 	# as there shouldn't be any coupling between this and the BrowseDB mode.
@@ -2151,9 +2161,7 @@ sub checkDefaults {
 # off lazification of the database once it's been populated with all music
 # information.
 sub scanDoneCallback($) {
-	$::d_plugins
-	  && Slim::Utils::Misc::msg(
-		"LazySearch2: Received notification of end of rescan\n");
+	$log->debug("Received notification of end of rescan");
 
 	# Check the plugin version that was present when we last lazified - if it
 	# has changed then we're going to rebuild the database lazification in
@@ -2163,26 +2171,20 @@ sub scanDoneCallback($) {
 	my $pluginRevision = '$Revision$';
 
 	if ( $prefRevision ne $pluginRevision ) {
-		$::d_plugins
-		  && Slim::Utils::Misc::msg(
-"LazySearch2: Re-lazifying (plugin version changed from '$prefRevision' to '$pluginRevision'\n"
-		  );
+		$log->info("Re-lazifying (plugin version changed from '$prefRevision' to '$pluginRevision'");
 		$force = 1;
 		Slim::Utils::Prefs::set( 'plugin-lazysearch2-revision',
 			$pluginRevision );
 	} else {
-		$::d_plugins
-		  && Slim::Utils::Misc::msg(
-			"LazySearch2: Lazifying entries not already done\n");
+		$log->info("Lazifying database items not already done");
 	}
-
-	lazifyDatabase($force);
 }
 
 # This function is called when the music database scan has finished. It
 # identifies each artist, track and album that has not yet been encoded into
 # lazy form and schedules a SlimServer background task to encode them.
 sub lazifyDatabase($) {
+
 	my $force = shift;
 
 	# Make sure the encode queue is empty, and cancel any lazification
@@ -2205,16 +2207,11 @@ sub lazifyDatabase($) {
 	# If there are any items to encode then initialise a background task that
 	# will do that work in chunks.
 	if ( scalar keys %encodeQueues ) {
-		$::d_plugins
-		  && Slim::Utils::Misc::msg(
-			"LazySearch2: Scheduling backround lazification\n");
+		$log->debug("Scheduling backround lazification");
 		Slim::Utils::Scheduler::add_task( \&encodeTask );
 		$lazifyingDatabase = 1;
 	} else {
-		$::d_plugins
-		  && Slim::Utils::Misc::msg(
-"LazySearch2: No object types require lazification - no task scheduled\n"
-		  );
+		$log->debug("No object types require lazification - no task scheduled");
 	}
 }
 
@@ -2292,9 +2289,7 @@ sub lazifyDatabaseType {
 	);
 	my $rsCount = $rs->count;
 
-	$::d_plugins
-	  && Slim::Utils::Misc::msg(
-		"LazySearch2: Lazify type=$type, " . $rsCount . " items to lazify\n" );
+	$log->debug("Lazify type=$type, " . $rsCount . " items to lazify");
 
 	# Store the unlazified item IDs; later, we'll work on these in chunks from
 	# within a task.
@@ -2321,10 +2316,7 @@ sub encodeTask {
 	# As protection from two encodes going on simultaneously, if we detect that
 	# a scan is in progress we cancel the whole encode task.
 	if ( Slim::Music::Import->stillScanning() ) {
-		$::d_plugins
-		  && Slim::Utils::Misc::msg(
-"LazySearch2: Detected a rescan while database scan in progress - cancelling lazy encoding\n"
-		  );
+		$log->debug("Detected a rescan while database scan in progress - cancelling lazy encoding");
 		%encodeQueues = ();
 
 		return 0;
@@ -2348,11 +2340,10 @@ sub encodeTask {
 	my $keywordAlbum   = $typeHash{keyword_album};
 	my $keywordTrack   = $typeHash{keyword_track};
 
-	$::d_plugins
-	  && Slim::Utils::Misc::msg( 'LazySearch2: EncodeTask - '
+	$log->debug( 'EncodeTask - '
 		  . $remainingItems
 		  . " $type"
-		  . "s remaining\n" );
+		  . "s remaining" );
 
 	# Go through and encode each of the identified IDs. To maintain performance
 	# we will bail out if this takes more than a defined time slice.
@@ -2419,17 +2410,14 @@ sub encodeTask {
 	if ( $endTime != $startTime ) {
 		$speed = int( $rowsDone / ( $endTime - $startTime ) );
 	}
-	$::d_plugins
-	  && Slim::Utils::Misc::msg(
-		"LazySearch2: Lazifier running at $speed $type" . "s/sec\n" );
+	$log->debug("Lazifier running at $speed $type" . "s/sec" );
 
 	# If we've exhausted the ids for this type then remove this type from the
 	# hash. If there are any left, however, we'll leave those in for the task
 	# next time.
 	if ( !defined($obj) ) {
 		delete $encodeQueues{$type};
-		$::d_plugins
-		  && Slim::Utils::Misc::msg("LazySearch2: Exhaused IDs for $type\n");
+		$log->debug("Exhaused IDs for $type");
 	}
 
 	# Find if there there is more work to do, and if so request that this task
@@ -2438,8 +2426,7 @@ sub encodeTask {
 	if ( scalar keys %encodeQueues ) {
 		$rescheduleTask = 1;
 	} else {
-		$::d_plugins
-		  && Slim::Utils::Misc::msg("LazySearch2: Lazification completed\n");
+		$log->info("Database lazification completed");
 
 		$rescheduleTask = 0;
 
@@ -2619,8 +2606,7 @@ sub keywordOnRightHandler {
 					onRight => \&keywordOnRightHandler,
 
 					onLeft => sub {
-						$::d_plugins
-						  && Slim::Utils::Misc::msg("LazySearch2: LEFT\n");
+						  $log->debug("LEFT");
 					},
 
 				 # A handler that manages play/add/insert (differentiated by the
@@ -2650,11 +2636,8 @@ sub keywordOnRightHandler {
 
 				# We're currently at the track level so push into track info
 				# browse mode (which needs the track URL to be looked-up).
-				$::d_plugins
-				  && Slim::Utils::Misc::msg(
-"LazySearch2: going into trackinfo mode for track ID=$id url="
-					  . $item->url
-					  . "\n" );
+				$log->debug("going into trackinfo mode for track ID=$id url="
+					  . $item->url);
 				Slim::Buttons::Common::pushModeLeft( $client, 'trackinfo',
 					{ 'track' => $item } );
 			}
@@ -2712,10 +2695,7 @@ sub keywordMatchText($$$) {
 # Called when one of the plugin preferences that affects the contents of the
 # database has changed - this schedules a forced relazify of the database.
 sub scheduleForcedRelazify {
-	$::d_plugins
-	  && Slim::Utils::Misc::msg(
-"LazySearch2: Scheduling database relazification because of preference changes.\n"
-	  );
+	$log->info("Scheduling database relazification because of preference changes");
 
 	# Remove any existing scheduled callback.
 	Slim::Utils::Timers::killOneTimer( 1, \&lazifyDatabase );

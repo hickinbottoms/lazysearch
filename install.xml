@@ -2,8 +2,8 @@
 
 <extension>
 	<id>a8cab4c9-904c-4f41-877f-276c29e6edea</id>
-	<name>LAZYSEARCH2</name>
-	<module>Slim::Plugin::LazySearch2::Plugin</module>
+	<name>PLUGIN_LAZYSEARCH2</name>
+	<module>Plugins::LazySearch2::Plugin</module>
 	<version>@@VERSION@@</version>
 	<description>PLUGIN_LAZYSEARCH2_DESC</description>
 	<creator>Stuart Hickinbottom</creator>

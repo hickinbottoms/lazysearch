@@ -19,7 +19,7 @@ PLUGIN_LAZYSEARCH2
 	NL	Lazy Search Music
 
 PLUGIN_LAZYSEARCH2_DESC
-	EN	Perform searches more quickly and easily using the remote control
+	EN	Perform searches more quickly and easily using your player's remote control.
 
 PLUGIN_LAZYSEARCH2_TOPMENU
 	DA	Lazy Search Music
@@ -38,12 +38,12 @@ PLUGIN_LAZYSEARCH2_LINE1_BROWSE
 	NL	Lazy Search
 
 PLUGIN_LAZYSEARCH2_LINE1_SEARCHING
-	DA	Søger efter \'%s\' ...
-	DE	Suchen nach \'%s\' ...
-	EN	Searching for \'%s\' ...
-	ES	Buscando \'%s\' ...
-	FI	Haen \'%s\'...
-	NL	Zoekend naar \'%s\' ...
+	DA	Søger efter '%s' ...
+	DE	Suchen nach '%s' ...
+	EN	Searching for '%s' ...
+	ES	Buscando '%s' ...
+	FI	Haen '%s'...
+	NL	Zoekend naar '%s' ...
 
 PLUGIN_LAZYSEARCH2_SHOWBRIEFLY_DISPLAY
 	DA	Lazy Search
@@ -187,9 +187,9 @@ SETUP_PLUGIN_LAZYSEARCH2_GROUP_LAZYSEARCH2
 	NL	Lazy Search
 
 SETUP_PLUGIN_LAZYSEARCH2_GROUP_LAZYSEARCH2_DESC
-	DA	Indstillingen nedenfor styrer ydelsen af lazy search afspillerens interface. Det er anbefalet at <i>Lazy Search Music</i> menuen fra dette plugin bliver tilføjet til en afspiller\'s home menu for at give nem adgang til dette plugin\'s funktioner. (Standard søgefunktionen vil også give adgang til denne funktionalitet).
+	DA	Indstillingen nedenfor styrer ydelsen af lazy search afspillerens interface. Det er anbefalet at <i>Lazy Search Music</i> menuen fra dette plugin bliver tilføjet til en afspiller's home menu for at give nem adgang til dette plugin's funktioner. (Standard søgefunktionen vil også give adgang til denne funktionalitet).
 	DE	Mit den unten angebenen Einstellungen kann definiert werden, wie sich die Player-Oberfläche der Faulpelz-Suche verhält. Es wird empfohlen, den Plugin-Menüpunkt <i>Faulpelz-Suche</i> zum Hauptmenü des Players hinzuzufügen, um einen einfachen Zugriff auf die Funktionen dieses Plugins zu ermöglichen (die Standard <i>SEARCH</i>-Taste auf der Fernbedienung ermöglicht ebenfalls den Zugang zu dieser Funktionalität).
-	EN	The settings below control how the lazy searching player interface performs. It is suggested that the <i>Lazy Search Music</i> menu item from this plugin is added to a player\'s home menu to provide easy access to this plugin\'s functions (the standard remote <i>search</i> button will also access this functionality).
+	EN	The settings below control how the lazy searching player interface performs. It is suggested that the <i>Lazy Search Music</i> menu item from this plugin is added to a player's home menu to provide easy access to this plugin's functions (the standard remote <i>search</i> button will also access this functionality).
 	ES	La configuración debajo controla cómo actúa la interface de búsqueda laxa del reproductor. Se sugiere que el item de menú <i>Búsqueda Laxa de Música</i> para este plugin se añada al menú inicial del reproductor para brindar un acceso fácil a las funciones del plugin (el botón <i>search</i> estándar del control remoto tendrá también acceso a esta funcionalidad).
 	FI	Alla olevat asetukset vaikuttavat laiskan haun toimintaan. Kätevin tapa käyttää <i>laiskaa musiikin hakua</i> on lisätä se soittimen päävalikkoon soittimen asetuksista. Laiskaan hakuun pääsee myös painamalla kaukosäätimen <i>hae</i>-nappia.
 	NL	Met de instellingen hieronder kan aangegeven worden hoe de Lazy SEARCH spelerinterface zich gedraagd. Het wordt aanbevolen de <i>Lazy SEARCH Muziek</i> functie aan het hoofdmenu van de speler toe te voegen, om zo een eenvoudige toegang tot de Lazy SEARCH plugin te verkrijgen (de normale <i>ZOEKknop</i> zal tevens deze functionaliteit verkrijgen).
@@ -205,7 +205,7 @@ SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_DESC
 	DA	Søgning efter kunstner, album, genre eller sang med et kort antal tegn er ikke brugbart i praksis, da det vil resultere i et stort antal resultater. For at undgå at søgningen starter før et mere brugbart antal tegn bliver tastet, kan et minimum antal tegn specificeres her. Der er separate indstillinger for kunstner og album navn, genre og sangtitel. - Det anbefales at bruge 3 for kunstner, album og genre, og 4 for sangtitel.
 	DE	Die Suche nach Interpreten, Alben, Stilrichtungen oder Titel mit einer zu kleinen Zahl von Zeichen ist nicht besonders sinnvoll, da sie zu viele Ergebnisse liefert. Um zu verhindern, dass eine Suche gestartet wird, bevor eine sinnvolle Anzahl von Zeichen eingeben wurde, ist eine Mindestzahl von Zeichen vorgegeben. Es gibt unterschiedliche Einstellungen für Interpretennamen, Albumnamen und Liedertitel - sinnvolle Voreinstellungen sind 3 für Interpreten und Alben und 4 für Lieder.
-	EN	Searching for artists, albums, genres or songs with a short number of characters isn\'t very useful as it will return so many results. To prevent a search being performed until a more useful number of characters have been entered a mininum number of characters is specified here. There are separate settings for artists and album names, genres and song titles - a setting of 3 for artists, albums and genres, and 4 for songs, is a useful default.
+	EN	Searching for artists, albums, genres or songs with a short number of characters isn't very useful as it will return so many results. To prevent a search being performed until a more useful number of characters have been entered a mininum number of characters is specified here. There are separate settings for artists and album names, genres and song titles - a setting of 3 for artists, albums and genres, and 4 for songs, is a useful default.
 	ES	El buscar artistas, álbumes, géneros o canciones con muy pocos caracteres no es muy útil, ya que retornará demasiados resultados. Para evitar que se efectúe una búsqueda hasta que se hayan ingresado más caracteres, se especifica aquí un número mínimo de ellos. Existen configuraciones individuales para búsqueda por nombre de artistas, nombre de álbumes, y nombre de canciones - valores por defecto apropiados son 3 caracteres para artistas, álbumes y géneros, y 4 caracteres para canciones.
 	FI	Jos haet esittäjää, levyä, lajia tai kappaletta liian lyhyellä sanalla, niin saat usein liian monta vastausta. Alla voit määritellä montako kirjainta pitää kirjoittaa, että laiska haku aloittaa haun. Voit määritellä eri arvon eri hakutavoille. Oletusarvoisesti lyhin kirjainmäärä on esittäjälle, levylle ja lajille kolme, sekä kappaleen nimelle neljä.
 	NL	Zoekend naar artiest, albums, genres of liederen met te weinig tekens is niet heel nuttig omdat het veel resultaten zal opleveren. Om te voorkomen dat een zoektocht verricht wordt voordat een nuttiger aantal tekens is ingevoerd, wordt hier een mininum aantal tekens gespecificeerd. Er zijn afzonderlijke instellingen voor artiest en album naam, genres en lied titels - een instelling van 3 voor artiest, albums en genres en 4 voor liederen, is een nuttige standaardwaarde.
@@ -353,7 +353,7 @@ SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD
 
 SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_DESC
 	DE	Je nachdem, wie man seine Alben mit "tags" versieht, kann es erwünscht oder unerwünscht sein, dass Album-Interpreten (der Inhalt des ALBUMARTIST tags) in der Liste der Interpreten, die zu einer Stichwort-Suche passen, angezeigt werden. Wenn man z.B. bei Samplern den Album-Interpreten auf "Various Artist" setzt, dann erwartet man diesen Wert nicht als Ergebnis einer Stichwort-Suche, da man an dem individuellen Interpreten des Liedes interessiert ist. Album-Interpreten nicht anzuzeigen ist die Voreinstellung.
-	EN	Depending on how you tag your albums you may or may not want your album artists (the ALBUMARTIST tag) to be returned in the list of artists matching a keyword search. For example, if you set the album artist to "Various Artists" for your compilations then you won\'t expect that to be returned in keyword searches because it\'s the individual song artists that you\'re interested in. Not returning album artists is the default behaviour.
+	EN	Depending on how you tag your albums you may or may not want your album artists (the ALBUMARTIST tag) to be returned in the list of artists matching a keyword search. For example, if you set the album artist to "Various Artists" for your compilations then you won't expect that to be returned in keyword searches because it's the individual song artists that you're interested in. Not returning album artists is the default behaviour.
 	FI	Riippuen siitä miten olet merkinnyt levysi, niin saatat haluta, että levyn esittäjä (ALBUMARTIST-merkintä) sisällytetään esittäjälistaan sana-haussa. Esimerkiksi, jos määrittelet kokoelmalevyn esittäjäksi "Various Artist", niin et luultavasti halua sisällyttää sitä esittäjälistaan, koska haluat löytää yksittäisen kappaleen esittäjän. Oletusarvo on pois päältä.
 
 SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHOOSE
@@ -376,7 +376,7 @@ SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_DESC
 	DE	Mit dieser Einstellung kann man die SEARCH-Taste auf der Squeezebox/Transporter-Fernbedienung mit der Funktionalität der <i>Faulpelz-Suche</i> anstelle der Funktionalität der originalen <i>Suche</i> belegen. Mit weiteren Optionen kann man festlegen, dass mit der SEARCH-Taste unmittelbar ein gewählter Typ der Faulpelz-Suche ausgewählt wird. Dies spart Zeit, wenn man meistens diesen Typ verwenden möchte.
-	EN	This setting allows the SEARCH button on the Squeezebox/Transporter remote control to be remapped to the <i>lazy search music</i> function instead of the original <i>search music</i> function. Further options allow the SEARCH button to immediately enter a chosen type of lazy search, which saves time if that\'s the type of search you prefer to use most often.
+	EN	This setting allows the SEARCH button on the Squeezebox/Transporter remote control to be remapped to the <i>lazy search music</i> function instead of the original <i>search music</i> function. Further options allow the SEARCH button to immediately enter a chosen type of lazy search, which saves time if that's the type of search you prefer to use most often.
 	FI	Tällä asetuksella voit muuttaa miten Squeezeboxin / Transporterin HAKU-nappi toimii. Painamalla sitä voit joko päästä <i>laiska musiikin haku</i>-valikkoon tai normaalin <i>haku</i>-valikkoon. Vaihtoehtona on myös, että HAKU-nappi aloittaa suoraan halutun laiskan haun tyylin, joka säästää aikaa, jos yleensä käytät juuri sitä hakutyyliä.
 	NL	Met deze instelling kan de ZOEKknop op de Squeezebox afstandsbediening gewijzigd worden door <i>de Lazy SEARCH muziek</i> functie in plaats van het originele <i>Zoek muziek</i> functie. Door deze instelling te activeren deze ZOEKknop wijzigind doorgevoerd worden zonder wijziging van de <i>Default.map</i> of <i>Custom.map</i>. Merk op dat de veranderingen in van deze instelling niet van kracht wordt totdat de plugin wordt herladen (b.v. door SlimServer opnieuw te starten).
 
@@ -486,7 +486,7 @@ SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_HEAD
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_OPTIONS_DESC
 	DA	Keyword søgning giver mulighed for at søge mellem flere kategorier, og på den måde finde albums, kunstnere og sangtitler som matcher et eller flere <i>keywords</i> i deres titel. Dette kan være brugbart, f.eks. med klassisk musik samlinger som både kan have kunster, forfatter og udøver inkluderet i sangtitlen og albumkunstneren eller sangkunstneren idet funktionen giver mulighed for at søge ligegyldigt hvordan sangens tags er opbygget. Følgende indstillinger giver dig mulighed for at specificere hvilke kategorier der bliver inkluderet i keyword søgningen. Hvis alle kattegorier er slået fra, vil keyword søgnings muligheden ikke optræde i afspillerens Lazy Search menu.
 	DE	Die Stichwort-Suche ermöglicht die Suche über mehrere Kategorien gleichzeitig, d.h. man kann Alben, Interpreten und Lieder finden, die ein oder mehrere <i>Stichworte</i> enthalten. Dies ist z.B. bei klassischen Musiksammlungen hilfreich, bei denen Interpreten, Komponisten und Dirigenten in den Liedertiteln, im Album-Interpret oder im Lied-Interpret enthalten sind, weil du deine Musik suchen und finden kannst unabhängig davon, wie die Lieder mit "Tags" versehen sind. Mit den folgenden Optionen kannst du einstellen, welche Kategorien in die Stichwort-Suche einbezogen werden. Wenn keine Kategorien ausgewählt ist, erscheint die Anzeige der Stichwort-Suche nicht im Faulpelz-Menü am Player.
-	EN	Keyword search allows searching across multiple categories, finding albums, artists and songs that match one or more <i>keywords</i> within their titles. This may be useful, for example, with classical music collections which can have artists, composers and performers included in the song titles as well as in the album artist and song artist because it lets you search and find your music no matter how the songs were tagged. The following settings allow you to specify which categories will be included in keyword searches. If all categories are disabled then the keyword search option won\'t appear in the player\'s Lazy Search menu at all.
+	EN	Keyword search allows searching across multiple categories, finding albums, artists and songs that match one or more <i>keywords</i> within their titles. This may be useful, for example, with classical music collections which can have artists, composers and performers included in the song titles as well as in the album artist and song artist because it lets you search and find your music no matter how the songs were tagged. The following settings allow you to specify which categories will be included in keyword searches. If all categories are disabled then the keyword search option won't appear in the player's Lazy Search menu at all.
 	FI	Sana-haulla voit etsiä samalla kertaa monesta eri kategoriasta. Voit yhdellä haulla etsiä <i>sanoja</i> levyn, esittäjän tai kappaleen nimestä. Tämä on käytännöllistä esimerkiksi klassisessa musiikissa: esittäjä tai säveltäjä voi olla merkitty joko kappaleen, levyn tai esittäjän kohdalle. Sana-haulla voit etsiä niistä kaikista. Seuraavilla asetuksilla voit määritellä mistä asioista haku tehdään. Jos kaikki ovat pois päältä, niin sana-hakua ei näytetä ollenkaan laiskan haun valikossa.
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_CHOOSE
