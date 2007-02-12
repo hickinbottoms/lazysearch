@@ -94,7 +94,7 @@
 				</td>
 				<td>
 					<select name="hooksearchbutton" class="stdedit" name="hooksearchbutton" id="hooksearchbutton">
-						<option value="0" [% IF NOT prefs.hooksearchbutton == 0 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_0" | string %]</option>
+						<option value="0" [% IF prefs.hooksearchbutton == 0 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_0" | string %]</option>
 						<option value="1" [% IF prefs.hooksearchbutton == 1 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_1" | string %]</option>
 						<option value="2" [% IF prefs.hooksearchbutton == 2 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_2" | string %]</option>
 						<option value="3" [% IF prefs.hooksearchbutton == 3 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_3" | string %]</option>
