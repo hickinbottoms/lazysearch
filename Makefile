@@ -5,8 +5,9 @@
 # Stuart Hickinbottom 2006-2007
 
 VERSION=3.0b1
-PERLSOURCE=Plugin.pm
+PERLSOURCE=Plugin.pm Settings.pm
 SOURCE=$(PERLSOURCE) INSTALL strings.txt install.xml
+DIRSOURCE=HTML
 RELEASEDIR=releases
 STAGEDIR=stage
 SLIMDIR=/usr/local/slimserver7/server
@@ -17,6 +18,7 @@ DISTFILE=LazySearch2-7_0-r$(REVISION).zip
 DISTFILEDIR=$(RELEASEDIR)/$(DISTFILE)
 SVNDISTFILE=LazySearch2.zip
 LATESTLINK=$(RELEASEDIR)/LazySearch2-7_0-latest.zip
+PREFS=/etc/slimserver7.pref
 
 .SILENT:
 
@@ -32,6 +34,7 @@ make-stage:
 	for FILE in $(SOURCE); do \
 		sed "s/@@VERSION@@/$(VERSION)/" <"$$FILE" >"$(STAGEDIR)/$$FILE"; \
 	done
+	cp -R $(DIRSOURCE) $(STAGEDIR)
 	chmod -w $(STAGEDIR)/*
 
 # Regenerate tags.
@@ -49,23 +52,23 @@ pretty:
 # Install the plugin in SlimServer.
 install: make-stage
 	echo Installing plugin...
-	-[[ -d "$(PLUGINSDIR)/$(PLUGINDIR)" ]] && chmod -R +w "$(PLUGINSDIR)/$(PLUGINDIR)"
-	-[[ -d "$(PLUGINSDIR)/$(PLUGINDIR)" ]] && rm -r "$(PLUGINSDIR)/$(PLUGINDIR)"
-	mkdir "$(PLUGINSDIR)/$(PLUGINDIR)"
-	cp -r $(STAGEDIR)/* "$(PLUGINSDIR)/$(PLUGINDIR)"
-	chmod -R -w "$(PLUGINSDIR)/$(PLUGINDIR)"
+	-[[ -d "$(PLUGINSDIR)/$(PLUGINDIR)" ]] && sudo chmod -R +w "$(PLUGINSDIR)/$(PLUGINDIR)"
+	-[[ -d "$(PLUGINSDIR)/$(PLUGINDIR)" ]] && sudo rm -r "$(PLUGINSDIR)/$(PLUGINDIR)"
+	sudo mkdir "$(PLUGINSDIR)/$(PLUGINDIR)"
+	sudo cp -r $(STAGEDIR)/* "$(PLUGINSDIR)/$(PLUGINDIR)"
+	sudo chmod -R -w "$(PLUGINSDIR)/$(PLUGINDIR)"
 
 # Restart SlimServer, quite forcefully. This is obviously quite
 # Gentoo-specific.
 restart:
 	echo "Forcefully restarting SlimServer..."
-	/etc/init.d/slimserver7 stop
-	/etc/init.d/slimserver7 zap
-	sleep 5
-	>/var/log/slimserver7/server.log
-	>/var/log/slimserver7/scanner.log
-	>/var/log/slimserver7/perfmon.log
-	/etc/init.d/slimserver7 restart
+	sudo /etc/init.d/slimserver7 stop
+	sudo /etc/init.d/slimserver7 zap
+	sleep 2
+	sudo sh -c ">/var/log/slimserver7/server.log"
+	sudo sh -c ">/var/log/slimserver7/scanner.log"
+	sudo sh -c ">/var/log/slimserver7/perfmon.log"
+	sudo /etc/init.d/slimserver7 restart
 
 logtail:
 	echo "Following the end of the SlimServer log..."
@@ -82,3 +85,9 @@ release: $(DISTFILES)
 	ln -s "$(DISTFILE)" "$(LATESTLINK)"
 	rm $(DESTSTAGE)
 	cp $(DISTFILEDIR) $(SVNDISTFILE)
+
+# Utility target to clear lazification from the database without the bother
+# of having to do a full rescan.
+unlazify:
+	echo Unlazifying the database...
+	sh -c "mysql --user=`grep -i dbuser $(PREFS) | cut -d' ' -f2` --password=`grep -i dbpassword $(PREFS) | cut -d' ' -f2` `grep -i dbsource $(PREFS) | cut -d' ' -f2 | cut -d= -f2 | cut -d';' -f1` < unlazify.sql"

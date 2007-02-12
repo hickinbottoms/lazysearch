@@ -1,5 +1,9 @@
 <?xml version="1.0"?>
 
+<!-- Metadata file for LazySearch2 plugin -->
+<!-- Copyright © Stuart Hickinbottom 2004-2007 -->
+<!-- $Id$ -->
+
 <extension>
 	<id>a8cab4c9-904c-4f41-877f-276c29e6edea</id>
 	<name>PLUGIN_LAZYSEARCH2</name>
@@ -13,7 +17,7 @@
         
 	<homepageURL>http://hickinbottom.demon.co.uk/lazysearch</homepageURL>
 	<optionsURL>plugins/LazySearch2/settings/basic.html</optionsURL>
-	<type>2</type><!-- type=extension -->
+	<type>2</type>
 
 	<targetApplication>
 		<id>SlimServer</id>

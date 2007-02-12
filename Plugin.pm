@@ -1,5 +1,5 @@
 # LazySearch2 Plugin for SlimServer
-# Copyright © Stuart Hickinbottom 2004-2006
+# Copyright © Stuart Hickinbottom 2004-2007
 #
 # $Id$
 #
@@ -29,6 +29,7 @@ package Plugins::LazySearch2::Plugin;
 use base qw(Slim::Plugin::Base);
 
 use utf8;
+use Plugins::LazySearch2::Settings;
 use Slim::Utils::Strings qw (string);
 use Slim::Utils::Misc;
 use Slim::Utils::Text;
@@ -65,6 +66,7 @@ use constant LAZYSEARCH_SEARCHBUTTON_TRACK    => 5;
 use constant LAZYSEARCH_SEARCHBUTTON_KEYWORD  => 6;
 
 # Preference ranges and defaults.
+use constant LAZYSEARCH_SHOWHELP_DEFAULT          => 0;
 use constant LAZYSEARCH_MINLENGTH_MIN             => 2;
 use constant LAZYSEARCH_MINLENGTH_MAX             => 9;
 use constant LAZYSEARCH_MINLENGTH_ARTIST_DEFAULT  => 3;
@@ -322,7 +324,7 @@ sub enterArtistSearch($$) {
 	$clientMode{$client}{enter_more_prompt}   = 'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_ARTISTS';
 	$clientMode{$client}{further_help_prompt} = 'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
 	$clientMode{$client}{min_search_length}   =
-	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-artist');
+	  Slim::Utils::Prefs::get('plugin-LazySearch2-minlength_artist');
 	$clientMode{$client}{perform_search} = \&performArtistSearch;
 	$clientMode{$client}{onright}        = \&rightIntoArtist;
 	$clientMode{$client}{search_tracks}  = \&searchTracksForArtist;
@@ -344,7 +346,7 @@ sub enterAlbumSearch($$) {
 	$clientMode{$client}{enter_more_prompt}   = 'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_ALBUMS';
 	$clientMode{$client}{further_help_prompt} = 'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
 	$clientMode{$client}{min_search_length}   =
-	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-album');
+	  Slim::Utils::Prefs::get('plugin-LazySearch2-minlength_album');
 	$clientMode{$client}{perform_search} = \&performAlbumSearch;
 	$clientMode{$client}{onright}        = \&rightIntoAlbum;
 	$clientMode{$client}{search_tracks}  = \&searchTracksForAlbum;
@@ -366,7 +368,7 @@ sub enterGenreSearch($$) {
 	$clientMode{$client}{enter_more_prompt}   = 'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_GENRES';
 	$clientMode{$client}{further_help_prompt} = 'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
 	$clientMode{$client}{min_search_length}   =
-	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-genre');
+	  Slim::Utils::Prefs::get('plugin-LazySearch2-minlength_genre');
 	$clientMode{$client}{perform_search} = \&performGenreSearch;
 	$clientMode{$client}{onright}        = \&rightIntoGenre;
 	$clientMode{$client}{search_tracks}  = \&searchTracksForGenre;
@@ -388,7 +390,7 @@ sub enterTrackSearch($$) {
 	$clientMode{$client}{enter_more_prompt}   = 'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_TRACKS';
 	$clientMode{$client}{further_help_prompt} = 'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
 	$clientMode{$client}{min_search_length}   =
-	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-track');
+	  Slim::Utils::Prefs::get('plugin-LazySearch2-minlength_track');
 	$clientMode{$client}{perform_search} = \&performTrackSearch;
 	$clientMode{$client}{onright}        = \&rightIntoTrack;
 	$clientMode{$client}{search_tracks}  = \&searchTracksForTrack;
@@ -410,7 +412,7 @@ sub enterKeywordSearch($$) {
 	$clientMode{$client}{enter_more_prompt}   = 'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_KEYWORDS';
 	$clientMode{$client}{further_help_prompt} = 'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
 	$clientMode{$client}{min_search_length}   =
-	  Slim::Utils::Prefs::get('plugin-lazysearch2-minlength-keyword');
+	  Slim::Utils::Prefs::get('plugin-LazySearch2-minlength_keyword');
 	$clientMode{$client}{onright}       = \&keywordOnRightHandler;
 	$clientMode{$client}{search_tracks} = undef;
 	setSearchBrowseMode( $client, $item, 0 );
@@ -569,6 +571,9 @@ sub initPlugin() {
 	$log->info("Initialising $VERSION");
 
 	$class->SUPER::initPlugin(@_);
+
+	# Initialise settings.
+	Plugins::LazySearch2::Settings->new;
 
 	# Remember we're now initialised. This prevents multiple-initialisation,
 	# which may otherwise cause trouble with duplicate hooks or modes.
@@ -729,18 +734,18 @@ sub shutdownPlugin() {
 sub setupGroup {
 	my %setupGroup = (
 		PrefOrder => [
-			'plugin-lazysearch2-minlength-artist',
-			'plugin-lazysearch2-minlength-album',
-			'plugin-lazysearch2-minlength-genre',
-			'plugin-lazysearch2-minlength-track',
-			'plugin-lazysearch2-minlength-keyword',
-			'plugin-lazysearch2-leftdeletes',
-			'plugin-lazysearch2-hooksearchbutton',
-			'plugin-lazysearch2-keyword-artists-enabled',
-			'plugin-lazysearch2-keyword-albums-enabled',
-			'plugin-lazysearch2-keyword-tracks-enabled',
-			'plugin-lazysearch2-keyword-return-albumartists',
-			'plugin-lazysearch2-lazifynow'
+			'plugin-LazySearch2-minlength_artist',
+			'plugin-LazySearch2-minlength_album',
+			'plugin-LazySearch2-minlength_genre',
+			'plugin-LazySearch2-minlength_track',
+			'plugin-LazySearch2-minlength_keyword',
+			'plugin-LazySearch2-leftdeletes',
+			'plugin-LazySearch2-hooksearchbutton',
+			'plugin-LazySearch2-keyword_artists_enabled',
+			'plugin-LazySearch2-keyword_albums_enabled',
+			'plugin-LazySearch2-keyword_tracks_enabled',
+			'plugin-LazySearch2-keyword_return_albumartists',
+			'plugin-LazySearch2-lazifynow'
 		],
 		GroupHead         => string('SETUP_PLUGIN_LAZYSEARCH2_GROUP_LAZYSEARCH2'),
 		GroupDesc         => string('SETUP_PLUGIN_LAZYSEARCH2_GROUP_LAZYSEARCH2_DESC'),
@@ -751,7 +756,7 @@ sub setupGroup {
 	);
 
 	my %setupPrefs = (
-		'plugin-lazysearch2-minlength-artist' => {
+		'plugin-LazySearch2-minlength_artist' => {
 			'validate'     => \&Slim::Utils::Validate::isInt,
 			'validateArgs' =>
 			  [ LAZYSEARCH_MINLENGTH_MIN, LAZYSEARCH_MINLENGTH_MAX ],
@@ -763,7 +768,7 @@ sub setupGroup {
 			'changeIntro' =>
 			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_CHANGE'),
 		},
-		'plugin-lazysearch2-minlength-album' => {
+		'plugin-LazySearch2-minlength_album' => {
 			'validate'     => \&Slim::Utils::Validate::isInt,
 			'validateArgs' =>
 			  [ LAZYSEARCH_MINLENGTH_MIN, LAZYSEARCH_MINLENGTH_MAX ],
@@ -773,7 +778,7 @@ sub setupGroup {
 			'changeIntro' =>
 			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ALBUM_CHANGE'),
 		},
-		'plugin-lazysearch2-minlength-genre' => {
+		'plugin-LazySearch2-minlength_genre' => {
 			'validate'     => \&Slim::Utils::Validate::isInt,
 			'validateArgs' =>
 			  [ LAZYSEARCH_MINLENGTH_MIN, LAZYSEARCH_MINLENGTH_MAX ],
@@ -783,7 +788,7 @@ sub setupGroup {
 			'changeIntro' =>
 			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE_CHANGE'),
 		},
-		'plugin-lazysearch2-minlength-track' => {
+		'plugin-LazySearch2-minlength_track' => {
 			'validate'     => \&Slim::Utils::Validate::isInt,
 			'validateArgs' =>
 			  [ LAZYSEARCH_MINLENGTH_MIN, LAZYSEARCH_MINLENGTH_MAX ],
@@ -793,7 +798,7 @@ sub setupGroup {
 			'changeIntro' =>
 			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK_CHANGE'),
 		},
-		'plugin-lazysearch2-minlength-keyword' => {
+		'plugin-LazySearch2-minlength_keyword' => {
 			'validate'     => \&Slim::Utils::Validate::isInt,
 			'validateArgs' =>
 			  [ LAZYSEARCH_MINLENGTH_MIN, LAZYSEARCH_MINLENGTH_MAX ],
@@ -803,7 +808,7 @@ sub setupGroup {
 			'changeIntro' =>
 			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD_CHANGE'),
 		},
-		'plugin-lazysearch2-leftdeletes' => {
+		'plugin-LazySearch2-leftdeletes' => {
 			'validate'   => \&Slim::Utils::Validate::trueFalse,
 			'PrefHead'   => string('SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES'),
 			'PrefDesc'   => string('SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_DESC'),
@@ -816,7 +821,7 @@ sub setupGroup {
 				'0' => string('SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_0')
 			},
 		},
-		'plugin-lazysearch2-hooksearchbutton' => {
+		'plugin-LazySearch2-hooksearchbutton' => {
 			'validate'     => \&Slim::Utils::Validate::inList,
 			'validateArgs' => [ 0 .. 6 ],
 			'PrefHead' => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON'),
@@ -836,7 +841,7 @@ sub setupGroup {
 				6 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_6')
 			},
 		},
-		'plugin-lazysearch2-keyword-artists-enabled' => {
+		'plugin-LazySearch2-keyword_artists_enabled' => {
 			'validate' => \&Slim::Utils::Validate::trueFalse,
 			'PrefHead' =>
 			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_HEAD'),
@@ -852,7 +857,7 @@ sub setupGroup {
 			},
 			'onChange' => \&scheduleForcedRelazify,
 		},
-		'plugin-lazysearch2-keyword-albums-enabled' => {
+		'plugin-LazySearch2-keyword_albums_enabled' => {
 			'validate' => \&Slim::Utils::Validate::trueFalse,
 			'PrefHead' =>
 			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_HEAD'),
@@ -866,7 +871,7 @@ sub setupGroup {
 			},
 			'onChange' => \&scheduleForcedRelazify,
 		},
-		'plugin-lazysearch2-keyword-tracks-enabled' => {
+		'plugin-LazySearch2-keyword_tracks_enabled' => {
 			'validate' => \&Slim::Utils::Validate::trueFalse,
 			'PrefHead' =>
 			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_HEAD'),
@@ -880,7 +885,7 @@ sub setupGroup {
 			},
 			'onChange' => \&scheduleForcedRelazify,
 		},
-		'plugin-lazysearch2-keyword-return-albumartists' => {
+		'plugin-LazySearch2-keyword_return_albumartists' => {
 			'validate' => \&Slim::Utils::Validate::trueFalse,
 			'PrefHead' => string('SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD'),
 			'PrefDesc' =>
@@ -894,7 +899,7 @@ sub setupGroup {
 				'0' => string('NO')
 			},
 		},
-		'plugin-lazysearch2-lazifynow' => {
+		'plugin-LazySearch2-lazifynow' => {
 			'validate'    => \&Slim::Utils::Validate::acceptAll,
 			'PrefHead'    => string('SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW'),
 			'PrefDesc'    => string('SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_DESC'),
@@ -1150,7 +1155,7 @@ sub lazyOnSearch {
 	$log->debug("SEARCH button intercepted");
 
 	my $searchBehaviour =
-	  Slim::Utils::Prefs::get('plugin-lazysearch2-hooksearchbutton');
+	  Slim::Utils::Prefs::get('plugin-LazySearch2-hooksearchbutton');
 
 	if ( !$initialised ) {
 
@@ -1830,7 +1835,7 @@ sub doKeywordSearch($$$$$$) {
 		# If the user wants, remove the ALBUMARTIST role (ticket:42)
 		if (
 			!Slim::Utils::Prefs::get(
-				'plugin-lazysearch2-keyword-return-albumartists')
+				'plugin-LazySearch2-keyword_return_albumartists')
 		  )
 		{
 			my $albumArtistRole =
@@ -1995,7 +2000,7 @@ sub onDelCharHandler {
 
 	my $currentText = $clientMode{$client}{search_text};
 	if ( ( length($currentText) > 0 )
-		&& Slim::Utils::Prefs::get('plugin-lazysearch2-leftdeletes') )
+		&& Slim::Utils::Prefs::get('plugin-LazySearch2-leftdeletes') )
 	{
 
 		# Remove the right-most character from the string.
@@ -2057,94 +2062,101 @@ sub onDelAllHandler {
 # plugin is activated and removing the need to check they're defined in each
 # case of reading them.
 sub checkDefaults {
-	if ( !Slim::Utils::Prefs::isDefined('plugin-lazysearch2-minlength-artist') )
+	if ( !Slim::Utils::Prefs::isDefined('plugin-LazySearch2-showhelp') )
 	{
 		Slim::Utils::Prefs::set(
-			'plugin-lazysearch2-minlength-artist',
+			'plugin-LazySearch2-showhelp',
+			LAZYSEARCH_SHOWHELP_DEFAULT
+		);
+	}
+	if ( !Slim::Utils::Prefs::isDefined('plugin-LazySearch2-minlength_artist') )
+	{
+		Slim::Utils::Prefs::set(
+			'plugin-LazySearch2-minlength_artist',
 			LAZYSEARCH_MINLENGTH_ARTIST_DEFAULT
 		);
 	}
-	if ( !Slim::Utils::Prefs::isDefined('plugin-lazysearch2-minlength-album') )
+	if ( !Slim::Utils::Prefs::isDefined('plugin-LazySearch2-minlength_album') )
 	{
 		Slim::Utils::Prefs::set(
-			'plugin-lazysearch2-minlength-album',
+			'plugin-LazySearch2-minlength_album',
 			LAZYSEARCH_MINLENGTH_ALBUM_DEFAULT
 		);
 	}
-	if ( !Slim::Utils::Prefs::isDefined('plugin-lazysearch2-minlength-genre') )
+	if ( !Slim::Utils::Prefs::isDefined('plugin-LazySearch2-minlength_genre') )
 	{
 		Slim::Utils::Prefs::set(
-			'plugin-lazysearch2-minlength-genre',
+			'plugin-LazySearch2-minlength_genre',
 			LAZYSEARCH_MINLENGTH_GENRE_DEFAULT
 		);
 	}
-	if ( !Slim::Utils::Prefs::isDefined('plugin-lazysearch2-minlength-track') )
+	if ( !Slim::Utils::Prefs::isDefined('plugin-LazySearch2-minlength_track') )
 	{
 		Slim::Utils::Prefs::set(
-			'plugin-lazysearch2-minlength-track',
+			'plugin-LazySearch2-minlength_track',
 			LAZYSEARCH_MINLENGTH_TRACK_DEFAULT
 		);
 	}
 	if (
-		!Slim::Utils::Prefs::isDefined('plugin-lazysearch2-minlength-keyword') )
+		!Slim::Utils::Prefs::isDefined('plugin-LazySearch2-minlength_keyword') )
 	{
 		Slim::Utils::Prefs::set(
-			'plugin-lazysearch2-minlength-keyword',
+			'plugin-LazySearch2-minlength_keyword',
 			LAZYSEARCH_MINLENGTH_KEYWORD_DEFAULT
 		);
 	}
-	if ( !Slim::Utils::Prefs::isDefined('plugin-lazysearch2-leftdeletes') ) {
-		Slim::Utils::Prefs::set( 'plugin-lazysearch2-leftdeletes',
+	if ( !Slim::Utils::Prefs::isDefined('plugin-LazySearch2-leftdeletes') ) {
+		Slim::Utils::Prefs::set( 'plugin-LazySearch2-leftdeletes',
 			LAZYSEARCH_LEFTDELETES_DEFAULT );
 	}
-	if ( !Slim::Utils::Prefs::isDefined('plugin-lazysearch2-hooksearchbutton') )
+	if ( !Slim::Utils::Prefs::isDefined('plugin-LazySearch2-hooksearchbutton') )
 	{
 		Slim::Utils::Prefs::set(
-			'plugin-lazysearch2-hooksearchbutton',
+			'plugin-LazySearch2-hooksearchbutton',
 			LAZYSEARCH_HOOKSEARCHBUTTON_DEFAULT
 		);
 	}
-	if ( !Slim::Utils::Prefs::isDefined('plugin-lazysearch2-allentries') ) {
-		Slim::Utils::Prefs::set( 'plugin-lazysearch2-allentries',
+	if ( !Slim::Utils::Prefs::isDefined('plugin-LazySearch2-allentries') ) {
+		Slim::Utils::Prefs::set( 'plugin-LazySearch2-allentries',
 			LAZYSEARCH_ALLENTRIES_DEFAULT );
 	}
 	if (
 		!Slim::Utils::Prefs::isDefined(
-			'plugin-lazysearch2-keyword-artists-enabled')
+			'plugin-LazySearch2-keyword_artists_enabled')
 	  )
 	{
 		Slim::Utils::Prefs::set(
-			'plugin-lazysearch2-keyword-artists-enabled',
+			'plugin-LazySearch2-keyword_artists_enabled',
 			LAZYSEARCH_KEYWORD_ARTISTS_DEFAULT
 		);
 	}
 	if (
 		!Slim::Utils::Prefs::isDefined(
-			'plugin-lazysearch2-keyword-albums-enabled')
+			'plugin-LazySearch2-keyword_albums_enabled')
 	  )
 	{
 		Slim::Utils::Prefs::set(
-			'plugin-lazysearch2-keyword-albums-enabled',
+			'plugin-LazySearch2-keyword_albums_enabled',
 			LAZYSEARCH_KEYWORD_ALBUMS_DEFAULT
 		);
 	}
 	if (
 		!Slim::Utils::Prefs::isDefined(
-			'plugin-lazysearch2-keyword-tracks-enabled')
+			'plugin-LazySearch2-keyword_tracks_enabled')
 	  )
 	{
 		Slim::Utils::Prefs::set(
-			'plugin-lazysearch2-keyword-tracks-enabled',
+			'plugin-LazySearch2-keyword_tracks_enabled',
 			LAZYSEARCH_KEYWORD_TRACKS_DEFAULT
 		);
 	}
 	if (
 		!Slim::Utils::Prefs::isDefined(
-			'plugin-lazysearch2-keyword-return-albumartists')
+			'plugin-LazySearch2-keyword_return_albumartists')
 	  )
 	{
 		Slim::Utils::Prefs::set(
-			'plugin-lazysearch2-keyword-return-albumartists',
+			'plugin-LazySearch2-keyword_return_albumartists',
 			LAZYSEARCH_KEYWORD_ALBUMARTISTS_DEFAULT
 		);
 	}
@@ -2152,8 +2164,8 @@ sub checkDefaults {
 	# If the revision isn't yet in the preferences we set it to something
 	# that's guaranteed to be different to the revision to force full
 	# lazification.
-	if ( !Slim::Utils::Prefs::isDefined('plugin-lazysearch2-revision') ) {
-		Slim::Utils::Prefs::set( 'plugin-lazysearch2-revision', '-undefined-' );
+	if ( !Slim::Utils::Prefs::isDefined('plugin-LazySearch2-revision') ) {
+		Slim::Utils::Prefs::set( 'plugin-LazySearch2-revision', '-undefined-' );
 	}
 }
 
@@ -2167,17 +2179,19 @@ sub scanDoneCallback($) {
 	# has changed then we're going to rebuild the database lazification in
 	# case this different plugin revision has changed the format.
 	my $force          = 0;
-	my $prefRevision   = Slim::Utils::Prefs::get('plugin-lazysearch2-revision');
+	my $prefRevision   = Slim::Utils::Prefs::get('plugin-LazySearch2-revision');
 	my $pluginRevision = '$Revision$';
 
 	if ( $prefRevision ne $pluginRevision ) {
 		$log->info("Re-lazifying (plugin version changed from '$prefRevision' to '$pluginRevision'");
 		$force = 1;
-		Slim::Utils::Prefs::set( 'plugin-lazysearch2-revision',
+		Slim::Utils::Prefs::set( 'plugin-LazySearch2-revision',
 			$pluginRevision );
 	} else {
 		$log->info("Lazifying database items not already done");
 	}
+
+	lazifyDatabase($force);
 }
 
 # This function is called when the music database scan has finished. It
@@ -2247,11 +2261,11 @@ sub lazifyDatabaseType {
 	# Include keywords in the lazified version if the caller asked for it and
 	# the user preference says they want it.
 	my $includeKeywordArtist = $considerKeywordArtist
-	  && Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-artists-enabled');
+	  && Slim::Utils::Prefs::get('plugin-LazySearch2-keyword_artists_enabled');
 	my $includeKeywordAlbum = $considerKeywordAlbum
-	  && Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-albums-enabled');
+	  && Slim::Utils::Prefs::get('plugin-LazySearch2-keyword_albums_enabled');
 	my $includeKeywordTrack = $considerKeywordTrack
-	  && Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-tracks-enabled');
+	  && Slim::Utils::Prefs::get('plugin-LazySearch2-keyword_tracks_enabled');
 
 	# If adding keywords for album titles then we need to join to the album
 	# table, too.
@@ -2508,9 +2522,9 @@ tr/ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 /222333444555666777788899991234567890X/;
 # Determines whether keyword searching is enabled. It's enabled if at least one
 # of the keyword search categories is enabled.
 sub keywordSearchEnabled {
-	return Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-artists-enabled')
-	  || Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-albums-enabled')
-	  || Slim::Utils::Prefs::get('plugin-lazysearch2-keyword-tracks-enabled');
+	return Slim::Utils::Prefs::get('plugin-LazySearch2-keyword_artists_enabled')
+	  || Slim::Utils::Prefs::get('plugin-LazySearch2-keyword_albums_enabled')
+	  || Slim::Utils::Prefs::get('plugin-LazySearch2-keyword_tracks_enabled');
 }
 
 # Handler when RIGHT is pressed on the top-level keyword search results mode.
@@ -2709,6 +2723,17 @@ sub scheduleForcedRelazify {
 	Slim::Utils::Timers::setTimer( 1,
 		Time::HiRes::time() + LAZYSEARCH_INITIAL_LAZIFY_DELAY,
 		\&lazifyDatabase );
+}
+
+# Called when the user pushes the 'lazify now' button on the plugin
+# preferences. This is principally used for debugging.
+sub lazifyNow {
+	if ( !$lazifyingDatabase ) {
+		$log->info("Manual lazification requested");
+
+		# Forcibly re-lazify the whole database.
+		lazifyDatabase(1);
+	}
 }
 
 1;
