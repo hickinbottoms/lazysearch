@@ -1,13 +1,28 @@
 # Makefile for LazySearch2 plugin for SlimServer 7.0 (and later)
-# 
-# $Id$
+# Copyright © Stuart Hickinbottom 2004-2007
+
+# This file is part of LazySearch2.
 #
-# Stuart Hickinbottom 2006-2007
+# LazySearch2 is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# LazySearch2 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+# $Id$
 
 VERSION=3.0b1
 PERLSOURCE=Plugin.pm Settings.pm
-SOURCE=$(PERLSOURCE) INSTALL strings.txt install.xml
-DIRSOURCE=HTML
+HTMLSOURCE=HTML/EN/plugins/LazySearch2/settings/basic.html
+SOURCE=$(PERLSOURCE) $(HTMLSOURCE) INSTALL strings.txt install.xml LICENSE
 RELEASEDIR=releases
 STAGEDIR=stage
 SLIMDIR=/usr/local/slimserver7/server
@@ -20,7 +35,7 @@ SVNDISTFILE=LazySearch2.zip
 LATESTLINK=$(RELEASEDIR)/LazySearch2-7_0-latest.zip
 PREFS=/etc/slimserver7.pref
 
-.SILENT:
+#.SILENT:
 
 all:
 	echo Try 'make install', 'make release' or 'make pretty'
@@ -32,9 +47,9 @@ make-stage:
 	echo "Creating plugin stage files (v$(VERSION))..."
 	-rm -rf $(STAGEDIR)/* >/dev/null 2>&1
 	for FILE in $(SOURCE); do \
+		mkdir -p "$(STAGEDIR)/`dirname $$FILE`"; \
 		sed "s/@@VERSION@@/$(VERSION)/" <"$$FILE" >"$(STAGEDIR)/$$FILE"; \
 	done
-	cp -R $(DIRSOURCE) $(STAGEDIR)
 	chmod -w $(STAGEDIR)/*
 
 # Regenerate tags.
