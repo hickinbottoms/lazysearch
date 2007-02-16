@@ -733,201 +733,6 @@ sub shutdownPlugin() {
 	$initialised = 0;
 }
 
-# Return information on this plugin's settings. The web interface will then
-# present those on the 'server settings->plugins' page.
-sub setupGroup {
-	my %setupGroup = (
-		PrefOrder => [
-			'plugin-LazySearch2-minlength_artist',
-			'plugin-LazySearch2-minlength_album',
-			'plugin-LazySearch2-minlength_genre',
-			'plugin-LazySearch2-minlength_track',
-			'plugin-LazySearch2-minlength_keyword',
-			'plugin-LazySearch2-leftdeletes',
-			'plugin-LazySearch2-hooksearchbutton',
-			'plugin-LazySearch2-keyword_artists_enabled',
-			'plugin-LazySearch2-keyword_albums_enabled',
-			'plugin-LazySearch2-keyword_tracks_enabled',
-			'plugin-LazySearch2-keyword_return_albumartists',
-			'plugin-LazySearch2-lazifynow'
-		],
-		GroupHead         => string('SETUP_PLUGIN_LAZYSEARCH2_GROUP_LAZYSEARCH2'),
-		GroupDesc         => string('SETUP_PLUGIN_LAZYSEARCH2_GROUP_LAZYSEARCH2_DESC'),
-		GroupLine         => 1,
-		GroupSub          => 1,
-		Suppress_PrefSub  => 1,
-		Suppress_PrefLine => 1,
-	);
-
-	my %setupPrefs = (
-		'plugin-LazySearch2-minlength_artist' => {
-			'validate'     => \&Slim::Utils::Validate::isInt,
-			'validateArgs' =>
-			  [ LAZYSEARCH_MINLENGTH_MIN, LAZYSEARCH_MINLENGTH_MAX ],
-			'PrefHead' => string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST'),
-			'PrefDesc' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_DESC'),
-			'PrefChoose' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_CHOOSE'),
-			'changeIntro' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_CHANGE'),
-		},
-		'plugin-LazySearch2-minlength_album' => {
-			'validate'     => \&Slim::Utils::Validate::isInt,
-			'validateArgs' =>
-			  [ LAZYSEARCH_MINLENGTH_MIN, LAZYSEARCH_MINLENGTH_MAX ],
-			'PrefHead'   => string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ALBUM'),
-			'PrefChoose' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ALBUM_CHOOSE'),
-			'changeIntro' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ALBUM_CHANGE'),
-		},
-		'plugin-LazySearch2-minlength_genre' => {
-			'validate'     => \&Slim::Utils::Validate::isInt,
-			'validateArgs' =>
-			  [ LAZYSEARCH_MINLENGTH_MIN, LAZYSEARCH_MINLENGTH_MAX ],
-			'PrefHead'   => string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE'),
-			'PrefChoose' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE_CHOOSE'),
-			'changeIntro' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE_CHANGE'),
-		},
-		'plugin-LazySearch2-minlength_track' => {
-			'validate'     => \&Slim::Utils::Validate::isInt,
-			'validateArgs' =>
-			  [ LAZYSEARCH_MINLENGTH_MIN, LAZYSEARCH_MINLENGTH_MAX ],
-			'PrefHead'   => string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK'),
-			'PrefChoose' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK_CHOOSE'),
-			'changeIntro' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK_CHANGE'),
-		},
-		'plugin-LazySearch2-minlength_keyword' => {
-			'validate'     => \&Slim::Utils::Validate::isInt,
-			'validateArgs' =>
-			  [ LAZYSEARCH_MINLENGTH_MIN, LAZYSEARCH_MINLENGTH_MAX ],
-			'PrefHead' => string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD'),
-			'PrefChoose' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD_CHOOSE'),
-			'changeIntro' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD_CHANGE'),
-		},
-		'plugin-LazySearch2-leftdeletes' => {
-			'validate'   => \&Slim::Utils::Validate::trueFalse,
-			'PrefHead'   => string('SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES'),
-			'PrefDesc'   => string('SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_DESC'),
-			'PrefChoose' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_CHOOSE'),
-			'changeIntro' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_CHANGE'),
-			'options' => {
-				'1' => string('SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_1'),
-				'0' => string('SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_0')
-			},
-		},
-		'plugin-LazySearch2-hooksearchbutton' => {
-			'validate'     => \&Slim::Utils::Validate::inList,
-			'validateArgs' => [ 0 .. 6 ],
-			'PrefHead' => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON'),
-			'PrefDesc' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_DESC'),
-			'PrefChoose' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_CHOOSE'),
-			'changeIntro' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_CHANGE'),
-			'options' => {
-				0 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_0'),
-				1 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_1'),
-				2 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_2'),
-				3 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_3'),
-				4 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_4'),
-				5 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_5'),
-				6 => string('SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_6')
-			},
-		},
-		'plugin-LazySearch2-keyword_artists_enabled' => {
-			'validate' => \&Slim::Utils::Validate::trueFalse,
-			'PrefHead' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_HEAD'),
-			'PrefDesc' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_OPTIONS_DESC'),
-			'PrefChoose' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_CHOOSE'),
-			'changeIntro' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_CHANGE'),
-			'options' => {
-				'1' => string('ENABLED'),
-				'0' => string('DISABLED')
-			},
-			'onChange' => \&scheduleForcedRelazify,
-		},
-		'plugin-LazySearch2-keyword_albums_enabled' => {
-			'validate' => \&Slim::Utils::Validate::trueFalse,
-			'PrefHead' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_HEAD'),
-			'PrefChoose' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_CHOOSE'),
-			'changeIntro' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_CHANGE'),
-			'options' => {
-				'1' => string('ENABLED'),
-				'0' => string('DISABLED')
-			},
-			'onChange' => \&scheduleForcedRelazify,
-		},
-		'plugin-LazySearch2-keyword_tracks_enabled' => {
-			'validate' => \&Slim::Utils::Validate::trueFalse,
-			'PrefHead' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_HEAD'),
-			'PrefChoose' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_CHOOSE'),
-			'changeIntro' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_CHANGE'),
-			'options' => {
-				'1' => string('ENABLED'),
-				'0' => string('DISABLED')
-			},
-			'onChange' => \&scheduleForcedRelazify,
-		},
-		'plugin-LazySearch2-keyword_return_albumartists' => {
-			'validate' => \&Slim::Utils::Validate::trueFalse,
-			'PrefHead' => string('SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD'),
-			'PrefDesc' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_DESC'),
-			'PrefChoose' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHOOSE'),
-			'changeIntro' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHANGE'),
-			'options' => {
-				'1' => string('YES'),
-				'0' => string('NO')
-			},
-		},
-		'plugin-LazySearch2-lazifynow' => {
-			'validate'    => \&Slim::Utils::Validate::acceptAll,
-			'PrefHead'    => string('SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW'),
-			'PrefDesc'    => string('SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_DESC'),
-			'changeIntro' =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_CHANGE'),
-			'inputTemplate' => 'setup_input_submit.html',
-			'ChangeButton'  =>
-			  string('SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_BUTTON'),
-			'onChange' => sub {
-				if ( !$lazifyingDatabase ) {
-						$log->info("Manual lazification requested");
-
-					# Forcibly re-lazify the whole database.
-					lazifyDatabase(1);
-				}
-			},
-			'dontSet'   => 1,
-			'changeMsg' => '',
-		},
-	);
-
-	return ( \%setupGroup, \%setupPrefs );
-}
-
 # Below are functions that are specific to this plugin.
 
 # Sub-mode, allowing entry search and browsing within a search category. This
@@ -2736,8 +2541,16 @@ sub lazifyNow {
 		$log->info("Manual lazification requested");
 
 		# Forcibly re-lazify the whole database.
-		lazifyDatabase(1);
+		relazifyDatabase();
 	}
+}
+
+# Force relazification of the database - this is different to normal
+# relazification since it will completely rebuild our custom content, whether
+# it needs it or not.
+sub relazifyDatabase {
+	# Forcibly re-lazify the whole database.
+	lazifyDatabase(1);
 }
 
 1;
