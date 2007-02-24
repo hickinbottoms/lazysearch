@@ -104,10 +104,9 @@ use vars qw($VERSION);
 $VERSION = 'v@@VERSION@@ (trunk-7.0)';
 
 # A logger we will use to write plugin-specific messages.
-#@@TODO@@ - change default level to INFO
 my $log = Slim::Utils::Log->addLogCategory({
 		'category' => 'plugin.lazysearch2',
-		'defaultLevel' => 'DEBUG',
+		'defaultLevel' => 'INFO',
 		'description' => 'PLUGIN_LAZYSEARCH2'
 	});
 
@@ -1098,7 +1097,7 @@ sub lazyOnPlay {
 	# If we're on the keyword hierarchy then the function is dependent on the
 	# level of the item we're on.
 	if ( $clientMode{$client}{search_type} eq SEARCH_TYPE_KEYWORD ) {
-		my $mode = $client->param("modeName");
+		my $mode = $client->modeParam("modeName");
 		$_ = $mode;
 		my ($level) = /^.*:(.*):.*$/;
 		if ( !( $level =~ /^-?\d/ ) ) {
@@ -2359,7 +2358,7 @@ sub keywordOnRightHandler {
 			my $hierarchy;
 
 			# The current keyword level is part of the mode name.
-			my $mode = $client->param("modeName");
+			my $mode = $client->modeParam("modeName");
 			$_ = $mode;
 			my ($level) = /^.*:(.*):.*$/;
 			if ( !( $level =~ /^-?\d/ ) ) {
