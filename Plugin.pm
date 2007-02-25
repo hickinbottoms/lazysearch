@@ -1030,15 +1030,11 @@ sub lazyOnSearch {
 sub enterCategoryMenu {
 	my $client = shift;
 
-	# @@TODO@@
-	# This doesn't seem to work properly - it doesn't seem to set the top
-	# menu to the lazy item prior to jumping in. It seems to work,
-	# but when existing the mode it doesn't exit to the lazy top
-	# level item
-#@@TODO@@ - uncomment
-#	Slim::Buttons::Common::setMode( $client, 'home' );
-#	Slim::Buttons::Home::jump( $client, LAZYSEARCH_HOME_MENUITEM );
-#	Slim::Buttons::Common::pushMode( $client, LAZYSEARCH_TOP_MODE );
+	# Set the mode back to the top-level menu, then push into our search
+	# mode. This is done so that repeated pushes of SEARCH don't keep creating
+	# deeper and deeper menus (one press of LEFT will always get back out of
+	# lazy search altogether).
+	Slim::Buttons::Common::setMode( $client, 'home' );
 	setMode(undef, $client, 'push');
 }
 
