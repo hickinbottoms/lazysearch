@@ -28,10 +28,9 @@ use base qw(Slim::Web::Settings);
 use Slim::Utils::Log;
 
 # A logger we will use to write plugin-specific messages.
-#@@TODO@@ - change default level to INFO
 my $log = Slim::Utils::Log->addLogCategory({
 		'category' => 'plugin.lazysearch2',
-		'defaultLevel' => 'DEBUG',
+		'defaultLevel' => 'INFO',
 		'description' => 'PLUGIN_LAZYSEARCH2'
 	});
 
