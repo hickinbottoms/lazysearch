@@ -99,6 +99,9 @@ use constant RESULT_ENTRY_ID_ALL => -1;
 # string.
 use constant KEYWORD_SEPARATOR_CHARACTER => ',';
 
+# The root of our web pages.
+use constant URL_BASE => 'plugins/LazySearch2';
+
 # Export the version to the server (as a subversion keyword).
 use vars qw($VERSION);
 $VERSION = 'v@@VERSION@@ (trunk-7.0)';
@@ -2546,6 +2549,24 @@ sub lazifyNow {
 sub relazifyDatabase {
 	# Forcibly re-lazify the whole database.
 	lazifyDatabase(1);
+}
+
+sub webPages {
+	my $class = shift;
+
+	#@@REMOVEME@@
+	$log->debug("webPages called");
+
+	Slim::Web::HTTP::addPageFunction(URL_BASE . '/settings/logo.jpg', \&handleLogoJPG);
+}
+
+sub handleLogoJPG {
+	my ($client, $params) = @_;
+
+	#@@REMOVEME@@
+	$log->debug("handleLogoJPG called");
+
+	return Slim::Web::HTTP::getStaticContent(URL_BASE . '/settings/logo.jpg', $params);
 }
 
 1;

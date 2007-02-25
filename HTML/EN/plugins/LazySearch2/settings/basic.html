@@ -184,11 +184,16 @@
 	</div>
 
 	<div class="settingSection">
-		<div class="prefHead">[% "SETUP_PLUGIN_LAZYSEARCH2_DEBUGGING" | string | upper %]</div>
+		<div class="prefHead">
+			<a href="http://hickinbottom.demon.co.uk/lazysearch" target="_blank"><img src="logo.jpg" alt="[% "PLUGIN_LAZYSEARCH2" | string | upper %]" class="viewSelect"></a>
+			[% "SETUP_PLUGIN_LAZYSEARCH2_DEBUGGING" | string | upper %]
+		</div>
 		[% IF prefs.showhelp %]
 		<div class="prefDesc">[% "SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_DESC" | string %]</div>
 		[% END %]
 		<input name="lazifynow" type="submit" class="stdclick" value="[% "SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_BUTTON" | string %]">
 	</div>
 
+
 [% PROCESS settings/footer.html %]
+
