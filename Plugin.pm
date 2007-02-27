@@ -2032,7 +2032,7 @@ sub lazifyDatabase($) {
 		Slim::Utils::Scheduler::add_task( \&encodeTask );
 		$lazifyingDatabase = 1;
 	} else {
-		$log->debug("No object types require lazification - no task scheduled");
+		$log->info("No database items require lazification");
 	}
 }
 
@@ -2551,6 +2551,7 @@ sub relazifyDatabase {
 	lazifyDatabase(1);
 }
 
+# Method to register handlers for the web pages provided by this plugin.
 sub webPages {
 	my $class = shift;
 
@@ -2560,6 +2561,7 @@ sub webPages {
 	Slim::Web::HTTP::addPageFunction(URL_BASE . '/settings/logo.jpg', \&handleLogoJPG);
 }
 
+# When the logo is requested, that's rendered as static content.
 sub handleLogoJPG {
 	my ($client, $params) = @_;
 

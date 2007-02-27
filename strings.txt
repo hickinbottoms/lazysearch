@@ -37,14 +37,6 @@ PLUGIN_LAZYSEARCH2
 PLUGIN_LAZYSEARCH2_DESC
 	EN	Perform searches more quickly and easily using your player's remote control.
 
-PLUGIN_LAZYSEARCH2_TOPMENU
-	DA	Lazy Search Music
-	DE	Faulpelz-Suche
-	EN	Lazy Search Music
-	ES	Búsqueda Laxa de Música
-	FI	Laiska musiikin haku
-	NL	Lazy Search Music
-
 PLUGIN_LAZYSEARCH2_LINE1_BROWSE
 	DA	Lazy Search
 	DE	Faulpelz-Suche
@@ -186,14 +178,6 @@ PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_KEYWORDS
 	EN	Enter Keyword Search
 	FI	Kirjoita hakusana
 
-PLUGIN_LAZYSEARCH2_SCAN_IN_PROGRESS_DBL
-	DA	Note: scanner
-	DE	Hinweis: Suche läuft
-	EN	Note: scanning
-	ES	Nota: recopilando
-	FI	Huomautus: etsin
-	NL	Merk op: Inlezen...
-
 SETUP_PLUGIN_LAZYSEARCH2_SHOWHELP
 	EN	Show descriptions for settings:
 
@@ -231,14 +215,6 @@ SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_CHOOSE
 	ES	Mínima longitud para búsqueda de artista (2-9 caracteres):
 	FI	Esittäjä-haun lyhin kirjainmäärä (2-9 kirjainta):
 	NL	De minimumlengte voor Artiest zoekopdracht (2-9 tekens):
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_CHANGE
-	DA	Minimum længde for kunstner søgning ændret til:
-	DE	Mindestlänge für die Suche nach Interpreten wurde geändert in:
-	EN	Minimum length for artist search changed to:
-	ES	Mínima longitud para búsqueda de artista cambió a:
-	FI	Esittäjä-haun lyhin kirjainmäärä vaihdettiin arvoon:
-	NL	De minimumlengte voor Artiest zoekopdracht is gewijzigd in:
 	
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ALBUM_CHOOSE
 	DA	Minimum længde for album søgning (2-9 tegn):
@@ -248,14 +224,6 @@ SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ALBUM_CHOOSE
 	FI	Levy-haun lyhin kirjainmäärä (2-9 kirjainta):
 	NL	De minimumlengte voor Album zoekopdracht (2-9 tekens):
 
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ALBUM_CHANGE
-	DA	Minimum længde for album søgning rettet til:
-	DE	Mindestlänge für die Suche nach Alben wurde geändert in:
-	EN	Minimum length for album search changed to:
-	ES	Mínima longitud para búsqueda de álbum cambió a:
-	FI	Lyvy-haun lyhin kirjainmäärä vaihdettiin arvoon:
-	NL	De minimumlengte voor Album zoekopdracht is gewijzigd in:
-
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK_CHOOSE
 	DA	Minimum længde for sang søgning (2-9 tegn):
 	DE	Mindestlänge für die Suche nach Titel (2-9 Zeichen):
@@ -264,14 +232,6 @@ SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK_CHOOSE
 	FI	Kappale-haun lyhin kirjainmäärä (2-9 kirjainta):
 	NL	De minimumlengte voor Liedjes zoekopdracht (2-9 tekens):
 
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK_CHANGE
-	DA	Minimum længde for sang søgning rettet til:
-	DE	Mindestlänge für die Suche nach Titel wurde geändert in:
-	EN	Minimum length for song search changed to:
-	ES	Mínima longitud para búsqueda de canción cambió a:
-	FI	Kappale-haun lyhin kirjainmäärä vaihdettiin arvoon:
-	NL	De minimumlengte voor Liedjes zoekopdracht is gewijzigd in:
-
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE_CHOOSE
 	DA	Minimum længde for genre søgning (2-9 tegn):
 	DE	Mindestlänge für die Suche nach Stilrichtungen (2-9 Zeichen):
@@ -279,14 +239,6 @@ SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE_CHOOSE
 	ES	Mínima longitud para búsqueda de género (2-9 caracteres):
 	FI	Laji-haun lyhin kirjainmäärä (2-9 kirjainta):
 	NL	De minimumlengte voor Genre zoektocht (2-9 tekens):
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE_CHANGE
-	DA	Minimum længde for genre søgning rettet til:
-	DE	Mindestlänge für die Suche nach Stilrichtungen wurde geändert in:
-	EN	Minimum length for genre search changed to:
-	ES	Mínima longitud para búsqueda de género cambió a:
-	FI	Laji-haun lyhin kirjainmäärä vaihdettiin arvoon:
-	NL	De minimumlengte voor Genre zoektocht is gewijzigd in:
 
 SETUP_PLUGIN_LAZYSEARCH2_BUTTON_BEHAVIOUR
 	EN	Remote Control Button Behaviour
@@ -307,14 +259,6 @@ SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_CHOOSE
 	FI	VASEN-napin toiminta hakua kirjoitettaessa:
 	NL	LINKERknop gebruikt in zoekmode:
 
-SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_CHANGE
-	DA	Tyk VENSTRE for at:
-	DE	Drücken der LINKS-Taste wurde geändert in:
-	EN	Pressing LEFT changed to:
-	ES	Presionando IZQUIERDA cambió a:
-	FI	VASEN-napin toiminta muutettu arvoon:
-	NL	LINKERknop gewijzigd in:
-
 SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_0
 	DA	Forlade søgning
 	DE	Beendet den Suchmodus
@@ -331,11 +275,6 @@ SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_1
 	FI	Poista viimeinen kirjain
 	NL	Verwijder het laatst ingevoerde karakter
 
-SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD
-	DE	Stichwort-Suche und Album-Interpret
-	EN	Keyword searching and artists behaviour
-	FI	Sana-haku ja esittäjä
-
 SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_DESC
 	DE	Je nachdem, wie man seine Alben mit "tags" versieht, kann es erwünscht oder unerwünscht sein, dass Album-Interpreten (der Inhalt des ALBUMARTIST tags) in der Liste der Interpreten, die zu einer Stichwort-Suche passen, angezeigt werden. Wenn man z.B. bei Samplern den Album-Interpreten auf "Various Artist" setzt, dann erwartet man diesen Wert nicht als Ergebnis einer Stichwort-Suche, da man an dem individuellen Interpreten des Liedes interessiert ist. Album-Interpreten nicht anzuzeigen ist die Voreinstellung.
 	EN	Depending on how you tag your albums you may or may not want your album artists (the ALBUMARTIST tag) to be returned in the list of artists matching a keyword search. For example, if you set the album artist to "Various Artists" for your compilations then you won't expect that to be returned in keyword searches because it's the individual song artists that you're interested in. Not returning album artists is the default behaviour.
@@ -345,11 +284,6 @@ SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHOOSE
 	DE	Album-Interpreten im Ergebnis der Stichwort-Suche anzeigen:
 	EN	Album artists included in keyword search results:
 	FI	Levyn esittäjän sisällyttäminen sana-hakuun:
-
-SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHANGE
-	DE	Album-Interpreten im Ergebnis der Stichwort-Suche einschließen wurde geändert in:
-	EN	Album artists returned in keyword searches changed to:
-	FI	Levyn esittäjän sisällyttäminen sana-hakuun vaihdettu arvoon:
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_DESC
 	EN	You can also choose to have the SEARCH button on the remote control remapped to the <i>lazy search music</i> function instead of the original <i>search music</i> function. Further options allow the SEARCH button to immediately enter a chosen type of lazy search, which saves time if that's the type of search you prefer to use most often.
@@ -361,14 +295,6 @@ SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_CHOOSE
 	ES	Presionando SEARCH en el remoto de Squeezebox/Transporter:
 	FI	Squeezeboxin / Transporterin kaukosäätimen HAKU-nappin toiminta:
 	NL	ZOEKknop op de Squeezebox afstandsbediening:
-
-SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_CHANGE
-	DA	Tryk på SEARCH går til:
-	DE	Drücken der SEARCH-Taste wurde geändert in:
-	EN	Pressing SEARCH changed to:
-	ES	Presionando SEARCH cambió a:
-	FI	HAKU-napin toiminta muutettu arvoon:
-	NL	ZOEKknop gewijzigd in:
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_0
 	DA	Standard søgning
@@ -430,14 +356,6 @@ SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_DESC
 	FI	Normaalisti laiska haku huomaa itse milloin sen pitää luoda hakuindeksi uudelleen. Jos haluat varmistaa, että laiskan haun hakuindeksi on varmasti ajan tasalla, niin voit tehdä sen painamalla alla olevaa nappia. Sitä ei normaalisti tarvitse tehdä koskaan, joten tämä on lähinnä tarkoitettu vian etsintään.
 	NL	De plugin is zo ontworpen dat de Lazy Search index, wanneer het noodzakelijk is aangemaakt wordt, onder normale omstandigheden, is er geen extra  onderhoud vereist. Indien u er zeker van wilt zijn dat de Lazy Search index correct is ingelezen, kan u de volgende knop gebruiken, maar gegeven dat, het zal nooit noodzakelijk deze knop te moeten gebruiken, het is hoofdzakelijk een debugging tool.
 
-SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_CHANGE
-	DA	Lazy Search indexet bliver du genopbygget
-	DE	Die Erzeugung des Index für die Faulpelz-Suche hat begonnen
-	EN	Lazy search index build has been started
-	ES	La creación del índice para búsqueda laxa ha comenzado
-	FI	Laiskan haun indeksointi on käynnistetty
-	NL	Lazy Search indexering is gestart
-
 SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_BUTTON
 	DA	Start opbygning af Lazy Search indexet
 	DE	Jetzt den Index für die Faulpelz-Suche erzeugen
@@ -470,29 +388,11 @@ SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_CHANGE
 	EN	Keyword search for artists changed to:
 	FI	Sana-hae esittäjää muutettu arvoon:
 
-SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_HEAD
-	DA	Keyword søgning efter Album
-	DE	Stichwort-Suche nach Alben
-	EN	Keyword Search for Albums
-	FI	Sana-hae levyn nimeä
-
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_CHOOSE
 	DA	Keyword søgning efter album:
 	DE	Stichwort-Suche nach Alben:
 	EN	Keyword search for albums:
 	FI	Sana-hae levyn nimeä:
-
-SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_CHANGE
-	DA	Keyword søgning for album rettet til:
-	DE	Stichwort-Suche nach Alben wurde geändert in:
-	EN	Keyword search for albums changed to:
-	FI	Sana-hae levyn nimeä vaihdettu arvoon:
-
-SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_HEAD
-	DA	Keyword søgning efter sangtitel
-	DE	Stichwort-Suche nach Liedern
-	EN	Keyword Search for Songs
-	FI	Sana-hae kappaleen nimeä
 
 SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_CHOOSE
 	DA	Keyword søgning efter sangtitel:
@@ -500,23 +400,11 @@ SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_CHOOSE
 	EN	Keyword search for songs:
 	FI	Sana-hae kappaleen nimeä:
 
-SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_CHANGE
-	DA	Keyword søgning for sangtitel rettet til:
-	DE	Stichwort-Suche nach Liedern wurde geändert in:
-	EN	Keyword search for songs changed to:
-	FI	Sana-hae kappaleen nimeä muutettu arvoon:
-
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD_CHOOSE
 	DA	Minimum længde for keyword søgning (2-9 tegn):
 	DE	Mindestlänge für die Stichwort-Suche (2-9 Zeichen):
 	EN	Minimum length for keyword search (2-9 characters):
 	FI	Sana-haun lyhin kirjainmäärä (2-9 kirjainta):
-
-SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD_CHANGE
-	DA	Minimum længde for keyword søgning rettet til:
-	DE	Mindestlänge für die Stichwort-Suche wurde geändert in:
-	EN	Minimum length for keyword search changed to:
-	FI	Sana-haun lyhin kirjainmäärä vaihdettu arvoon:
 
 # Local Variables:
 # tab-width:4

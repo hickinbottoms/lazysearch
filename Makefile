@@ -35,7 +35,7 @@ SVNDISTFILE=LazySearch2.zip
 LATESTLINK=$(RELEASEDIR)/LazySearch2-7_0-latest.zip
 PREFS=/etc/slimserver7.pref
 
-#.SILENT:
+.SILENT:
 
 all:
 	echo Try 'make install', 'make release' or 'make pretty'
