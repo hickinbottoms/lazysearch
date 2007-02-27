@@ -107,12 +107,13 @@ use vars qw($VERSION);
 $VERSION = 'v@@VERSION@@ (trunk-7.0)';
 
 # A logger we will use to write plugin-specific messages.
-my $log = Slim::Utils::Log->addLogCategory({
-		'category' => 'plugin.lazysearch2',
+my $log = Slim::Utils::Log->addLogCategory(
+	{
+		'category'     => 'plugin.lazysearch2',
 		'defaultLevel' => 'INFO',
-		'description' => 'PLUGIN_LAZYSEARCH2'
-	});
-
+		'description'  => 'PLUGIN_LAZYSEARCH2'
+	}
+);
 
 # This hash-of-hashes contains state information on the current lazy search for
 # each player. The first hash index is the player (eg $clientMode{$client}),
@@ -214,7 +215,7 @@ my %numberScrollMap = (
 
 # Main mode of this plugin; offers the artist/album/genre/song browse options
 sub setMode {
-	my $class = shift;
+	my $class  = shift;
 	my $client = shift;
 	my $method = shift || '';
 
@@ -261,12 +262,17 @@ sub setMode {
 				if ( $client->linesPerScreen == 1 ) {
 					$client->showBriefly(
 						{
-							'line1' => $client->doubleString('PLUGIN_LAZYSEARCH2_SCAN_IN_PROGRESS')
+							'line1' => $client->doubleString(
+								'PLUGIN_LAZYSEARCH2_SCAN_IN_PROGRESS')
 						}
 					);
 				} else {
 					$client->showBriefly(
-						{ 'line1' => string('PLUGIN_LAZYSEARCH2_SCAN_IN_PROGRESS') } );
+						{
+							'line1' =>
+							  string('PLUGIN_LAZYSEARCH2_SCAN_IN_PROGRESS')
+						}
+					);
 				}
 			}
 		},
@@ -320,16 +326,20 @@ sub enterArtistSearch($$) {
 	my $client = shift;
 	my $item   = shift;
 
-	$clientMode{$client}{search_type}         = 'Contributor';
-	$clientMode{$client}{side}                = 0;
-	$clientMode{$client}{hierarchy}           = 'contributor,album,track';
-	$clientMode{$client}{level}               = 0;
-	$clientMode{$client}{all_entry}           = '{ALL_ARTISTS}';
-	$clientMode{$client}{player_title}        = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ARTISTS}';
-	$clientMode{$client}{player_title_empty}  = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ARTISTS_EMPTY}';
-	$clientMode{$client}{enter_more_prompt}   = 'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_ARTISTS';
-	$clientMode{$client}{further_help_prompt} = 'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
-	$clientMode{$client}{min_search_length}   =
+	$clientMode{$client}{search_type}  = 'Contributor';
+	$clientMode{$client}{side}         = 0;
+	$clientMode{$client}{hierarchy}    = 'contributor,album,track';
+	$clientMode{$client}{level}        = 0;
+	$clientMode{$client}{all_entry}    = '{ALL_ARTISTS}';
+	$clientMode{$client}{player_title} =
+	  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ARTISTS}';
+	$clientMode{$client}{player_title_empty} =
+	  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ARTISTS_EMPTY}';
+	$clientMode{$client}{enter_more_prompt} =
+	  'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_ARTISTS';
+	$clientMode{$client}{further_help_prompt} =
+	  'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
+	$clientMode{$client}{min_search_length} =
 	  Slim::Utils::Prefs::get('plugin-LazySearch2-minlength_artist');
 	$clientMode{$client}{perform_search} = \&performArtistSearch;
 	$clientMode{$client}{onright}        = \&rightIntoArtist;
@@ -342,16 +352,20 @@ sub enterAlbumSearch($$) {
 	my $client = shift;
 	my $item   = shift;
 
-	$clientMode{$client}{search_type}         = 'Album';
-	$clientMode{$client}{side}                = 0;
-	$clientMode{$client}{hierarchy}           = 'album,track';
-	$clientMode{$client}{level}               = 0;
-	$clientMode{$client}{all_entry}           = '{ALL_ALBUMS}';
-	$clientMode{$client}{player_title}        = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ALBUMS}';
-	$clientMode{$client}{player_title_empty}  = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ALBUMS_EMPTY}';
-	$clientMode{$client}{enter_more_prompt}   = 'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_ALBUMS';
-	$clientMode{$client}{further_help_prompt} = 'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
-	$clientMode{$client}{min_search_length}   =
+	$clientMode{$client}{search_type}  = 'Album';
+	$clientMode{$client}{side}         = 0;
+	$clientMode{$client}{hierarchy}    = 'album,track';
+	$clientMode{$client}{level}        = 0;
+	$clientMode{$client}{all_entry}    = '{ALL_ALBUMS}';
+	$clientMode{$client}{player_title} =
+	  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ALBUMS}';
+	$clientMode{$client}{player_title_empty} =
+	  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ALBUMS_EMPTY}';
+	$clientMode{$client}{enter_more_prompt} =
+	  'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_ALBUMS';
+	$clientMode{$client}{further_help_prompt} =
+	  'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
+	$clientMode{$client}{min_search_length} =
 	  Slim::Utils::Prefs::get('plugin-LazySearch2-minlength_album');
 	$clientMode{$client}{perform_search} = \&performAlbumSearch;
 	$clientMode{$client}{onright}        = \&rightIntoAlbum;
@@ -364,16 +378,20 @@ sub enterGenreSearch($$) {
 	my $client = shift;
 	my $item   = shift;
 
-	$clientMode{$client}{search_type}         = 'Genre';
-	$clientMode{$client}{side}                = 0;
-	$clientMode{$client}{hierarchy}           = 'genre,track';
-	$clientMode{$client}{level}               = 0;
-	$clientMode{$client}{all_entry}           = undef;
-	$clientMode{$client}{player_title}        = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_GENRES}';
-	$clientMode{$client}{player_title_empty}  = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_GENRES_EMPTY}';
-	$clientMode{$client}{enter_more_prompt}   = 'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_GENRES';
-	$clientMode{$client}{further_help_prompt} = 'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
-	$clientMode{$client}{min_search_length}   =
+	$clientMode{$client}{search_type}  = 'Genre';
+	$clientMode{$client}{side}         = 0;
+	$clientMode{$client}{hierarchy}    = 'genre,track';
+	$clientMode{$client}{level}        = 0;
+	$clientMode{$client}{all_entry}    = undef;
+	$clientMode{$client}{player_title} =
+	  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_GENRES}';
+	$clientMode{$client}{player_title_empty} =
+	  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_GENRES_EMPTY}';
+	$clientMode{$client}{enter_more_prompt} =
+	  'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_GENRES';
+	$clientMode{$client}{further_help_prompt} =
+	  'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
+	$clientMode{$client}{min_search_length} =
 	  Slim::Utils::Prefs::get('plugin-LazySearch2-minlength_genre');
 	$clientMode{$client}{perform_search} = \&performGenreSearch;
 	$clientMode{$client}{onright}        = \&rightIntoGenre;
@@ -386,16 +404,20 @@ sub enterTrackSearch($$) {
 	my $client = shift;
 	my $item   = shift;
 
-	$clientMode{$client}{search_type}         = 'Track';
-	$clientMode{$client}{side}                = 1;
-	$clientMode{$client}{hierarchy}           = 'track';
-	$clientMode{$client}{level}               = 0;
-	$clientMode{$client}{all_entry}           = '{ALL_SONGS}';
-	$clientMode{$client}{player_title}        = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_TRACKS}';
-	$clientMode{$client}{player_title_empty}  = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_TRACKS_EMPTY}';
-	$clientMode{$client}{enter_more_prompt}   = 'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_TRACKS';
-	$clientMode{$client}{further_help_prompt} = 'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
-	$clientMode{$client}{min_search_length}   =
+	$clientMode{$client}{search_type}  = 'Track';
+	$clientMode{$client}{side}         = 1;
+	$clientMode{$client}{hierarchy}    = 'track';
+	$clientMode{$client}{level}        = 0;
+	$clientMode{$client}{all_entry}    = '{ALL_SONGS}';
+	$clientMode{$client}{player_title} =
+	  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_TRACKS}';
+	$clientMode{$client}{player_title_empty} =
+	  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_TRACKS_EMPTY}';
+	$clientMode{$client}{enter_more_prompt} =
+	  'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_TRACKS';
+	$clientMode{$client}{further_help_prompt} =
+	  'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
+	$clientMode{$client}{min_search_length} =
 	  Slim::Utils::Prefs::get('plugin-LazySearch2-minlength_track');
 	$clientMode{$client}{perform_search} = \&performTrackSearch;
 	$clientMode{$client}{onright}        = \&rightIntoTrack;
@@ -408,16 +430,20 @@ sub enterKeywordSearch($$) {
 	my $client = shift;
 	my $item   = shift;
 
-	$clientMode{$client}{search_type}         = SEARCH_TYPE_KEYWORD;
-	$clientMode{$client}{side}                = 2;
-	$clientMode{$client}{all_entry}           = undef;
-	$clientMode{$client}{hierarchy}           = 'contributor,album,track';
-	$clientMode{$client}{level}               = 0;
-	$clientMode{$client}{player_title}        = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ARTISTS}';
-	$clientMode{$client}{player_title_empty}  = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_KEYWORDS_EMPTY}';
-	$clientMode{$client}{enter_more_prompt}   = 'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_KEYWORDS';
-	$clientMode{$client}{further_help_prompt} = 'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
-	$clientMode{$client}{min_search_length}   =
+	$clientMode{$client}{search_type}  = SEARCH_TYPE_KEYWORD;
+	$clientMode{$client}{side}         = 2;
+	$clientMode{$client}{all_entry}    = undef;
+	$clientMode{$client}{hierarchy}    = 'contributor,album,track';
+	$clientMode{$client}{level}        = 0;
+	$clientMode{$client}{player_title} =
+	  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ARTISTS}';
+	$clientMode{$client}{player_title_empty} =
+	  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_KEYWORDS_EMPTY}';
+	$clientMode{$client}{enter_more_prompt} =
+	  'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_KEYWORDS';
+	$clientMode{$client}{further_help_prompt} =
+	  'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
+	$clientMode{$client}{min_search_length} =
 	  Slim::Utils::Prefs::get('plugin-LazySearch2-minlength_keyword');
 	$clientMode{$client}{onright}       = \&keywordOnRightHandler;
 	$clientMode{$client}{search_tracks} = undef;
@@ -591,7 +617,8 @@ sub initPlugin() {
 
 	# Subscribe so that we are notified when the database has been rescanned;
 	# we use this so that we can apply lazification.
-	Slim::Control::Request::subscribe( \&Plugins::LazySearch2::Plugin::scanDoneCallback,
+	Slim::Control::Request::subscribe(
+		\&Plugins::LazySearch2::Plugin::scanDoneCallback,
 		[ ['rescan'], ['done'] ] );
 
 	# Top-level menu mode. We register a custom INPUT.Choice mode so that
@@ -1017,6 +1044,7 @@ sub lazyOnSearch {
 
 	} else {
 		if ($gotoLazy) {
+
 			# Go to the top-level category menu for the plugin's search mode.
 			$log->debug("Entering top-level category menu");
 			enterCategoryMenu($client);
@@ -1038,7 +1066,7 @@ sub enterCategoryMenu {
 	# deeper and deeper menus (one press of LEFT will always get back out of
 	# lazy search altogether).
 	Slim::Buttons::Common::setMode( $client, 'home' );
-	setMode(undef, $client, 'push');
+	setMode( undef, $client, 'push' );
 }
 
 # Subroutine to perform the 'browse into' RIGHT button handler for lazy search
@@ -1154,7 +1182,9 @@ sub lazyOnPlay {
 	if ( blessed($item) ) {
 		my $id = $item->id;
 
-		$log->debug("PLAY/ADD/INSERT pressed on '$clientMode{$client}{search_type}' search results (id $id), addMode=$addMode");
+		$log->debug(
+"PLAY/ADD/INSERT pressed on '$clientMode{$client}{search_type}' search results (id $id), addMode=$addMode"
+		);
 
 		@playItems = &$searchTracksFunction($id);
 	} else {
@@ -1175,7 +1205,7 @@ sub lazyOnPlay {
 	}
 
 	# Now we've built the list of track items, play them.
-	$log->debug("About to '$cmd' " . scalar @playItems . " items");
+	$log->debug( "About to '$cmd' " . scalar @playItems . " items" );
 	$client->execute( [ 'playlist', $cmd, 'listref', \@playItems ] );
 
 	# Not sure why, but we don't need to start the play
@@ -1378,8 +1408,10 @@ sub onFindTimer() {
 
 		$client->showBriefly(
 			{
-				'line1' =>
-				  sprintf( $client->string('PLUGIN_LAZYSEARCH2_LINE1_SEARCHING'), $searchText )
+				'line1' => sprintf(
+					$client->string('PLUGIN_LAZYSEARCH2_LINE1_SEARCHING'),
+					$searchText
+				)
 			}
 		);
 
@@ -1458,8 +1490,7 @@ sub performArtistSearch($$) {
 		'contributor',
 		$condition,
 		{
-			columns =>
-			  [ 'id', 'name', 'musicmagic_mixable' ],
+			columns  => [ 'id', 'name', 'musicmagic_mixable' ],
 			order_by => 'name'
 		}
 	  )->distinct;
@@ -1497,8 +1528,7 @@ sub performGenreSearch($$) {
 	my $searchResults = Slim::Schema->resultset('Genre')->search(
 		$condition,
 		{
-			columns =>
-			  [ 'id', 'name', 'musicmagic_mixable' ],
+			columns  => [ 'id', 'name', 'musicmagic_mixable' ],
 			order_by => 'name'
 		}
 	);
@@ -1517,11 +1547,7 @@ sub performTrackSearch($$) {
 	my $searchResults = Slim::Schema->resultset('Track')->search(
 		$condition,
 		{
-			columns => [
-				'id',  'title',
-				'url',
-				'musicmagic_mixable'
-			],
+			columns  => [ 'id', 'title', 'url', 'musicmagic_mixable' ],
 			order_by => 'title'
 		}
 	);
@@ -1757,7 +1783,7 @@ sub onCreateMixHandler {
 	my $items     = $client->modeParam('listRef');
 	my $item      = $items->[$listIndex];
 
-	$log->debug('Creating mix for item ' . $item->id);
+	$log->debug( 'Creating mix for item ' . $item->id );
 
 	# Punt on to the implementation in BrowseDB... This is not very elegant
 	# as there shouldn't be any coupling between this and the BrowseDB mode.
@@ -1869,12 +1895,9 @@ sub onDelAllHandler {
 # plugin is activated and removing the need to check they're defined in each
 # case of reading them.
 sub checkDefaults {
-	if ( !Slim::Utils::Prefs::isDefined('plugin-LazySearch2-showhelp') )
-	{
-		Slim::Utils::Prefs::set(
-			'plugin-LazySearch2-showhelp',
-			LAZYSEARCH_SHOWHELP_DEFAULT
-		);
+	if ( !Slim::Utils::Prefs::isDefined('plugin-LazySearch2-showhelp') ) {
+		Slim::Utils::Prefs::set( 'plugin-LazySearch2-showhelp',
+			LAZYSEARCH_SHOWHELP_DEFAULT );
 	}
 	if ( !Slim::Utils::Prefs::isDefined('plugin-LazySearch2-minlength_artist') )
 	{
@@ -1990,7 +2013,9 @@ sub scanDoneCallback($) {
 	my $pluginRevision = '$Revision$';
 
 	if ( $prefRevision ne $pluginRevision ) {
-		$log->info("Re-lazifying (plugin version changed from '$prefRevision' to '$pluginRevision'");
+		$log->info(
+"Re-lazifying (plugin version changed from '$prefRevision' to '$pluginRevision'"
+		);
 		$force = 1;
 		Slim::Utils::Prefs::set( 'plugin-LazySearch2-revision',
 			$pluginRevision );
@@ -2110,7 +2135,7 @@ sub lazifyDatabaseType {
 	);
 	my $rsCount = $rs->count;
 
-	$log->debug("Lazify type=$type, " . $rsCount . " items to lazify");
+	$log->debug( "Lazify type=$type, " . $rsCount . " items to lazify" );
 
 	# Store the unlazified item IDs; later, we'll work on these in chunks from
 	# within a task.
@@ -2137,7 +2162,9 @@ sub encodeTask {
 	# As protection from two encodes going on simultaneously, if we detect that
 	# a scan is in progress we cancel the whole encode task.
 	if ( Slim::Music::Import->stillScanning() ) {
-		$log->debug("Detected a rescan while database scan in progress - cancelling lazy encoding");
+		$log->debug(
+"Detected a rescan while database scan in progress - cancelling lazy encoding"
+		);
 		%encodeQueues = ();
 
 		return 0;
@@ -2161,10 +2188,7 @@ sub encodeTask {
 	my $keywordAlbum   = $typeHash{keyword_album};
 	my $keywordTrack   = $typeHash{keyword_track};
 
-	$log->debug( 'EncodeTask - '
-		  . $remainingItems
-		  . " $type"
-		  . "s remaining" );
+	$log->debug( 'EncodeTask - ' . $remainingItems . " $type" . "s remaining" );
 
 	# Go through and encode each of the identified IDs. To maintain performance
 	# we will bail out if this takes more than a defined time slice.
@@ -2231,7 +2255,7 @@ sub encodeTask {
 	if ( $endTime != $startTime ) {
 		$speed = int( $rowsDone / ( $endTime - $startTime ) );
 	}
-	$log->debug("Lazifier running at $speed $type" . "s/sec" );
+	$log->debug( "Lazifier running at $speed $type" . "s/sec" );
 
 	# If we've exhausted the ids for this type then remove this type from the
 	# hash. If there are any left, however, we'll leave those in for the task
@@ -2374,16 +2398,18 @@ sub keywordOnRightHandler {
 
 					# Current item provides contributor constraint.
 					$contributorConstraint = $id;
-					$line1BrowseText       = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ALBUMS}';
-					$hierarchy             = 'album,track';
+					$line1BrowseText       =
+					  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ALBUMS}';
+					$hierarchy = 'album,track';
 
 					#					$client->modeParam('search_type') = 'Album';
 				} elsif ( $level == 2 ) {
 
 					# Current item provides album constraint.
 					$albumConstraint = $id;
-					$line1BrowseText = '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_TRACKS}';
-					$hierarchy       = 'track';
+					$line1BrowseText =
+					  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_TRACKS}';
+					$hierarchy = 'track';
 
 					#					$client->modeParam('search_type') = 'Track';
 				}
@@ -2427,7 +2453,7 @@ sub keywordOnRightHandler {
 					onRight => \&keywordOnRightHandler,
 
 					onLeft => sub {
-						  $log->debug("LEFT");
+						$log->debug("LEFT");
 					},
 
 				 # A handler that manages play/add/insert (differentiated by the
@@ -2457,8 +2483,8 @@ sub keywordOnRightHandler {
 
 				# We're currently at the track level so push into track info
 				# browse mode (which needs the track URL to be looked-up).
-				$log->debug("going into trackinfo mode for track ID=$id url="
-					  . $item->url);
+				$log->debug( "going into trackinfo mode for track ID=$id url="
+					  . $item->url );
 				Slim::Buttons::Common::pushModeLeft( $client, 'trackinfo',
 					{ 'track' => $item } );
 			}
@@ -2516,7 +2542,8 @@ sub keywordMatchText($$$) {
 # Called when one of the plugin preferences that affects the contents of the
 # database has changed - this schedules a forced relazify of the database.
 sub scheduleForcedRelazify {
-	$log->info("Scheduling database relazification because of preference changes");
+	$log->info(
+		"Scheduling database relazification because of preference changes");
 
 	# Remove any existing scheduled callback.
 	Slim::Utils::Timers::killOneTimer( 1, \&lazifyDatabase );
@@ -2547,6 +2574,7 @@ sub lazifyNow {
 # relazification since it will completely rebuild our custom content, whether
 # it needs it or not.
 sub relazifyDatabase {
+
 	# Forcibly re-lazify the whole database.
 	lazifyDatabase(1);
 }
@@ -2555,14 +2583,16 @@ sub relazifyDatabase {
 sub webPages {
 	my $class = shift;
 
-	Slim::Web::HTTP::addPageFunction(URL_BASE . '/settings/logo.jpg', \&handleLogoJPG);
+	Slim::Web::HTTP::addPageFunction( URL_BASE . '/settings/logo.jpg',
+		\&handleLogoJPG );
 }
 
 # When the logo is requested, that's rendered as static content.
 sub handleLogoJPG {
-	my ($client, $params) = @_;
+	my ( $client, $params ) = @_;
 
-	return Slim::Web::HTTP::getStaticContent(URL_BASE . '/settings/logo.jpg', $params);
+	return Slim::Web::HTTP::getStaticContent( URL_BASE . '/settings/logo.jpg',
+		$params );
 }
 
 1;
