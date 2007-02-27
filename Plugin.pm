@@ -2555,18 +2555,12 @@ sub relazifyDatabase {
 sub webPages {
 	my $class = shift;
 
-	#@@REMOVEME@@
-	$log->debug("webPages called");
-
 	Slim::Web::HTTP::addPageFunction(URL_BASE . '/settings/logo.jpg', \&handleLogoJPG);
 }
 
 # When the logo is requested, that's rendered as static content.
 sub handleLogoJPG {
 	my ($client, $params) = @_;
-
-	#@@REMOVEME@@
-	$log->debug("handleLogoJPG called");
 
 	return Slim::Web::HTTP::getStaticContent(URL_BASE . '/settings/logo.jpg', $params);
 }
