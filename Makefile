@@ -29,7 +29,7 @@ SLIMDIR=/usr/local/slimserver7/server
 PLUGINSDIR=$(SLIMDIR)/Plugins
 PLUGINDIR=LazySearch2
 REVISION=`svn info . | grep "^Revision:" | cut -d' ' -f2`
-DISTFILE=LazySearch2-7_0-r$(REVISION).zip
+DISTFILE=LazySearch2-7_0-$(VERSION).zip
 DISTFILEDIR=$(RELEASEDIR)/$(DISTFILE)
 SVNDISTFILE=LazySearch2.zip
 LATESTLINK=$(RELEASEDIR)/LazySearch2-7_0-latest.zip
@@ -45,12 +45,13 @@ FORCE:
 
 make-stage:
 	echo "Creating plugin stage files (v$(VERSION))..."
+	-chmod -R +w $(STAGEDIR)/* >/dev/null 2>&1
 	-rm -rf $(STAGEDIR)/* >/dev/null 2>&1
 	for FILE in $(SOURCE); do \
-		mkdir -p "$(STAGEDIR)/`dirname $$FILE`"; \
-		sed "s/@@VERSION@@/$(VERSION)/" <"$$FILE" >"$(STAGEDIR)/$$FILE"; \
+		mkdir -p "$(STAGEDIR)/$(PLUGINDIR)/`dirname $$FILE`"; \
+		sed "s/@@VERSION@@/$(VERSION)/" <"$$FILE" >"$(STAGEDIR)/$(PLUGINDIR)/$$FILE"; \
 	done
-	chmod -w $(STAGEDIR)/*
+	chmod -R -w $(STAGEDIR)/*
 
 # Regenerate tags.
 tags: $(PERLSOURCE)
@@ -69,8 +70,7 @@ install: make-stage
 	echo Installing plugin...
 	-[[ -d "$(PLUGINSDIR)/$(PLUGINDIR)" ]] && sudo chmod -R +w "$(PLUGINSDIR)/$(PLUGINDIR)"
 	-[[ -d "$(PLUGINSDIR)/$(PLUGINDIR)" ]] && sudo rm -r "$(PLUGINSDIR)/$(PLUGINDIR)"
-	sudo mkdir "$(PLUGINSDIR)/$(PLUGINDIR)"
-	sudo cp -r $(STAGEDIR)/* "$(PLUGINSDIR)/$(PLUGINDIR)"
+	sudo cp -r "$(STAGEDIR)/$(PLUGINDIR)" "$(PLUGINSDIR)"
 	sudo chmod -R -w "$(PLUGINSDIR)/$(PLUGINDIR)"
 
 # Restart SlimServer, quite forcefully. This is obviously quite
@@ -91,14 +91,13 @@ logtail:
 
 # TODO - fix this for new package layout
 # Build a distribution package for this Plugin.
-release: $(DISTFILES)
+release: make-stage
 	echo Building distfile: $(DISTFILE)
 	echo Remember to have committed and updated first.
-	rm "$(DISTFILEDIR)" >/dev/null 2>&1 || true
-	zip -j "$(DISTFILEDIR)" $(DISTFILES)
-	rm "$(LATESTLINK)" >/dev/null 2>&1 || true
+	-rm "$(DISTFILEDIR)" >/dev/null 2>&1
+	(cd "$(STAGEDIR)" && zip -r "../$(DISTFILEDIR)" "$(PLUGINDIR)")
+	-rm "$(LATESTLINK)" >/dev/null 2>&1
 	ln -s "$(DISTFILE)" "$(LATESTLINK)"
-	rm $(DESTSTAGE)
 	cp $(DISTFILEDIR) $(SVNDISTFILE)
 
 # Utility target to clear lazification from the database without the bother

@@ -4,11 +4,12 @@ This file contains very brief instructions on how to install and activate
 this plugin on SlimServer. For full details please refer to:
 http://hickinbottom.demon.co.uk/lazysearch
 
-1. Make sure you are running SlimServer 6.5.0 or later (you need a different
-version of the plugin for SlimServer 6.3.x or 6.2.x - see the website if that
-applies to you).
+1. Make sure you are running SlimServer 7.0 or later (you need different
+versions of the plugin for earlier versions of SlimServer - see the website if
+that applies to you).
 
-2. Copy LazySearch2.pm to your SlimServer plugins directory.
+2. Extract the ZIP file (being sure to preserve the paths in the ZIP file), and
+copy the resulting LazySearch2 directory to your SlimServer plugins directory.
 Windows: C:\Program Files\SlimServer\Server\Plugins
 Linux: it depends, but something like /usr/local/slimserver/Plugins
 MacOSX: ~/Library/SlimDevices/Plugins (I believe you need to do this
@@ -20,7 +21,7 @@ Windows: use the 'services' applet in the control panel, or the SlimServer
 Linux: it depends, but something like '/etc/init.d/slimserver restart'.
 Mac OS X: use the standard OSX 'System Properties' menu.
 
-4. Make sure the plugin is present and ticked on the 'Server Settings/Plugins'
+4. Make sure the plugin is present and enabled on the 'Server Settings/Plugins'
 page on the SlimServer web interface.
 
 5. Start using the plugin when the initial background scan has finished.
