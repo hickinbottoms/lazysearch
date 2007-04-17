@@ -29,11 +29,11 @@
 	<version>@@VERSION@@</version>
 	<description>PLUGIN_LAZYSEARCH2_DESC</description>
 	<creator>Stuart Hickinbottom</creator>
-	<email>stuart@hickinbottom.demon.co.uk</email>
+	<email>stuart@hickinbottom.com</email>
 
 	<defaultState>enabled</defaultState>
         
-	<homepageURL>http://hickinbottom.demon.co.uk/lazysearch</homepageURL>
+	<homepageURL>http://www.hickinbottom.com/lazysearch</homepageURL>
 	<optionsURL>plugins/LazySearch2/settings/basic.html</optionsURL>
 	<type>2</type>
 

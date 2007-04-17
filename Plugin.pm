@@ -23,7 +23,7 @@
 # remote control.
 #
 # For further details see:
-# http://hickinbottom.demon.co.uk/lazysearch
+# http://www.hickinbottom.com/lazysearch
 
 use strict;
 use warnings;
