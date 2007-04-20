@@ -26,6 +26,7 @@ package Plugins::LazySearch2::Settings;
 
 use base qw(Slim::Web::Settings);
 use Slim::Utils::Log;
+use Slim::Utils::Prefs;
 
 # A logger we will use to write plugin-specific messages.
 my $log = Slim::Utils::Log->addLogCategory(
@@ -36,6 +37,9 @@ my $log = Slim::Utils::Log->addLogCategory(
 	}
 );
 
+# Access to preferences for this plugin.
+my $myPrefs = preferences('plugin.lazysearch2');
+
 sub name {
 	return 'PLUGIN_LAZYSEARCH2';
 }
@@ -44,7 +48,11 @@ sub page {
 	return 'plugins/LazySearch2/settings/basic.html';
 }
 
-#@@TODO@@ make sure we validate to ensure integers etc.
+# Set up validation rules.
+$myPrefs->setValidate(
+	{ 'validator' => 'intlimit', 'low' => 2, 'high' => 9 },
+	qw(minlength_artist minlength_album minlength_genre minlength_track minlength_keyword)
+);
 
 sub handler {
 	my ( $class, $client, $params ) = @_;
@@ -80,17 +88,14 @@ sub handler {
 		# the change in preferences.
 		my $force_relazify = 0;
 		for my $relazify_pref (@force_relazify_prefs) {
-			if ( Slim::Utils::Prefs::get("plugin-LazySearch2-$relazify_pref") ne
-				$params->{$relazify_pref} )
-			{
+			if ( $myPrefs->get($relazify_pref) ne $params->{$relazify_pref} ) {
 				$log->debug("Preference '$relazify_pref' changed");
 				$force_relazify = 1;
 			}
 		}
 
 		for my $pref (@prefs) {
-			Slim::Utils::Prefs::set( "plugin-LazySearch2-" . $pref,
-				$params->{$pref} );
+			$myPrefs->set( $pref, $params->{$pref} );
 		}
 
 		if ($force_relazify) {
@@ -107,8 +112,7 @@ sub handler {
 	}
 
 	for my $pref (@prefs) {
-		$params->{'prefs'}->{$pref} =
-		  Slim::Utils::Prefs::get( "plugin-LazySearch2-" . $pref );
+		$params->{'prefs'}->{$pref} = $myPrefs->get($pref);
 	}
 
 	return $class->SUPER::handler( $client, $params );
