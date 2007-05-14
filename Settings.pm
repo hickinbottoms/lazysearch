@@ -94,10 +94,15 @@ sub handler {
 			}
 		}
 
+		# Now change the preferences from the ones posted through our
+		# settings page.
 		for my $pref (@prefs) {
 			$myPrefs->set( $pref, $params->{$pref} );
 		}
 
+		# If we found earlier that any of the settings that affect our
+		# database contents have been changed, then make sure we rebuild our
+		# extra information in the database.
 		if ($force_relazify) {
 			$log->info(
 				"Forcing relazification of the database due to settings changes"
