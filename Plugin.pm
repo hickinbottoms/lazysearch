@@ -2032,6 +2032,12 @@ sub lazifyDatabaseType {
 	my $considerKeywordArtist = shift;
 	my $considerKeywordAlbum  = shift;
 	my $considerKeywordTrack  = shift;
+	my $isTrackEncode         = 0;
+
+	# If any keyword encoding is considered then it's a track encode.
+	$isTrackEncode = $considerKeywordArtist
+	  || $considerKeywordAlbum
+	  || $considerKeywordTrack;
 
 	# Include keywords in the lazified version if the caller asked for it and
 	# the user preference says they want it.
@@ -2087,6 +2093,7 @@ sub lazifyDatabaseType {
 			rs              => $rs,
 			source_attr     => $sourceAttr,
 			remaining_items => $rsCount,
+			is_track_encode => $isTrackEncode,
 			keyword_artist  => $includeKeywordArtist,
 			keyword_album   => $includeKeywordAlbum,
 			keyword_track   => $includeKeywordTrack,
@@ -2127,6 +2134,7 @@ sub encodeTask {
 	my $rs             = $typeHash{rs};
 	my $sourceAttr     = $typeHash{source_attr};
 	my $remainingItems = $typeHash{remaining_items};
+	my $isTrackEncode  = $typeHash{is_track_encode};
 	my $keywordArtist  = $typeHash{keyword_artist};
 	my $keywordAlbum   = $typeHash{keyword_album};
 	my $keywordTrack   = $typeHash{keyword_track};
@@ -2153,6 +2161,12 @@ sub encodeTask {
 			# database.
 			my $customSearch = lazifyColumn( $obj->get_column($sourceAttr) );
 
+			# Track encoding has a separator to separate the track part from
+			# the keywords (if any are encoded).
+			if ($isTrackEncode) {
+				$customSearch .= '|';
+			}
+
 			# If keyword searching is enabled then add keywords.
 			if ( $keywordArtist || $keywordAlbum || $keywordTrack ) {
 				my $encodedArtist = '';
@@ -2176,7 +2190,7 @@ sub encodeTask {
 				}
 
 				# Add this to the custom search column.
-				$customSearch .= "|$encodedTrack$encodedAlbum$encodedArtist";
+				$customSearch .= "$encodedTrack$encodedAlbum$encodedArtist";
 			}
 
 			# Get the custom search added to the database.
