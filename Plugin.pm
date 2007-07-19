@@ -2280,7 +2280,8 @@ tr/ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 /222333444555666777788899991234567890X/;
 	# Now, if there's any punctuation left in we remove that to aid searching.
 	# We do that by calling the SlimServer method that transforms all
 	# punctuation to spaces, then remove those spaces (since the original
-	# spaces are temporarily turned to X's.
+	# spaces are temporarily turned to X's, we'll be able to recover those
+	# in the next step).
 	if ( $out_string ne '0' ) {
 		$out_string = Slim::Utils::Text::ignorePunct($out_string);
 		$out_string =~ s/ //go;
