@@ -1,4 +1,4 @@
-# Web settings page handler for LazySearch2 plugin for SlimServer.
+# Web settings page handler for LazySearch2 plugin for SqueezeCentre.
 # Copyright © Stuart Hickinbottom 2004-2007
 
 # This file is part of LazySearch2.
@@ -14,7 +14,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Foobar; if not, write to the Free Software
+# along with LazySearch2; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 # $Id$

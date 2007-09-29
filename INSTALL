@@ -1,28 +1,29 @@
 # $Id$
 
 This file contains very brief instructions on how to install and activate
-this plugin on SlimServer. For full details please refer to:
+this plugin on SqueezeCentre. For full details please refer to:
 http://www.hickinbottom.com/lazysearch
 
-1. Make sure you are running SlimServer 7.0 or later (you need different
-versions of the plugin for earlier versions of SlimServer - see the website if
-that applies to you).
+1. Make sure you are running SqueezeCentre 7.0 or later (you need different
+versions of the plugin for earlier versions of SqueezeCentre (or SlimServer as it was previously called) - see the website if that applies to you).
 
 2. Extract the ZIP file (being sure to preserve the paths in the ZIP file), and
-copy the resulting LazySearch2 directory to your SlimServer plugins directory.
-Windows: C:\Program Files\SlimServer\Server\Plugins
-Linux: it depends, but something like /usr/local/slimserver/Plugins
-MacOSX: ~/Library/SlimDevices/Plugins (I believe you need to do this
-  as the user that you originally installed SlimServer as.
+copy the resulting LazySearch2 directory to your SqueezeCentre plugins
+directory.
 
-3. Restart SlimServer to make sure it has seen the new plugin.
-Windows: use the 'services' applet in the control panel, or the SlimServer
-  tray icon in the bottom-right of the screen if you have it running.
-Linux: it depends, but something like '/etc/init.d/slimserver restart'.
+Windows: C:\Program Files\SqueezeCentre\Server\Plugins
+Linux: it depends, but something like /usr/local/squeezecentre/Plugins
+MacOSX: ~/Library/SlimDevices/Plugins (I believe you need to do this
+  as the user that you originally installed SqueezeCentre as.
+
+3. Restart SqueezeCentre to make sure it has seen the new plugin.
+Windows: use the 'services' applet in the control panel, or the SqueezeCentre
+         tray icon in the bottom-right of the screen if you have it running.
+Linux: it depends, but something like '/etc/init.d/squeezecentre restart'.
 Mac OS X: use the standard OSX 'System Properties' menu.
 
 4. Make sure the plugin is present and enabled on the 'Server Settings/Plugins'
-page on the SlimServer web interface.
+page on the SqueezeCentre web interface.
 
 5. Start using the plugin when the initial background scan has finished.
 The plugin will begin adding lazy search indexing the first time the server

@@ -16,7 +16,7 @@
 <!-- GNU General Public License for more details. -->
 
 <!-- You should have received a copy of the GNU General Public License -->
-<!-- along with Foobar; if not, write to the Free Software -->
+<!-- along with LazySearch2; if not, write to the Free Software -->
 <!-- Foundation, Inc., 51 Franklin St, Fifth Floor, -->
 <!-- Boston, MA  02110-1301  USA -->
 
@@ -38,7 +38,7 @@
 	<type>2</type>
 
 	<targetApplication>
-		<id>SlimServer</id>
+		<id>SqueezeCentre</id>
 		<minVersion>7.0a</minVersion>
 		<maxVersion>7.0+</maxVersion>
 	</targetApplication>

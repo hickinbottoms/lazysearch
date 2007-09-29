@@ -1,4 +1,4 @@
-# Makefile for LazySearch2 plugin for SlimServer 7.0 (and later)
+# Makefile for LazySearch2 plugin for SqueezeCentre 7.0 (and later)
 # Copyright © Stuart Hickinbottom 2004-2007
 
 # This file is part of LazySearch2.
@@ -14,18 +14,18 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Foobar; if not, write to the Free Software
+# along with LazySearch2; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 # $Id$
 
-VERSION=3.0b2
+VERSION=3.0b3
 PERLSOURCE=Plugin.pm Settings.pm
 HTMLSOURCE=HTML/EN/plugins/LazySearch2/settings/basic.html HTML/EN/plugins/LazySearch2/settings/logo.jpg
 SOURCE=$(PERLSOURCE) $(HTMLSOURCE) INSTALL strings.txt install.xml LICENSE
 RELEASEDIR=releases
 STAGEDIR=stage
-SLIMDIR=/usr/local/slimserver7/server
+SLIMDIR=/usr/local/squeezecenter/server
 PLUGINSDIR=$(SLIMDIR)/Plugins
 PLUGINDIR=LazySearch2
 REVISION=`svn info . | grep "^Revision:" | cut -d' ' -f2`
@@ -33,7 +33,7 @@ DISTFILE=LazySearch2-7_0-$(VERSION).zip
 DISTFILEDIR=$(RELEASEDIR)/$(DISTFILE)
 SVNDISTFILE=LazySearch2.zip
 LATESTLINK=$(RELEASEDIR)/LazySearch2-7_0-latest.zip
-PREFS=/etc/slimserver7.pref
+PREFS=/etc/squeezecenter.pref
 
 .SILENT:
 
@@ -65,7 +65,7 @@ pretty:
 	done
 	echo "You're Beautiful..."
 
-# Install the plugin in SlimServer.
+# Install the plugin in SqueezeCentre.
 install: make-stage
 	echo Installing plugin...
 	-[[ -d "$(PLUGINSDIR)/$(PLUGINDIR)" ]] && sudo chmod -R +w "$(PLUGINSDIR)/$(PLUGINDIR)"
@@ -73,21 +73,23 @@ install: make-stage
 	sudo cp -r "$(STAGEDIR)/$(PLUGINDIR)" "$(PLUGINSDIR)"
 	sudo chmod -R -w "$(PLUGINSDIR)/$(PLUGINDIR)"
 
-# Restart SlimServer, quite forcefully. This is obviously quite
+# Restart SqueezeCentre, quite forcefully. This is obviously quite
 # Gentoo-specific.
 restart:
-	echo "Forcefully restarting SlimServer..."
-	sudo /etc/init.d/slimserver7 stop
-	sudo /etc/init.d/slimserver7 zap
+	echo "Forcefully restarting SqueezeCentre..."
+	sudo /etc/init.d/squeezeslave stop
+	sudo /etc/init.d/squeezecenter stop
+	sudo /etc/init.d/squeezecenter zap
 	sleep 2
-	sudo sh -c ">/var/log/slimserver7/server.log"
-	sudo sh -c ">/var/log/slimserver7/scanner.log"
-	sudo sh -c ">/var/log/slimserver7/perfmon.log"
-	sudo /etc/init.d/slimserver7 restart
+	sudo sh -c ">/var/log/squeezecenter/server.log"
+	sudo sh -c ">/var/log/squeezecenter/scanner.log"
+	sudo sh -c ">/var/log/squeezecenter/perfmon.log"
+	sudo /etc/init.d/squeezecenter restart
+	sudo /etc/init.d/squeezeslave restart
 
 logtail:
-	echo "Following the end of the SlimServer log..."
-	tail -F /var/log/slimserver7/server.log
+	echo "Following the end of the SqueezeCentre log..."
+	multitail -f /var/log/squeezecenter/server.log
 
 # TODO - fix this for new package layout
 # Build a distribution package for this Plugin.
