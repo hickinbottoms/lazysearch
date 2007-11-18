@@ -77,7 +77,8 @@ install: make-stage
 # Gentoo-specific.
 restart:
 	echo "Forcefully restarting SqueezeCentre..."
-	sudo /etc/init.d/squeezeslave stop
+	-sudo pkill -9 squeezeslave
+	sudo /etc/init.d/squeezeslave zap
 	sudo /etc/init.d/squeezecenter stop
 	sudo /etc/init.d/squeezecenter zap
 	sleep 2

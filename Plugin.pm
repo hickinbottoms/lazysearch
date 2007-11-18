@@ -567,7 +567,7 @@ sub rightIntoTrack($$) {
 	# Push into the trackinfo mode for this one track.
 	my $track = Slim::Schema->rs('Track')->find( $item->id );
 	Slim::Buttons::Common::pushModeLeft( $client, 'trackinfo',
-		{ 'track' => $track->url } );
+		{ 'track' => $track } );
 }
 
 # Function called when leaving our top-level lazy search menu mode. We use this
