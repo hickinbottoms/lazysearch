@@ -4,22 +4,24 @@
 
 inherit eutils
 
-MY_P="LazySearch2-${PV}"
-
-SLIMSERVER_VERSION="7.0"
+MY_P="LazySearch2-7_0-${PV}"
 
 DESCRIPTION="A plugin for SqueezeCentre to perform searches more quickly and easily using your player's remote control."
 HOMEPAGE="http://www.hickinbottom.com/lazysearch"
-SRC_URI="http://www.hickinbottom.com/lazysearch/${MY_P}.tar.gz"
+SRC_URI="http://www.hickinbottom.com/lazysearch/browser/downloads/${MY_P}.zip?format=raw"
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~x86"
-IUSE=""
-DEPEND=""
+
 RDEPEND="
-	>=media-sound/squeezecentre-${SLIMSERVER_VERSION}"
-S="${WORKDIR}"
+	media-sound/squeezecentre
+	"
+
+S="${WORKDIR}/${MY_P}"
+
+# The root of the SqueezeCenter, as defined by the SqueezeCenter ebuild
+INSTROOT=/opt/squeezecenter
 
 src_install() {
-	cp -r * ${D}/opt/squeezecentre/Plugins
+	cp -r * ${D}${INSTROOT}/Plugins
 }

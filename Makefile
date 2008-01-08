@@ -35,6 +35,14 @@ SVNDISTFILE=../downloads/$(DISTFILE)
 LATESTLINK=$(RELEASEDIR)/LazySearch2-7_0-latest.zip
 PREFS=/etc/squeezecenter.pref
 
+# VM stuff for testing
+PIDFILE=qemu.pid
+VMHOST=chandra
+LOCAL_PORTAGE=/usr/local/portage
+EBUILD_PREFIX=squeezecenter-lazysearch2
+EBUILD_CATEGORY=media-plugins/$(EBUILD_PREFIX)
+EBUILD_DIR=$(LOCAL_PORTAGE)/$(EBUILD_CATEGORY)
+
 .SILENT:
 
 all:
@@ -108,3 +116,19 @@ release: make-stage
 unlazify:
 	echo Unlazifying the database...
 	sh -c "mysql --user=`grep -i dbuser $(PREFS) | cut -d' ' -f2` --password=`grep -i dbpassword $(PREFS) | cut -d' ' -f2` `grep -i dbsource $(PREFS) | cut -d' ' -f2 | cut -d= -f2 | cut -d';' -f1` < unlazify.sql"
+
+
+inject:
+	[ -f $(PIDFILE) ] || echo error: VM not running
+	[ -f $(PIDFILE) ] && echo Injecting ebuilds...
+	ssh root@$(VMHOST) "rm -r $(EBUILD_DIR)/* >/dev/null 2>&1 || true"
+	ssh root@$(VMHOST) mkdir -p $(EBUILD_DIR) $(EBUILD_DIR)/files
+	scp ebuild/metadata.xml $(EBUILDS) root@$(VMHOST):$(EBUILD_DIR)
+	(cd files; scp $(FILES) root@$(VMHOST):$(EBUILD_DIR)/files)
+	ssh root@$(VMHOST) 'cd $(EBUILD_DIR); for EBUILD in $(EBUILDS); do ebuild $(EBUILD_DIR)/$$EBUILD manifest; done'
+	echo Unmasking ebuild...
+	ssh root@$(VMHOST) mkdir -p /etc/portage
+	ssh root@$(VMHOST) "grep -q '$(EBUILD_CATEGORY)' /etc/portage/package.keywords >/dev/null 2>&1 || echo '$(EBUILD_CATEGORY) ~x86' >> /etc/portage/package.keywords"
+	ssh root@$(VMHOST) "echo 'dev-perl/GD jpeg png' >> /etc/portage/package.use"
+	ssh root@$(VMHOST) "echo 'media-libs/gd jpeg png' >> /etc/portage/package.use"
+
