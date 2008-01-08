@@ -31,7 +31,7 @@ PLUGINDIR=LazySearch2
 REVISION=`svn info . | grep "^Revision:" | cut -d' ' -f2`
 DISTFILE=LazySearch2-7_0-$(VERSION).zip
 DISTFILEDIR=$(RELEASEDIR)/$(DISTFILE)
-SVNDISTFILE=LazySearch2.zip
+SVNDISTFILE=../downloads/$(DISTFILE)
 LATESTLINK=$(RELEASEDIR)/LazySearch2-7_0-latest.zip
 PREFS=/etc/squeezecenter.pref
 

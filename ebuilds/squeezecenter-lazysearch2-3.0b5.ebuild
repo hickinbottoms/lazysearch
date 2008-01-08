@@ -1,12 +1,13 @@
-# LazySearch2 Plugin for SqueezeCentre
-# Copyright © Stuart Hickinbottom 2004-2007
-#
-# $Id$
+# Copyright 1999-2008 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header:$
 
 inherit eutils
 
-SLIMSERVER_VERSION="7.0"
 MY_P="LazySearch2-${PV}"
+
+SLIMSERVER_VERSION="7.0"
+
 DESCRIPTION="A plugin for SqueezeCentre to perform searches more quickly and easily using your player's remote control."
 HOMEPAGE="http://www.hickinbottom.com/lazysearch"
 SRC_URI="http://www.hickinbottom.com/lazysearch/${MY_P}.tar.gz"
