@@ -305,12 +305,7 @@ SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_0
 	NL	Geeft toegang tot het normale zoek muziek menu
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_1
-	DA	Lazy Search menuen.
-	DE	Zeigt das Menü der Faulpelz-Suche an
-	EN	Accesses the lazy search music menu
-	ES	Accede al menú de búsqueda musical laxa
-	FI	Laiska musiikin haku
-	NL	Geeft toegang tot het Lazy Search muziek menu
+	EN	Toggles between lazy search and standard search
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_2
 	DE	Startet eine Faulpelz-Suche nach einem Interpret
@@ -336,6 +331,14 @@ SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_6
 	DE	Startet eine Faulpelz-Suche nach einem Stichwort
 	EN	Begins a keyword lazy search
 	FI	Aloittaa sanan laiskan haun
+
+SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_7
+	DA	Lazy Search menuen.
+	DE	Zeigt das Menü der Faulpelz-Suche an
+	EN	Accesses the lazy search music menu
+	ES	Accede al menú de búsqueda musical laxa
+	FI	Laiska musiikin haku
+	NL	Geeft toegang tot het Lazy Search muziek menu
 
 PLUGIN_LAZYSEARCH2_SCAN_IN_PROGRESS
 	DA	Note: dit musik biblioteket bliver lige nu scannet

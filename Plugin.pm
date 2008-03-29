@@ -63,12 +63,13 @@ use constant LAZYBROWSE_KEYWORD_MODE => 'PLUGIN_LAZYSEARCH2.keywordbrowse';
 
 # Search button behaviour options.
 use constant LAZYSEARCH_SEARCHBUTTON_STANDARD => 0;
-use constant LAZYSEARCH_SEARCHBUTTON_MENU     => 1;
+use constant LAZYSEARCH_SEARCHBUTTON_TOGGLE   => 1;
 use constant LAZYSEARCH_SEARCHBUTTON_ARTIST   => 2;
 use constant LAZYSEARCH_SEARCHBUTTON_ALBUM    => 3;
 use constant LAZYSEARCH_SEARCHBUTTON_GENRE    => 4;
 use constant LAZYSEARCH_SEARCHBUTTON_TRACK    => 5;
 use constant LAZYSEARCH_SEARCHBUTTON_KEYWORD  => 6;
+use constant LAZYSEARCH_SEARCHBUTTON_MENU     => 7;
 
 # Preference ranges and defaults.
 use constant LAZYSEARCH_SHOWHELP_DEFAULT          => 0;
@@ -81,7 +82,7 @@ use constant LAZYSEARCH_MINLENGTH_TRACK_DEFAULT   => 4;
 use constant LAZYSEARCH_MINLENGTH_KEYWORD_DEFAULT => 4;
 use constant LAZYSEARCH_LEFTDELETES_DEFAULT       => 1;
 use constant LAZYSEARCH_HOOKSEARCHBUTTON_DEFAULT =>
-  LAZYSEARCH_SEARCHBUTTON_MENU;
+  LAZYSEARCH_SEARCHBUTTON_TOGGLE;
 use constant LAZYSEARCH_ALLENTRIES_DEFAULT           => 1;
 use constant LAZYSEARCH_KEYWORD_ARTISTS_DEFAULT      => 1;
 use constant LAZYSEARCH_KEYWORD_ALBUMS_DEFAULT       => 1;
@@ -979,7 +980,9 @@ sub lazyForceSearch {
 # Called when the user presses SEARCH. This allows toggling between the
 # lazy search menu and the standard player search menu. A preference allows
 # the SEARCH button to decide whether it's going to enter the standard or
-# lazy search modes when it's currently in neither.
+# lazy search modes when it's currently in neither, whether it's going to
+# toggle modes or not, or whether it's going to enter an immediate search
+# of a defined type.
 sub lazyOnSearch {
 	my $client       = shift;
 	my $mode         = Slim::Buttons::Common::mode($client);
@@ -987,7 +990,6 @@ sub lazyOnSearch {
 	  || ( $mode eq LAZYSEARCH_CATEGORY_MENU_MODE )
 	  || ( $mode eq LAZYBROWSE_MODE )
 	  || 0;
-	my $inSearch     = 0;       #@@TODO@@
 	my $gotoLazy     = 0;
 	my $gotoCategory = undef;
 
@@ -999,27 +1001,22 @@ sub lazyOnSearch {
 
 		# We never intercept SEARCH if the plugin isn't initialised.
 		$gotoLazy = 0;
+	} elsif ($searchBehaviour == LAZYSEARCH_SEARCHBUTTON_MENU) {
+		# Basic operation - go to lazy search menu with no toggling.
+		$gotoLazy = 1;
 	} elsif (
-		( $searchBehaviour == LAZYSEARCH_SEARCHBUTTON_MENU )
+		( $searchBehaviour == LAZYSEARCH_SEARCHBUTTON_TOGGLE )
 		|| ( ( $searchBehaviour == LAZYSEARCH_SEARCHBUTTON_KEYWORD )
 			&& !keywordSearchEnabled() )
 	  )
 	{
-
-		# Normal operation - enter lazy search as long as we're not already
+		# Toggle operation - enter lazy search as long as we're not already
 		# in it, in which case we go to original search (allows double-search
 		# to get back to the old mode).
 		$gotoLazy = !$inLazySearch || 0;
 	} elsif ( $searchBehaviour == LAZYSEARCH_SEARCHBUTTON_STANDARD ) {
-		if ($inSearch) {
-
-			# If in original search mode we always enter lazy search.
-			$gotoLazy = 1;
-		} else {
-
-			# Go into the standard search.
-			$gotoLazy = 0;
-		}
+		# Go into the standard search.
+		$gotoLazy = 0;
 	} elsif ( $searchBehaviour == LAZYSEARCH_SEARCHBUTTON_ARTIST ) {
 		$gotoCategory = '{ARTISTS}';
 	} elsif ( $searchBehaviour == LAZYSEARCH_SEARCHBUTTON_ALBUM ) {

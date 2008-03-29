@@ -22,7 +22,7 @@ Windows: use the 'services' applet in the control panel, or the SqueezeCenter
 Linux: it depends, but something like '/etc/init.d/squeezecentre restart'.
 Mac OS X: use the standard OSX 'System Properties' menu.
 
-4. Make sure the plugin is present and enabled on the 'Server Settings/Extras'
+4. Make sure the plugin is present and enabled on the 'Settings/Plugins'
 page on the SqueezeCenter web interface.
 
 5. Start using the plugin when the initial background scan has finished.
