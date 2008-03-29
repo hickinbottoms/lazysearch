@@ -1,5 +1,5 @@
 # Web settings page handler for LazySearch2 plugin for SqueezeCentre.
-# Copyright © Stuart Hickinbottom 2004-2007
+# Copyright © Stuart Hickinbottom 2004-2008
 
 # This file is part of LazySearch2.
 #
@@ -39,6 +39,12 @@ my $log = Slim::Utils::Log->addLogCategory(
 
 # Access to preferences for this plugin.
 my $myPrefs = preferences('plugin.lazysearch2');
+
+sub new {
+	my $class = shift;
+
+	$class->SUPER::new;
+}
 
 sub name {
 	return 'PLUGIN_LAZYSEARCH2';

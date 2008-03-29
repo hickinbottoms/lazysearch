@@ -1,5 +1,5 @@
 # LazySearch2 Plugin for SqueezeCentre
-# Copyright © Stuart Hickinbottom 2004-2007
+# Copyright © Stuart Hickinbottom 2004-2008
 
 # This file is part of LazySearch2.
 #
@@ -235,7 +235,7 @@ sub setMode {
 
 	# The menu items shown depend on whether keyword search is enabled or
 	# not.
-	my @topMenuItems = (qw({ARTISTS} {ALBUMS} {GENRES} {SONGS}));
+	my @topMenuItems = (qw({ARTISTS} {ALBUMS} {SONGS} {GENRES}));
 	if ( keywordSearchEnabled() ) {
 		push @topMenuItems, '{PLUGIN_LAZYSEARCH2_KEYWORD_MENU_ITEM}';
 	}
@@ -606,7 +606,7 @@ sub initPlugin() {
 	$class->SUPER::initPlugin(@_);
 
 	# Initialise settings.
-	Plugins::LazySearch2::Settings->new;
+	Plugins::LazySearch2::Settings->new($class);
 
 	# Remember we're now initialised. This prevents multiple-initialisation,
 	# which may otherwise cause trouble with duplicate hooks or modes.

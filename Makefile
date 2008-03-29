@@ -1,5 +1,5 @@
 # Makefile for LazySearch2 plugin for SqueezeCentre 7.0 (and later)
-# Copyright © Stuart Hickinbottom 2004-2007
+# Copyright © Stuart Hickinbottom 2004-2008
 
 # This file is part of LazySearch2.
 #
@@ -36,10 +36,10 @@ LATESTLINK=$(RELEASEDIR)/LazySearch2-7_0-latest.zip
 PREFS=/etc/squeezecenter.pref
 
 # VM stuff for testing
-PIDFILE=qemu.pid
+PIDFILE=/home/stuarth/code/audiothings/scebuild/qemu.pid
 VMHOST=chandra
 LOCAL_PORTAGE=/usr/local/portage
-EBUILD_PREFIX=squeezecenter-lazysearch2
+EBUILD_PREFIX=squeezecenter-lazysearch
 EBUILD_CATEGORY=media-plugins/$(EBUILD_PREFIX)
 EBUILD_DIR=$(LOCAL_PORTAGE)/$(EBUILD_CATEGORY)
 
@@ -124,11 +124,9 @@ inject:
 	ssh root@$(VMHOST) "rm -r $(EBUILD_DIR)/* >/dev/null 2>&1 || true"
 	ssh root@$(VMHOST) mkdir -p $(EBUILD_DIR) $(EBUILD_DIR)/files
 	scp ebuild/metadata.xml $(EBUILDS) root@$(VMHOST):$(EBUILD_DIR)
-	(cd files; scp $(FILES) root@$(VMHOST):$(EBUILD_DIR)/files)
-	ssh root@$(VMHOST) 'cd $(EBUILD_DIR); for EBUILD in $(EBUILDS); do ebuild $(EBUILD_DIR)/$$EBUILD manifest; done'
+	scp ebuild/*.ebuild $(EBUILDS) root@$(VMHOST):$(EBUILD_DIR)
+	ssh root@$(VMHOST) 'cd $(EBUILD_DIR); for EBUILD in *.ebuild; do echo $$EBUILD; echo ebuild $(EBUILD_DIR)/$$EBUILD manifest; done'
 	echo Unmasking ebuild...
 	ssh root@$(VMHOST) mkdir -p /etc/portage
 	ssh root@$(VMHOST) "grep -q '$(EBUILD_CATEGORY)' /etc/portage/package.keywords >/dev/null 2>&1 || echo '$(EBUILD_CATEGORY) ~x86' >> /etc/portage/package.keywords"
-	ssh root@$(VMHOST) "echo 'dev-perl/GD jpeg png' >> /etc/portage/package.use"
-	ssh root@$(VMHOST) "echo 'media-libs/gd jpeg png' >> /etc/portage/package.use"
 

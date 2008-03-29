@@ -19,9 +19,11 @@ RDEPEND="
 
 S="${WORKDIR}/${MY_P}"
 
-# The root of the SqueezeCenter, as defined by the SqueezeCenter ebuild
+# The root of the SqueezeCenter installation, as defined by the SqueezeCenter
+# ebuild
 INSTROOT=/opt/squeezecenter
 
 src_install() {
+	dodir ${D}${INSTROOT}
 	cp -r * ${D}${INSTROOT}/Plugins
 }

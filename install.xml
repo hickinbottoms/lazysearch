@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!-- Metadata file for LazySearch2 plugin -->
-<!-- Copyright © Stuart Hickinbottom 2004-2007 -->
+<!-- Copyright © Stuart Hickinbottom 2004-2008 -->
 
 <!-- This file is part of LazySearch2. -->
 
@@ -39,7 +39,7 @@
 
 	<targetApplication>
 		<id>SqueezeCentre</id>
-		<minVersion>7.0a</minVersion>
-		<maxVersion>7.0+</maxVersion>
+		<minVersion>7.0</minVersion>
+		<maxVersion>7.1+</maxVersion>
 	</targetApplication>
 </extension>
