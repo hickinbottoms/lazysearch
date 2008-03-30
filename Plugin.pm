@@ -757,9 +757,6 @@ sub shutdownPlugin() {
 	Slim::Control::Request::unsubscribe(
 		\&Plugins::LazySearch2::Plugin::scanDoneCallback );
 
-	# @@TODO@@
-	# Do we need to remove our top-level mode?
-
 	# We're no longer initialised.
 	$initialised = 0;
 }
@@ -984,10 +981,12 @@ sub lazyForceSearch {
 # toggle modes or not, or whether it's going to enter an immediate search
 # of a defined type.
 sub lazyOnSearch {
-	my $client       = shift;
-	my $mode         = Slim::Buttons::Common::mode($client);
-	my $inLazySearch = ( $mode eq LAZYSEARCH_TOP_MODE )
+	my $client          = shift;
+	my $mode            = Slim::Buttons::Common::mode($client);
+	my $inLazySearchTop = ( $mode eq LAZYSEARCH_TOP_MODE )
 	  || ( $mode eq LAZYSEARCH_CATEGORY_MENU_MODE )
+	  || 0;
+	my $inLazySearch = $inLazySearchTop
 	  || ( $mode eq LAZYBROWSE_MODE )
 	  || 0;
 	my $gotoLazy     = 0;
@@ -1001,7 +1000,8 @@ sub lazyOnSearch {
 
 		# We never intercept SEARCH if the plugin isn't initialised.
 		$gotoLazy = 0;
-	} elsif ($searchBehaviour == LAZYSEARCH_SEARCHBUTTON_MENU) {
+	} elsif ( $searchBehaviour == LAZYSEARCH_SEARCHBUTTON_MENU ) {
+
 		# Basic operation - go to lazy search menu with no toggling.
 		$gotoLazy = 1;
 	} elsif (
@@ -1010,11 +1010,13 @@ sub lazyOnSearch {
 			&& !keywordSearchEnabled() )
 	  )
 	{
+
 		# Toggle operation - enter lazy search as long as we're not already
 		# in it, in which case we go to original search (allows double-search
 		# to get back to the old mode).
 		$gotoLazy = !$inLazySearch || 0;
 	} elsif ( $searchBehaviour == LAZYSEARCH_SEARCHBUTTON_STANDARD ) {
+
 		# Go into the standard search.
 		$gotoLazy = 0;
 	} elsif ( $searchBehaviour == LAZYSEARCH_SEARCHBUTTON_ARTIST ) {
@@ -1042,9 +1044,19 @@ sub lazyOnSearch {
 	} else {
 		if ($gotoLazy) {
 
-			# Go to the top-level category menu for the plugin's search mode.
-			$log->debug("Entering top-level category menu");
-			enterCategoryMenu($client);
+			if ( $gotoLazy && $inLazySearchTop ) {
+
+				# Step through the menu items (be consistent with original
+				# search mode button behaviour).
+				$log->debug("Stepping through lazy search menu items");
+				( Slim::Buttons::Input::Choice::getFunctions() )
+				  ->{'down'}($client);
+			} else {
+
+			   # Go to the top-level category menu for the plugin's search mode.
+				$log->debug("Entering top-level category menu");
+				enterCategoryMenu($client);
+			}
 		} else {
 
 			# Into the normal search menu.
