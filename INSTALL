@@ -13,8 +13,8 @@ directory.
 
 Windows: C:\Program Files\SqueezeCenter\Server\Plugins
 Linux: it depends, but something like /usr/local/squeezecentre/Plugins
-MacOSX: ~/Library/SlimDevices/Plugins (I believe you need to do this
-  as the user that you originally installed SqueezeCenter as.
+MacOSX: ~/Library/Application Support/SqueezeCenter/Plugins (I believe you need
+  to do this as the user that you originally installed SqueezeCenter as.
 
 3. Restart SqueezeCenter to make sure it has seen the new plugin.
 Windows: use the 'services' applet in the control panel, or the SqueezeCenter
