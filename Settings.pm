@@ -57,7 +57,7 @@ sub page {
 # Set up validation rules.
 $myPrefs->setValidate(
 	{ 'validator' => 'intlimit', 'low' => 2, 'high' => 9 },
-	qw(minlength_artist minlength_album minlength_genre minlength_track minlength_keyword)
+	qw(pref_minlength_artist pref_minlength_album pref_minlength_genre pref_minlength_track pref_minlength_keyword)
 );
 
 sub handler {
@@ -65,26 +65,26 @@ sub handler {
 
 	# A list of all our plugin preferences (with the common prefix removed).
 	my @prefs = qw(
-	  showhelp
-	  minlength_artist
-	  minlength_album
-	  minlength_genre
-	  minlength_track
-	  minlength_keyword
-	  leftdeletes
-	  hooksearchbutton
-	  keyword_artists_enabled
-	  keyword_albums_enabled
-	  keyword_tracks_enabled
-	  keyword_return_albumartists
+	  pref_showhelp
+	  pref_minlength_artist
+	  pref_minlength_album
+	  pref_minlength_genre
+	  pref_minlength_track
+	  pref_minlength_keyword
+	  pref_leftdeletes
+	  pref_hooksearchbutton
+	  pref_keyword_artists_enabled
+	  pref_keyword_albums_enabled
+	  pref_keyword_tracks_enabled
+	  pref_keyword_return_albumartists
 	);
 
 	# The subset of those preferences that force the database to be
 	# relazified if they change.
 	my @force_relazify_prefs = qw(
-	  keyword_artists_enabled
-	  keyword_albums_enabled
-	  keyword_tracks_enabled
+	  pref_keyword_artists_enabled
+	  pref_keyword_albums_enabled
+	  pref_keyword_tracks_enabled
 	);
 
 	if ( $params->{'saveSettings'} ) {
@@ -117,7 +117,7 @@ sub handler {
 		}
 	}
 
-	if ( $params->{'lazifynow'} ) {
+	if ( $params->{'pref_lazifynow'} ) {
 		$log->debug('Lazify Now button pushed');
 		Plugins::LazySearch2::Plugin::lazifyNow();
 	}

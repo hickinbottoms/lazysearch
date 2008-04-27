@@ -345,7 +345,7 @@ sub enterArtistSearch($$) {
 	  'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_ARTISTS';
 	$clientMode{$client}{further_help_prompt} =
 	  'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
-	$clientMode{$client}{min_search_length} = $myPrefs->get('minlength_artist');
+	$clientMode{$client}{min_search_length} = $myPrefs->get('pref_minlength_artist');
 	$clientMode{$client}{perform_search}    = \&performArtistSearch;
 	$clientMode{$client}{onright}           = \&rightIntoArtist;
 	$clientMode{$client}{search_tracks}     = \&searchTracksForArtist;
@@ -370,7 +370,7 @@ sub enterAlbumSearch($$) {
 	  'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_ALBUMS';
 	$clientMode{$client}{further_help_prompt} =
 	  'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
-	$clientMode{$client}{min_search_length} = $myPrefs->get('minlength_album');
+	$clientMode{$client}{min_search_length} = $myPrefs->get('pref_minlength_album');
 	$clientMode{$client}{perform_search}    = \&performAlbumSearch;
 	$clientMode{$client}{onright}           = \&rightIntoAlbum;
 	$clientMode{$client}{search_tracks}     = \&searchTracksForAlbum;
@@ -395,7 +395,7 @@ sub enterGenreSearch($$) {
 	  'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_GENRES';
 	$clientMode{$client}{further_help_prompt} =
 	  'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
-	$clientMode{$client}{min_search_length} = $myPrefs->get('minlength_genre');
+	$clientMode{$client}{min_search_length} = $myPrefs->get('pref_minlength_genre');
 	$clientMode{$client}{perform_search}    = \&performGenreSearch;
 	$clientMode{$client}{onright}           = \&rightIntoGenre;
 	$clientMode{$client}{search_tracks}     = \&searchTracksForGenre;
@@ -420,7 +420,7 @@ sub enterTrackSearch($$) {
 	  'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_TRACKS';
 	$clientMode{$client}{further_help_prompt} =
 	  'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
-	$clientMode{$client}{min_search_length} = $myPrefs->get('minlength_track');
+	$clientMode{$client}{min_search_length} = $myPrefs->get('pref_minlength_track');
 	$clientMode{$client}{perform_search}    = \&performTrackSearch;
 	$clientMode{$client}{onright}           = \&rightIntoTrack;
 	$clientMode{$client}{search_tracks}     = \&searchTracksForTrack;
@@ -446,7 +446,7 @@ sub enterKeywordSearch($$) {
 	$clientMode{$client}{further_help_prompt} =
 	  'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
 	$clientMode{$client}{min_search_length} =
-	  $myPrefs->get('minlength_keyword');
+	  $myPrefs->get('pref_minlength_keyword');
 	$clientMode{$client}{onright}       = \&keywordOnRightHandler;
 	$clientMode{$client}{search_tracks} = undef;
 	setSearchBrowseMode( $client, $item, 0 );
@@ -994,7 +994,7 @@ sub lazyOnSearch {
 
 	$log->debug("SEARCH button intercepted");
 
-	my $searchBehaviour = $myPrefs->get('hooksearchbutton');
+	my $searchBehaviour = $myPrefs->get('pref_hooksearchbutton');
 
 	if ( !$initialised ) {
 
@@ -1672,7 +1672,7 @@ sub doKeywordSearch($$$$$$) {
 		my @roles = @{$artistOnlyRoles};
 
 		# If the user wants, remove the ALBUMARTIST role (ticket:42)
-		if ( !$myPrefs->get('keyword_return_albumartists') ) {
+		if ( !$myPrefs->get('pref_keyword_return_albumartists') ) {
 			my $albumArtistRole =
 			  Slim::Schema::Contributor->typeToRole('ALBUMARTIST');
 			@roles = grep { !/^$albumArtistRole$/ } @roles;
@@ -1744,7 +1744,7 @@ sub doKeywordSearch($$$$$$) {
 sub buildFind($) {
 	my $searchText      = shift;
 	my $side            = shift || 0;
-	my $searchSubstring = ( $serverPrefs->get('searchSubString') );
+	my $searchSubstring = ( $serverPrefs->get('pref_searchSubString') );
 	my $searchReturn;
 
 	if ($searchSubstring) {
@@ -1835,7 +1835,7 @@ sub onDelCharHandler {
 
 	my $currentText = $clientMode{$client}{search_text};
 	if ( ( length($currentText) > 0 )
-		&& $myPrefs->get('leftdeletes') )
+		&& $myPrefs->get('pref_leftdeletes') )
 	{
 
 		# Remove the right-most character from the string.
@@ -1897,58 +1897,58 @@ sub onDelAllHandler {
 # plugin is activated and removing the need to check they're defined in each
 # case of reading them.
 sub checkDefaults {
-	if ( !defined( $myPrefs->get('showhelp') ) ) {
-		$myPrefs->set( 'showhelp', LAZYSEARCH_SHOWHELP_DEFAULT );
+	if ( !defined( $myPrefs->get('pref_showhelp') ) ) {
+		$myPrefs->set( 'pref_showhelp', LAZYSEARCH_SHOWHELP_DEFAULT );
 	}
-	if ( !defined( $myPrefs->get('minlength_artist') ) ) {
-		$myPrefs->set( 'minlength_artist',
+	if ( !defined( $myPrefs->get('pref_minlength_artist') ) ) {
+		$myPrefs->set( 'pref_minlength_artist',
 			LAZYSEARCH_MINLENGTH_ARTIST_DEFAULT );
 	}
-	if ( !defined( $myPrefs->get('minlength_album') ) ) {
-		$myPrefs->set( 'minlength_album', LAZYSEARCH_MINLENGTH_ALBUM_DEFAULT );
+	if ( !defined( $myPrefs->get('pref_minlength_album') ) ) {
+		$myPrefs->set( 'pref_minlength_album', LAZYSEARCH_MINLENGTH_ALBUM_DEFAULT );
 	}
-	if ( !defined( $myPrefs->get('minlength_genre') ) ) {
-		$myPrefs->set( 'minlength_genre', LAZYSEARCH_MINLENGTH_GENRE_DEFAULT );
+	if ( !defined( $myPrefs->get('pref_minlength_genre') ) ) {
+		$myPrefs->set( 'pref_minlength_genre', LAZYSEARCH_MINLENGTH_GENRE_DEFAULT );
 	}
-	if ( !defined( $myPrefs->get('minlength_track') ) ) {
-		$myPrefs->set( 'minlength_track', LAZYSEARCH_MINLENGTH_TRACK_DEFAULT );
+	if ( !defined( $myPrefs->get('pref_minlength_track') ) ) {
+		$myPrefs->set( 'pref_minlength_track', LAZYSEARCH_MINLENGTH_TRACK_DEFAULT );
 	}
-	if ( !defined( $myPrefs->get('minlength_keyword') ) ) {
-		$myPrefs->set( 'minlength_keyword',
+	if ( !defined( $myPrefs->get('pref_minlength_keyword') ) ) {
+		$myPrefs->set( 'pref_minlength_keyword',
 			LAZYSEARCH_MINLENGTH_KEYWORD_DEFAULT );
 	}
-	if ( !defined( $myPrefs->get('leftdeletes') ) ) {
-		$myPrefs->set( 'leftdeletes', LAZYSEARCH_LEFTDELETES_DEFAULT );
+	if ( !defined( $myPrefs->get('pref_leftdeletes') ) ) {
+		$myPrefs->set( 'pref_leftdeletes', LAZYSEARCH_LEFTDELETES_DEFAULT );
 	}
-	if ( !defined( $myPrefs->get('hooksearchbutton') ) ) {
-		$myPrefs->set( 'hooksearchbutton',
+	if ( !defined( $myPrefs->get('pref_hooksearchbutton') ) ) {
+		$myPrefs->set( 'pref_hooksearchbutton',
 			LAZYSEARCH_HOOKSEARCHBUTTON_DEFAULT );
 	}
-	if ( !defined( $myPrefs->get('allentries') ) ) {
-		$myPrefs->set( 'allentries', LAZYSEARCH_ALLENTRIES_DEFAULT );
+	if ( !defined( $myPrefs->get('pref_allentries') ) ) {
+		$myPrefs->set( 'pref_allentries', LAZYSEARCH_ALLENTRIES_DEFAULT );
 	}
-	if ( !defined( $myPrefs->get('keyword_artists_enabled') ) ) {
-		$myPrefs->set( 'keyword_artists_enabled',
+	if ( !defined( $myPrefs->get('pref_keyword_artists_enabled') ) ) {
+		$myPrefs->set( 'pref_keyword_artists_enabled',
 			LAZYSEARCH_KEYWORD_ARTISTS_DEFAULT );
 	}
-	if ( !defined( $myPrefs->get('keyword_albums_enabled') ) ) {
-		$myPrefs->set( 'keyword_albums_enabled',
+	if ( !defined( $myPrefs->get('pref_keyword_albums_enabled') ) ) {
+		$myPrefs->set( 'pref_keyword_albums_enabled',
 			LAZYSEARCH_KEYWORD_ALBUMS_DEFAULT );
 	}
-	if ( !defined( $myPrefs->get('keyword_tracks_enabled') ) ) {
-		$myPrefs->set( 'keyword_tracks_enabled',
+	if ( !defined( $myPrefs->get('pref_keyword_tracks_enabled') ) ) {
+		$myPrefs->set( 'pref_keyword_tracks_enabled',
 			LAZYSEARCH_KEYWORD_TRACKS_DEFAULT );
 	}
-	if ( !defined( $myPrefs->get('keyword_return_albumartists') ) ) {
-		$myPrefs->set( 'keyword_return_albumartists',
+	if ( !defined( $myPrefs->get('pref_keyword_return_albumartists') ) ) {
+		$myPrefs->set( 'pref_keyword_return_albumartists',
 			LAZYSEARCH_KEYWORD_ALBUMARTISTS_DEFAULT );
 	}
 
 	# If the revision isn't yet in the preferences we set it to something
 	# that's guaranteed to be different to the revision to force full
 	# lazification.
-	if ( !defined( $myPrefs->get('revision') ) ) {
-		$myPrefs->set( 'revision', '-undefined-' );
+	if ( !defined( $myPrefs->get('pref_revision') ) ) {
+		$myPrefs->set( 'pref_revision', '-undefined-' );
 	}
 }
 
@@ -1962,7 +1962,7 @@ sub scanDoneCallback($) {
 	# has changed then we're going to rebuild the database lazification in
 	# case this different plugin revision has changed the format.
 	my $force          = 0;
-	my $prefRevision   = $myPrefs->get('revision');
+	my $prefRevision   = $myPrefs->get('pref_revision');
 	my $pluginRevision = '$Revision$';
 
 	if ( $prefRevision ne $pluginRevision ) {
@@ -1970,7 +1970,7 @@ sub scanDoneCallback($) {
 "Re-lazifying (plugin version changed from '$prefRevision' to '$pluginRevision'"
 		);
 		$force = 1;
-		$myPrefs->set( 'revision', $pluginRevision );
+		$myPrefs->set( 'pref_revision', $pluginRevision );
 	} else {
 		$log->info("Lazifying database items not already done");
 	}
@@ -2051,11 +2051,11 @@ sub lazifyDatabaseType {
 	# Include keywords in the lazified version if the caller asked for it and
 	# the user preference says they want it.
 	my $includeKeywordArtist = $considerKeywordArtist
-	  && $myPrefs->get('keyword_artists_enabled');
+	  && $myPrefs->get('pref_keyword_artists_enabled');
 	my $includeKeywordAlbum = $considerKeywordAlbum
-	  && $myPrefs->get('keyword_albums_enabled');
+	  && $myPrefs->get('pref_keyword_albums_enabled');
 	my $includeKeywordTrack = $considerKeywordTrack
-	  && $myPrefs->get('keyword_tracks_enabled');
+	  && $myPrefs->get('pref_keyword_tracks_enabled');
 
 	# If adding keywords for album titles then we need to join to the album
 	# table, too.
@@ -2320,9 +2320,9 @@ tr/ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 /222333444555666777788899991234567890X/;
 # Determines whether keyword searching is enabled. It's enabled if at least one
 # of the keyword search categories is enabled.
 sub keywordSearchEnabled {
-	return $myPrefs->get('keyword_artists_enabled')
-	  || $myPrefs->get('keyword_albums_enabled')
-	  || $myPrefs->get('keyword_tracks_enabled');
+	return $myPrefs->get('pref_keyword_artists_enabled')
+	  || $myPrefs->get('pref_keyword_albums_enabled')
+	  || $myPrefs->get('pref_keyword_tracks_enabled');
 }
 
 # Handler when RIGHT is pressed on the top-level keyword search results mode.

@@ -27,10 +27,10 @@
 		<table>
 			<tr>
 				<td>
-					<label for="showhelp">[% "SETUP_PLUGIN_LAZYSEARCH2_SHOWHELP" | string %]&nbsp;</label>
+					<label for="pref_showhelp">[% "SETUP_PLUGIN_LAZYSEARCH2_SHOWHELP" | string %]&nbsp;</label>
 				</td>
 				<td>
-					<input name="showhelp" type="checkbox" [% IF prefs.showhelp %] checked [% END %]>
+					<input name="pref_showhelp" type="checkbox" [% IF prefs.pref_showhelp %] checked [% END %]>
 				</td>
 			</tr>
 		</table>
@@ -38,7 +38,7 @@
 
 	<div class="settingSection">
 		<div class="prefHead">[% "SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_HEAD" | string | upper %]</div>
-		[% IF prefs.showhelp %]
+		[% IF prefs.pref_showhelp %]
 		<div class="prefDesc">[% "SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_DESC" | string %]</div>
 		[% END %]
 
@@ -46,42 +46,42 @@
 			<table>
 				<tr>
 					<td>
-						<label for="minlength_artist">[% "SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_CHOOSE" | string %]&nbsp;</label>
+						<label for="pref_minlength_artist">[% "SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ARTIST_CHOOSE" | string %]&nbsp;</label>
 					</td>
 					<td>
-						<input type="text" class="stdedit" name="minlength_artist" value="[% prefs.minlength_artist %]" size="1">
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<label for="minlength_album">[% "SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ALBUM_CHOOSE" | string %]&nbsp;</label>
-					</td>
-					<td>
-						<input type="text" class="stdedit" name="minlength_album" value="[% prefs.minlength_album %]" size="1">
+						<input type="text" class="stdedit" name="pref_minlength_artist" value="[% prefs.pref_minlength_artist %]" size="1">
 					</td>
 				</tr>
 				<tr>
 					<td>
-						<label for="minlength_genre">[% "SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE_CHOOSE" | string %]&nbsp;</label>
+						<label for="pref_minlength_album">[% "SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_ALBUM_CHOOSE" | string %]&nbsp;</label>
 					</td>
 					<td>
-						<input type="text" class="stdedit" name="minlength_genre" value="[% prefs.minlength_genre %]" size="1">
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<label for="minlength_track">[% "SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK_CHOOSE" | string %]&nbsp;</label>
-					</td>
-					<td>
-						<input type="text" class="stdedit" name="minlength_track" value="[% prefs.minlength_track %]" size="1">
+						<input type="text" class="stdedit" name="pref_minlength_album" value="[% prefs.pref_minlength_album %]" size="1">
 					</td>
 				</tr>
 				<tr>
 					<td>
-						<label for="minlength_keyword">[% "SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD_CHOOSE" | string %]&nbsp;</label>
+						<label for="pref_minlength_genre">[% "SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE_CHOOSE" | string %]&nbsp;</label>
 					</td>
 					<td>
-						<input type="text" class="stdedit" name="minlength_keyword" value="[% prefs.minlength_keyword %]" size="1">
+						<input type="text" class="stdedit" name="pref_minlength_genre" value="[% prefs.pref_minlength_genre %]" size="1">
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<label for="pref_minlength_track">[% "SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_TRACK_CHOOSE" | string %]&nbsp;</label>
+					</td>
+					<td>
+						<input type="text" class="stdedit" name="pref_minlength_track" value="[% prefs.pref_minlength_track %]" size="1">
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<label for="pref_minlength_keyword">[% "SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_KEYWORD_CHOOSE" | string %]&nbsp;</label>
+					</td>
+					<td>
+						<input type="text" class="stdedit" name="pref_minlength_keyword" value="[% prefs.pref_minlength_keyword %]" size="1">
 					</td>
 				</tr>
 			</table>
@@ -91,7 +91,7 @@
 	<div class="settingSection">
 		<div class="prefHead">[% "SETUP_PLUGIN_LAZYSEARCH2_BUTTON_BEHAVIOUR" | string | upper %]</div>
 
-		[% IF prefs.showhelp %]
+		[% IF prefs.pref_showhelp %]
 		<div class="prefDesc">[% "SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_DESC" | string %]</div>
 		<div class="prefDesc">[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_DESC" | string %]</div>
 		[% END %]
@@ -99,29 +99,29 @@
 		<table border="0" cellspacing="7" cellpadding="7">
 			<tr>
 				<td>
-					<label for="leftdeletes">[% "SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_CHOOSE" | string %]&nbsp;</label>
+					<label for="pref_leftdeletes">[% "SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_CHOOSE" | string %]&nbsp;</label>
 				</td>
 				<td>
-					<select name="leftdeletes" class="stdedit" name="leftdeletes">
-						<option value="0" [% IF NOT prefs.leftdeletes %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_0" | string %]</option>
-						<option value="1" [% IF prefs.leftdeletes %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_1" | string %]</option>
+					<select name="pref_leftdeletes" class="stdedit" name="pref_leftdeletes">
+						<option value="0" [% IF NOT prefs.pref_leftdeletes %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_0" | string %]</option>
+						<option value="1" [% IF prefs.pref_leftdeletes %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_1" | string %]</option>
 					</select>
 				</td>
 			</tr>
 			<tr>
 				<td>
-					<label for="hooksearchbutton">[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_CHOOSE" | string %]&nbsp;</label>
+					<label for="pref_hooksearchbutton">[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_CHOOSE" | string %]&nbsp;</label>
 				</td>
 				<td>
-					<select name="hooksearchbutton" class="stdedit" name="hooksearchbutton">
-						<option value="0" [% IF prefs.hooksearchbutton == 0 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_0" | string %]</option>
-						<option value="1" [% IF prefs.hooksearchbutton == 1 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_1" | string %]</option>
-						<option value="7" [% IF prefs.hooksearchbutton == 7 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_7" | string %]</option>
-						<option value="2" [% IF prefs.hooksearchbutton == 2 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_2" | string %]</option>
-						<option value="3" [% IF prefs.hooksearchbutton == 3 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_3" | string %]</option>
-						<option value="4" [% IF prefs.hooksearchbutton == 4 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_4" | string %]</option>
-						<option value="5" [% IF prefs.hooksearchbutton == 5 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_5" | string %]</option>
-						<option value="6" [% IF prefs.hooksearchbutton == 6 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_6" | string %]</option>
+					<select name="pref_hooksearchbutton" class="stdedit" name="pref_hooksearchbutton">
+						<option value="0" [% IF prefs.pref_hooksearchbutton == 0 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_0" | string %]</option>
+						<option value="1" [% IF prefs.pref_hooksearchbutton == 1 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_1" | string %]</option>
+						<option value="7" [% IF prefs.pref_hooksearchbutton == 7 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_7" | string %]</option>
+						<option value="2" [% IF prefs.pref_hooksearchbutton == 2 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_2" | string %]</option>
+						<option value="3" [% IF prefs.pref_hooksearchbutton == 3 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_3" | string %]</option>
+						<option value="4" [% IF prefs.pref_hooksearchbutton == 4 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_4" | string %]</option>
+						<option value="5" [% IF prefs.pref_hooksearchbutton == 5 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_5" | string %]</option>
+						<option value="6" [% IF prefs.pref_hooksearchbutton == 6 %]selected[% END %]>[% "SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_6" | string %]</option>
 					</select>
 				</td>
 			</tr>
@@ -131,7 +131,7 @@
 	<div class="settingSection">
 		<div class="prefHead">[% "SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_HEAD" | string | upper %]</div>
 
-		[% IF prefs.showhelp %]
+		[% IF prefs.pref_showhelp %]
 		<div class="prefDesc">[% "SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_OPTIONS_DESC" | string %]</div>
 		<div class="prefDesc">[% "SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_DESC" | string %]</div>
 		[% END %]
@@ -139,45 +139,45 @@
 		<table border="0" cellspacing="7" cellpadding="7">
 			<tr>
 				<td>
-					<label for="keyword_artists_enabled">[% "SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_CHOOSE" | string %]&nbsp;</label>
+					<label for="pref_keyword_artists_enabled">[% "SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ARTISTS_CHOOSE" | string %]&nbsp;</label>
 				</td>
 				<td>
-					<select name="keyword_artists_enabled" class="stdedit" name="keyword_artists_enabled">
-						<option value="0" [% IF NOT prefs.keyword_artists_enabled %]selected[% END %]>[% "DISABLED" | string %]</option>
-						<option value="1" [% IF prefs.keyword_artists_enabled %]selected[% END %]>[% "ENABLED" | string %]</option>
+					<select name="pref_keyword_artists_enabled" class="stdedit" name="pref_keyword_artists_enabled">
+						<option value="0" [% IF NOT prefs.pref_keyword_artists_enabled %]selected[% END %]>[% "DISABLED" | string %]</option>
+						<option value="1" [% IF prefs.pref_keyword_artists_enabled %]selected[% END %]>[% "ENABLED" | string %]</option>
 					</select>
 				</td>
 			</tr>
 			<tr>
 				<td>
-					<label for="keyword_albums_enabled">[% "SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_CHOOSE" | string %]&nbsp;</label>
+					<label for="pref_keyword_albums_enabled">[% "SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_ALBUMS_CHOOSE" | string %]&nbsp;</label>
 				</td>
 				<td>
-					<select name="keyword_albums_enabled" class="stdedit" name="keyword_albums_enabled">
-						<option value="0" [% IF NOT prefs.keyword_albums_enabled %]selected[% END %]>[% "DISABLED" | string %]</option>
-						<option value="1" [% IF prefs.keyword_albums_enabled %]selected[% END %]>[% "ENABLED" | string %]</option>
+					<select name="pref_keyword_albums_enabled" class="stdedit" name="pref_keyword_albums_enabled">
+						<option value="0" [% IF NOT prefs.pref_keyword_albums_enabled %]selected[% END %]>[% "DISABLED" | string %]</option>
+						<option value="1" [% IF prefs.pref_keyword_albums_enabled %]selected[% END %]>[% "ENABLED" | string %]</option>
 					</select>
 				</td>
 			</tr>
 			<tr>
 				<td>
-					<label for="keyword_tracks_enabled">[% "SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_CHOOSE" | string %]&nbsp;</label>
+					<label for="pref_keyword_tracks_enabled">[% "SETUP_PLUGIN_LAZYSEARCH2_KEYWORD_TRACKS_CHOOSE" | string %]&nbsp;</label>
 				</td>
 				<td>
-					<select name="keyword_tracks_enabled" class="stdedit" name="keyword_tracks_enabled">
-						<option value="0" [% IF NOT prefs.keyword_tracks_enabled %]selected[% END %]>[% "DISABLED" | string %]</option>
-						<option value="1" [% IF prefs.keyword_tracks_enabled %]selected[% END %]>[% "ENABLED" | string %]</option>
+					<select name="pref_keyword_tracks_enabled" class="stdedit" name="pref_keyword_tracks_enabled">
+						<option value="0" [% IF NOT prefs.pref_keyword_tracks_enabled %]selected[% END %]>[% "DISABLED" | string %]</option>
+						<option value="1" [% IF prefs.pref_keyword_tracks_enabled %]selected[% END %]>[% "ENABLED" | string %]</option>
 					</select>
 				</td>
 			</tr>
 			<tr>
 				<td>
-					<label for="keyword_return_albumartists">[% "SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHOOSE" | string %]&nbsp;</label>
+					<label for="pref_keyword_return_albumartists">[% "SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHOOSE" | string %]&nbsp;</label>
 				</td>
 				<td>
-					<select name="keyword_return_albumartists" class="stdedit" name="keyword_return_albumartists">
-						<option value="0" [% IF NOT prefs.keyword_return_albumartists %]selected[% END %]>[% "NO" | string %]</option>
-						<option value="1" [% IF prefs.keyword_return_albumartists %]selected[% END %]>[% "YES" | string %]</option>
+					<select name="pref_keyword_return_albumartists" class="stdedit" name="pref_keyword_return_albumartists">
+						<option value="0" [% IF NOT prefs.pref_keyword_return_albumartists %]selected[% END %]>[% "NO" | string %]</option>
+						<option value="1" [% IF prefs.pref_keyword_return_albumartists %]selected[% END %]>[% "YES" | string %]</option>
 					</select>
 				</td>
 			</tr>
@@ -189,12 +189,11 @@
 			<a href="http://www.hickinbottom.com/lazysearch" target="_blank"><img src="[% webroot %]settings/server/plugins/LazySearch2/settings/logo.jpg" alt="[% "PLUGIN_LAZYSEARCH2" | string | upper %]" class="viewSelect" align="right"></a>
 			[% "SETUP_PLUGIN_LAZYSEARCH2_DEBUGGING" | string | upper %]
 		</div>
-		[% IF prefs.showhelp %]
+		[% IF prefs.pref_showhelp %]
 		<div class="prefDesc">[% "SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_DESC" | string %]</div>
 		[% END %]
-		<input name="lazifynow" type="submit" class="stdclick" value="[% "SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_BUTTON" | string %]">
+		<input name="pref_lazifynow" type="submit" class="stdclick" value="[% "SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_BUTTON" | string %]">
 	</div>
 
 
 [% PROCESS settings/footer.html %]
-
