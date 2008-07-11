@@ -173,6 +173,8 @@ my $serverPrefs = preferences('server');
 #						is passed as a parameter to this method). This is used
 #						to find the tracks that will be added/replaced in the
 #						playlist when ADD/INSERT/PLAY is pressed.
+#	mix_type:			The mix type CLI argument for MusicIP mixes created
+#						from this search type.
 my %clientMode = ();
 
 # Hash of outstanding database objects that are to be lazy-encoded. This is
@@ -345,10 +347,12 @@ sub enterArtistSearch($$) {
 	  'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_ARTISTS';
 	$clientMode{$client}{further_help_prompt} =
 	  'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
-	$clientMode{$client}{min_search_length} = $myPrefs->get('pref_minlength_artist');
-	$clientMode{$client}{perform_search}    = \&performArtistSearch;
-	$clientMode{$client}{onright}           = \&rightIntoArtist;
-	$clientMode{$client}{search_tracks}     = \&searchTracksForArtist;
+	$clientMode{$client}{min_search_length} =
+	  $myPrefs->get('pref_minlength_artist');
+	$clientMode{$client}{perform_search} = \&performArtistSearch;
+	$clientMode{$client}{onright}        = \&rightIntoArtist;
+	$clientMode{$client}{search_tracks}  = \&searchTracksForArtist;
+	$clientMode{$client}{mix_type}       = 'artist';
 	setSearchBrowseMode( $client, $item, 0 );
 }
 
@@ -370,10 +374,12 @@ sub enterAlbumSearch($$) {
 	  'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_ALBUMS';
 	$clientMode{$client}{further_help_prompt} =
 	  'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
-	$clientMode{$client}{min_search_length} = $myPrefs->get('pref_minlength_album');
-	$clientMode{$client}{perform_search}    = \&performAlbumSearch;
-	$clientMode{$client}{onright}           = \&rightIntoAlbum;
-	$clientMode{$client}{search_tracks}     = \&searchTracksForAlbum;
+	$clientMode{$client}{min_search_length} =
+	  $myPrefs->get('pref_minlength_album');
+	$clientMode{$client}{perform_search} = \&performAlbumSearch;
+	$clientMode{$client}{onright}        = \&rightIntoAlbum;
+	$clientMode{$client}{search_tracks}  = \&searchTracksForAlbum;
+	$clientMode{$client}{mix_type}       = 'album';
 	setSearchBrowseMode( $client, $item, 0 );
 }
 
@@ -395,10 +401,12 @@ sub enterGenreSearch($$) {
 	  'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_GENRES';
 	$clientMode{$client}{further_help_prompt} =
 	  'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
-	$clientMode{$client}{min_search_length} = $myPrefs->get('pref_minlength_genre');
-	$clientMode{$client}{perform_search}    = \&performGenreSearch;
-	$clientMode{$client}{onright}           = \&rightIntoGenre;
-	$clientMode{$client}{search_tracks}     = \&searchTracksForGenre;
+	$clientMode{$client}{min_search_length} =
+	  $myPrefs->get('pref_minlength_genre');
+	$clientMode{$client}{perform_search} = \&performGenreSearch;
+	$clientMode{$client}{onright}        = \&rightIntoGenre;
+	$clientMode{$client}{search_tracks}  = \&searchTracksForGenre;
+	$clientMode{$client}{mix_type}       = 'genre';
 	setSearchBrowseMode( $client, $item, 0 );
 }
 
@@ -420,10 +428,12 @@ sub enterTrackSearch($$) {
 	  'PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_TRACKS';
 	$clientMode{$client}{further_help_prompt} =
 	  'PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP';
-	$clientMode{$client}{min_search_length} = $myPrefs->get('pref_minlength_track');
-	$clientMode{$client}{perform_search}    = \&performTrackSearch;
-	$clientMode{$client}{onright}           = \&rightIntoTrack;
-	$clientMode{$client}{search_tracks}     = \&searchTracksForTrack;
+	$clientMode{$client}{min_search_length} =
+	  $myPrefs->get('pref_minlength_track');
+	$clientMode{$client}{perform_search} = \&performTrackSearch;
+	$clientMode{$client}{onright}        = \&rightIntoTrack;
+	$clientMode{$client}{search_tracks}  = \&searchTracksForTrack;
+	$clientMode{$client}{mix_type}       = 'song';
 	setSearchBrowseMode( $client, $item, 0 );
 }
 
@@ -845,10 +855,8 @@ sub setSearchBrowseMode {
 		# What overlays are shown on lines 1 and 2.
 		overlayRef => \&lazyOverlay,
 
-		# To keep BrowseDB's create_mix handler happy.
-		hierarchy => $clientMode{$client}{hierarchy},
-		level     => $clientMode{$client}{level},
-		descend   => 1,
+		# What kind of mix will be created if the user tries?
+		mixType => $clientMode{$client}{mix_type},
 	);
 
 	# Make sure we pop back to the first result - most useful because of the
@@ -887,7 +895,7 @@ sub lazyOverlay {
 		&& ( scalar(@$listRef) != 0 ) )
 	{
 
-		# MusicMagic/MoodLogic overlay - pinched from BrowseDB.
+		# MusicIP overlay - pinched from BrowseDB.
 		my $Imports = Slim::Music::Import->importers;
 
 		for my $import ( keys %{$Imports} ) {
@@ -1777,7 +1785,7 @@ sub onPlayHandler {
 	&$onPlay( $client, $item, 0 );
 }
 
-# Create a mix (MusicMagic or MoodLogic) for the current item.
+# Create a mix (MusicIP) for the current item.
 sub onCreateMixHandler {
 	my ( $client, $method ) = @_;
 
@@ -1785,16 +1793,60 @@ sub onCreateMixHandler {
 	my $items     = $client->modeParam('listRef');
 	my $item      = $items->[$listIndex];
 
-	$log->debug( 'Creating mix for item ' . $item->id );
+	my $mixType = $client->modeParam('mixType');
+	my $item_id = $item->id;
 
-	# Punt on to the implementation in BrowseDB... This is not very elegant
-	# as there shouldn't be any coupling between this and the BrowseDB mode.
-	# However, there isn't another interface easily available so this is
-	# the most straightforward way of avoiding having to duplicate all
-	# the mixing code in the BrowseDB mode. I've raise bug #4451 to try
-	# to address this in a future SqueezeCentre version.
-	my $createMix = Slim::Buttons::BrowseDB::getFunctions()->{'create_mix'};
-	&$createMix($client);
+	# Tell the user
+	$client->showBriefly(
+		{
+			'line1' =>
+			  sprintf( $client->string('PLUGIN_LAZYSEARCH2_MIX_CREATING'), )
+		}
+	);
+	$log->debug( "Creating mix for $mixType:" . $item_id );
+
+	# Create the mix through the CLI.
+	my $request =
+	  $client->execute( [ 'musicip', 'mix', $mixType . '_id:' . $item_id ] );
+
+	# Now need to display and play it...
+	my $count = $request->getResult('count');
+	$log->info( "Mix created for $mixType with song count: " . $count );
+	if ( $count == 0 ) {
+		$client->showBriefly(
+			{
+				'line1' =>
+				  sprintf( $client->string('PLUGIN_LAZYSEARCH2_MIX_EMPTY'), )
+			}
+		);
+	} else {
+		my @items;
+		for ( my $index = 0 ; $index < $count ; $index++ ) {
+			my $id = $request->getResultLoop( 'titles_loop', $index, 'id' );
+			my $track = Slim::Schema->rs('Track')->find($id);
+			push @items, $track;
+		}
+
+		# Push into a new mix result mode, from which the user can press
+		# PLAY to replace and play the returned mix, or press ADD to
+		# add the results to the end of the current playlist.
+		my %params = (
+			'listRef'        => \@items,
+			'externRef'      => \&Slim::Music::Info::standardTitle,
+			'header'         => 'MUSICMAGIC_MIX',
+			'headerAddCount' => 1,
+			'stringHeader'   => 1,
+
+			#			'callback'       => \&mixExitHandler,
+			'overlayRef' =>
+			  sub { return ( undef, shift->symbols('rightarrow') ) },
+			'overlayRefArgs' => 'C',
+			'parentMode'     => 'musicmagic_mix',
+		);
+
+		Slim::Buttons::Common::pushMode( $client, 'INPUT.List', \%params );
+
+	}
 }
 
 # Call the play/insert/add handler (passing the parameter to differentiate
@@ -1905,13 +1957,16 @@ sub checkDefaults {
 			LAZYSEARCH_MINLENGTH_ARTIST_DEFAULT );
 	}
 	if ( !defined( $myPrefs->get('pref_minlength_album') ) ) {
-		$myPrefs->set( 'pref_minlength_album', LAZYSEARCH_MINLENGTH_ALBUM_DEFAULT );
+		$myPrefs->set( 'pref_minlength_album',
+			LAZYSEARCH_MINLENGTH_ALBUM_DEFAULT );
 	}
 	if ( !defined( $myPrefs->get('pref_minlength_genre') ) ) {
-		$myPrefs->set( 'pref_minlength_genre', LAZYSEARCH_MINLENGTH_GENRE_DEFAULT );
+		$myPrefs->set( 'pref_minlength_genre',
+			LAZYSEARCH_MINLENGTH_GENRE_DEFAULT );
 	}
 	if ( !defined( $myPrefs->get('pref_minlength_track') ) ) {
-		$myPrefs->set( 'pref_minlength_track', LAZYSEARCH_MINLENGTH_TRACK_DEFAULT );
+		$myPrefs->set( 'pref_minlength_track',
+			LAZYSEARCH_MINLENGTH_TRACK_DEFAULT );
 	}
 	if ( !defined( $myPrefs->get('pref_minlength_keyword') ) ) {
 		$myPrefs->set( 'pref_minlength_keyword',
@@ -1928,8 +1983,10 @@ sub checkDefaults {
 		$myPrefs->set( 'pref_allentries', LAZYSEARCH_ALLENTRIES_DEFAULT );
 	}
 	if ( !defined( $myPrefs->get('pref_keyword_artists_enabled') ) ) {
-		$myPrefs->set( 'pref_keyword_artists_enabled',
-			LAZYSEARCH_KEYWORD_ARTISTS_DEFAULT );
+		$myPrefs->set(
+			'pref_keyword_artists_enabled',
+			LAZYSEARCH_KEYWORD_ARTISTS_DEFAULT
+		);
 	}
 	if ( !defined( $myPrefs->get('pref_keyword_albums_enabled') ) ) {
 		$myPrefs->set( 'pref_keyword_albums_enabled',
@@ -1940,8 +1997,10 @@ sub checkDefaults {
 			LAZYSEARCH_KEYWORD_TRACKS_DEFAULT );
 	}
 	if ( !defined( $myPrefs->get('pref_keyword_return_albumartists') ) ) {
-		$myPrefs->set( 'pref_keyword_return_albumartists',
-			LAZYSEARCH_KEYWORD_ALBUMARTISTS_DEFAULT );
+		$myPrefs->set(
+			'pref_keyword_return_albumartists',
+			LAZYSEARCH_KEYWORD_ALBUMARTISTS_DEFAULT
+		);
 	}
 
 	# If the revision isn't yet in the preferences we set it to something
@@ -2369,7 +2428,6 @@ sub keywordOnRightHandler {
 					  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ALBUMS}';
 					$hierarchy = 'album,track';
 
-					#					$client->modeParam('search_type') = 'Album';
 				} elsif ( $level == 2 ) {
 
 					# Current item provides album constraint.
@@ -2378,7 +2436,6 @@ sub keywordOnRightHandler {
 					  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_TRACKS}';
 					$hierarchy = 'track';
 
-					#					$client->modeParam('search_type') = 'Track';
 				}
 
 				# Remember these consraints in the mode.

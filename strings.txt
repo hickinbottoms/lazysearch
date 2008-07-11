@@ -178,6 +178,12 @@ PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_KEYWORDS
 	EN	Enter Keyword Search
 	FI	Kirjoita hakusana
 
+PLUGIN_LAZYSEARCH2_MIX_CREATING
+	EN	Creating mix...
+
+PLUGIN_LAZYSEARCH2_MIX_EMPTY
+	EN	No songs found for mix
+
 SETUP_PLUGIN_LAZYSEARCH2_SHOWHELP
 	EN	Show descriptions for settings:
 
