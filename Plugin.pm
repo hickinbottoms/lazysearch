@@ -106,7 +106,7 @@ use constant URL_BASE => 'plugins/LazySearch2';
 
 # Export the version to the server (as a subversion keyword).
 use vars qw($VERSION);
-$VERSION = 'v@@VERSION@@ (trunk-7.0)';
+$VERSION = 'v@@VERSION@@ (trunk-7.x)';
 
 # A logger we will use to write plugin-specific messages.
 my $log = Slim::Utils::Log->addLogCategory(

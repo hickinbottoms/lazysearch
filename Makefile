@@ -19,7 +19,7 @@
 
 # $Id$
 
-VERSION=3.1
+VERSION=3.2
 PERLSOURCE=Plugin.pm Settings.pm
 HTMLSOURCE=HTML/EN/plugins/LazySearch2/settings/basic.html HTML/EN/plugins/LazySearch2/settings/logo.jpg
 SOURCE=$(PERLSOURCE) $(HTMLSOURCE) INSTALL strings.txt install.xml LICENSE
@@ -29,10 +29,10 @@ SLIMDIR=/usr/local/squeezecenter/server
 PLUGINSDIR=$(SLIMDIR)/Plugins
 PLUGINDIR=LazySearch2
 REVISION=`svn info . | grep "^Revision:" | cut -d' ' -f2`
-DISTFILE=LazySearch2-7_0-$(VERSION).zip
+DISTFILE=LazySearch2-7-$(VERSION).zip
 DISTFILEDIR=$(RELEASEDIR)/$(DISTFILE)
 SVNDISTFILE=../downloads/$(DISTFILE)
-LATESTLINK=$(RELEASEDIR)/LazySearch2-7_0-latest.zip
+LATESTLINK=$(RELEASEDIR)/LazySearch2-7-latest.zip
 PREFS=/etc/squeezecenter.pref
 
 # VM stuff for testing
