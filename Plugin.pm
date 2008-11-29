@@ -2026,7 +2026,7 @@ sub scanDoneCallback($) {
 
 	if ( $prefRevision ne $pluginRevision ) {
 		$log->info(
-"Re-lazifying (plugin version changed from '$prefRevision' to '$pluginRevision'"
+"Re-lazifying (plugin version changed from '$prefRevision' to '$pluginRevision')"
 		);
 		$force = 1;
 		$myPrefs->set( 'pref_revision', $pluginRevision );

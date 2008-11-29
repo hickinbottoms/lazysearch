@@ -19,7 +19,7 @@
 
 # $Id$
 
-VERSION=3.2
+VERSION=3.3
 PERLSOURCE=Plugin.pm Settings.pm
 HTMLSOURCE=HTML/EN/plugins/LazySearch2/settings/basic.html HTML/EN/plugins/LazySearch2/settings/logo.jpg
 SOURCE=$(PERLSOURCE) $(HTMLSOURCE) INSTALL strings.txt install.xml LICENSE
@@ -53,13 +53,13 @@ FORCE:
 
 make-stage:
 	echo "Creating plugin stage files (v$(VERSION))..."
-	-chmod -R +w $(STAGEDIR)/* >/dev/null 2>&1
+#	-chmod -R +w $(STAGEDIR)/* >/dev/null 2>&1
 	-rm -rf $(STAGEDIR)/* >/dev/null 2>&1
 	for FILE in $(SOURCE); do \
 		mkdir -p "$(STAGEDIR)/$(PLUGINDIR)/`dirname $$FILE`"; \
 		sed "s/@@VERSION@@/$(VERSION)/" <"$$FILE" >"$(STAGEDIR)/$(PLUGINDIR)/$$FILE"; \
 	done
-	chmod -R -w $(STAGEDIR)/*
+#	chmod -R -w $(STAGEDIR)/*
 
 # Regenerate tags.
 tags: $(PERLSOURCE)
