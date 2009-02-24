@@ -1671,7 +1671,7 @@ sub doKeywordSearch($$$$$$) {
 	if ( $level == 1 ) {
 
 		# We restrict the search to include artists related in the roles the
-		# user wants (set through SqueezeCentre preferences).
+		# user wants (set through SqueezeCenter preferences).
 		my $artistOnlyRoles = Slim::Schema->artistOnlyRoles('TRACKARTIST');
 		if ( !defined($artistOnlyRoles) ) {
 			my @emptyArtists;
