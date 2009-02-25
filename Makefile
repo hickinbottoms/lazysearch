@@ -1,5 +1,5 @@
 # Makefile for LazySearch2 plugin for SqueezeCentre 7.0 (and later)
-# Copyright © Stuart Hickinbottom 2004-2008
+# Copyright © Stuart Hickinbottom 2004-2009
 
 # This file is part of LazySearch2.
 #
@@ -17,9 +17,7 @@
 # along with LazySearch2; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-# $Id$
-
-VERSION=3.3
+VERSION=3.4b1
 PERLSOURCE=Plugin.pm Settings.pm
 HTMLSOURCE=HTML/EN/plugins/LazySearch2/settings/basic.html HTML/EN/plugins/LazySearch2/settings/logo.jpg
 SOURCE=$(PERLSOURCE) $(HTMLSOURCE) INSTALL strings.txt install.xml LICENSE
@@ -28,10 +26,9 @@ STAGEDIR=stage
 SLIMDIR=/usr/local/squeezecenter/server
 PLUGINSDIR=$(SLIMDIR)/Plugins
 PLUGINDIR=LazySearch2
-REVISION=`svn info . | grep "^Revision:" | cut -d' ' -f2`
+COMMIT=`git log -1 --pretty=format:%H`
 DISTFILE=LazySearch2-7-$(VERSION).zip
 DISTFILEDIR=$(RELEASEDIR)/$(DISTFILE)
-SVNDISTFILE=../downloads/$(DISTFILE)
 LATESTLINK=$(RELEASEDIR)/LazySearch2-7-latest.zip
 PREFS=/etc/squeezecenter.pref
 
@@ -52,12 +49,12 @@ all:
 FORCE:
 
 make-stage:
-	echo "Creating plugin stage files (v$(VERSION))..."
+	echo "Creating stage files (v$(VERSION)/$(COMMIT))..."
 #	-chmod -R +w $(STAGEDIR)/* >/dev/null 2>&1
 	-rm -rf $(STAGEDIR)/* >/dev/null 2>&1
 	for FILE in $(SOURCE); do \
 		mkdir -p "$(STAGEDIR)/$(PLUGINDIR)/`dirname $$FILE`"; \
-		sed "s/@@VERSION@@/$(VERSION)/" <"$$FILE" >"$(STAGEDIR)/$(PLUGINDIR)/$$FILE"; \
+		sed "s/@@VERSION@@/$(VERSION)/;s/@@COMMIT@@/$(COMMIT)/" <"$$FILE" >"$(STAGEDIR)/$(PLUGINDIR)/$$FILE"; \
 	done
 #	chmod -R -w $(STAGEDIR)/*
 
@@ -100,7 +97,6 @@ logtail:
 	echo "Following the end of the SqueezeCentre log..."
 	multitail -f /var/log/squeezecenter/server.log
 
-# TODO - fix this for new package layout
 # Build a distribution package for this Plugin.
 release: make-stage
 	echo Building distfile: $(DISTFILE)
@@ -109,7 +105,6 @@ release: make-stage
 	(cd "$(STAGEDIR)" && zip -r "../$(DISTFILEDIR)" "$(PLUGINDIR)")
 	-rm "$(LATESTLINK)" >/dev/null 2>&1
 	ln -s "$(DISTFILE)" "$(LATESTLINK)"
-	cp $(DISTFILEDIR) $(SVNDISTFILE)
 
 # Utility target to clear lazification from the database without the bother
 # of having to do a full rescan.

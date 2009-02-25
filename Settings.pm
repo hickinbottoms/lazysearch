@@ -1,5 +1,5 @@
 # Web settings page handler for LazySearch2 plugin for SqueezeCentre.
-# Copyright © Stuart Hickinbottom 2004-2008
+# Copyright © Stuart Hickinbottom 2004-2009
 
 # This file is part of LazySearch2.
 #
@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with LazySearch2; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-# $Id$
 
 use strict;
 use warnings;

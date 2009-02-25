@@ -1,5 +1,5 @@
 # LazySearch2 Plugin for SqueezeCentre
-# Copyright © Stuart Hickinbottom 2004-2008
+# Copyright © Stuart Hickinbottom 2004-2009
 
 # This file is part of LazySearch2.
 #
@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with LazySearch2; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-# $Id$
 
 # This is a plugin to implement lazy searching using the Squeezebox/Transporter
 # remote control.
@@ -40,6 +38,7 @@ use Slim::Utils::Text;
 use Slim::Utils::Timers;
 use Slim::Utils::Log;
 use Slim::Utils::Prefs;
+use Slim::Utils::OSDetect;
 use Time::HiRes;
 use Text::Unidecode;
 use Scalar::Util qw(blessed);
@@ -103,6 +102,9 @@ use constant KEYWORD_SEPARATOR_CHARACTER => ',';
 
 # The root of our web pages.
 use constant URL_BASE => 'plugins/LazySearch2';
+
+# Maximum WoL keep-awake interval.
+use constant WOL_TICKLE_INTERVAL => 60;
 
 # Export the version to the server (as a subversion keyword).
 use vars qw($VERSION);
@@ -202,6 +204,14 @@ my $initialised = 0;
 # database. Used to detect and warn the user of this when entering
 # lazy search mode while this is in progress.
 my $lazifyingDatabase = 0;
+
+# Flag to indicate whether the plugin is running on Windows - if we are then we
+# will stop Windows form sleeping during the lazification process.
+my $onWindows = 0;
+
+# Time that the last WoL tickle occurred; used to control frequency that the
+# tickle API is called.
+my $lastWoLTickle = 0;
 
 # Map which is used to quickly translate the button pushes captured by our
 # mode back into the numbers on those keys.
@@ -622,6 +632,15 @@ sub initPlugin() {
 	# Remember we're now initialised. This prevents multiple-initialisation,
 	# which may otherwise cause trouble with duplicate hooks or modes.
 	$initialised = 1;
+
+	# Detect whether we're on Windows (we support the wake-on-LAN keep-awake
+	# tickle if we are)
+	my $os = Slim::Utils::OSDetect::OS();
+	if ( $os eq 'win' ) {
+		eval 'use Win32::API';
+		$log->debug('LazySearch2 is running on Windows');
+		$onWindows = 1;
+	}
 
 	# Make sure the preferences are set to something sensible before we call
 	# on them later.
@@ -2022,7 +2041,7 @@ sub scanDoneCallback($) {
 	# case this different plugin revision has changed the format.
 	my $force          = 0;
 	my $prefRevision   = $myPrefs->get('pref_revision');
-	my $pluginRevision = '$Revision$';
+	my $pluginRevision = '@@COMMIT@@';
 
 	if ( $prefRevision ne $pluginRevision ) {
 		$log->info(
@@ -2192,6 +2211,23 @@ sub encodeTask {
 	# lazification has been kicked off before this one has finished.
 	if ( ( scalar keys %encodeQueues ) == 0 ) {
 		return 0;
+	}
+
+	# If we're on Windows, and it has been a while since we last did it, then
+	# kick the Win32 API to prevent the server going into standby. Cribbed
+	# from the PreventStandby plugin.
+	if ( $onWindows
+		&& ( ( Time::HiRes::time() - $lastWoLTickle ) > WOL_TICKLE_INTERVAL ) )
+	{
+		$log->debug("Preventing possible standby");
+
+		# Access and call the Win32 API.
+		my $SetThreadExecutionState =
+		  Win32::API->new( 'kernel32', 'SetThreadExecutionState', 'N', 'N' );
+		$SetThreadExecutionState->Call(1);
+
+		# Remember the last time we did this.
+		$lastWoLTickle = Time::HiRes::time();
 	}
 
 	# Get a single type hash from the encode queue. It doesn't matter on the

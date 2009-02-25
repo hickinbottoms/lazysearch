@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!-- Metadata file for LazySearch2 plugin -->
-<!-- Copyright © Stuart Hickinbottom 2004-2008 -->
+<!-- Copyright © Stuart Hickinbottom 2004-2009 -->
 
 <!-- This file is part of LazySearch2. -->
 
@@ -19,8 +19,6 @@
 <!-- along with LazySearch2; if not, write to the Free Software -->
 <!-- Foundation, Inc., 51 Franklin St, Fifth Floor, -->
 <!-- Boston, MA  02110-1301  USA -->
-
-<!-- $Id$ -->
 
 <extension>
 	<id>a8cab4c9-904c-4f41-877f-276c29e6edea</id>
