@@ -39,6 +39,7 @@ use Slim::Utils::Timers;
 use Slim::Utils::Log;
 use Slim::Utils::Prefs;
 use Slim::Utils::OSDetect;
+use Slim::Control::Request;
 use Time::HiRes;
 use Text::Unidecode;
 use Scalar::Util qw(blessed);
@@ -212,6 +213,10 @@ my $onWindows = 0;
 # Time that the last WoL tickle occurred; used to control frequency that the
 # tickle API is called.
 my $lastWoLTickle = 0;
+
+# The cookie returned from the Server Power Control plugin when Lazy Search has
+# set a block on powering down or suspending the server.
+my $spcBlockCode = undef;
 
 # Map which is used to quickly translate the button pushes captured by our
 # mode back into the numbers on those keys.
@@ -2063,6 +2068,9 @@ sub lazifyDatabase($) {
 
 	my $force = shift;
 
+	# Block server power control.
+	spcBegin();
+
 	# Make sure the encode queue is empty, and cancel any lazification
 	# currently underway.
 	%encodeQueues = ();
@@ -2088,7 +2096,27 @@ sub lazifyDatabase($) {
 		$lazifyingDatabase = 1;
 	} else {
 		$log->info("No database items require lazification");
+
+		# Unblock server power control.
+		spcEnd();
 	}
+}
+
+# Prevent untimely suspends etc - utilises the Server Power Control plugin
+# if it is present.
+sub spcBegin {
+	$log->debug("Blocking server power control");
+	my $request = Slim::Control::Request::executeRequest(undef, ['srvrpowerctrl', 'setblock', 'Performing_Lazification', 'LazySearch2']);
+	$spcBlockCode = $request->getResult('_blockcode');
+	$log->debug("blockcode $spcBlockCode");
+}
+
+# Allow system suspends to begin again - through the Server Power Control
+# plugin if it is present.
+sub spcEnd {
+	$log->debug("Unblocking server power control");
+	Slim::Control::Request::executeRequest(undef, ['srvrpowerctrl', 'clearblock', $spcBlockCode, 'LazySearch2']);
+	$spcBlockCode = undef;
 }
 
 # Return a lazy-encoded search column value; the original 'search' version
@@ -2203,6 +2231,9 @@ sub encodeTask {
 "Detected a rescan while database scan in progress - cancelling lazy encoding"
 		);
 		%encodeQueues = ();
+
+		# Unblock server power control.
+		spcEnd();
 
 		return 0;
 	}
@@ -2338,6 +2369,9 @@ sub encodeTask {
 
 		# Make sure our work gets persisted.
 		Slim::Schema->forceCommit;
+
+		# Unblock server power control.
+		spcEnd();
 
 		# Clear the global flag indicating the task is in progress.
 		$lazifyingDatabase = 0;
