@@ -2107,7 +2107,7 @@ sub lazifyDatabase($) {
 sub spcBegin {
 	$log->debug("Blocking server power control");
 	my $request = Slim::Control::Request::executeRequest(undef, ['srvrpowerctrl', 'setblock', 'Performing_Lazification', 'LazySearch2']);
-	$spcBlockCode = $request->getResult('_blockcode');
+	$spcBlockCode = $request->getResult('_blockcode') || 'none';
 	$log->debug("blockcode $spcBlockCode");
 }
 
