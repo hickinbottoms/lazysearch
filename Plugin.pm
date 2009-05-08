@@ -474,6 +474,7 @@ sub enterKeywordSearch($$) {
 	  $myPrefs->get('pref_minlength_keyword');
 	$clientMode{$client}{onright}       = \&keywordOnRightHandler;
 	$clientMode{$client}{search_tracks} = undef;
+	$clientMode{$client}{mix_type}      = 'artist';
 	setSearchBrowseMode( $client, $item, 0 );
 }
 
@@ -2475,6 +2476,7 @@ sub keywordOnRightHandler {
 			  $clientMode{$client}{contributor_constraint};
 			my $albumConstraint = $clientMode{$client}{album_constraint};
 			my $hierarchy;
+			my $mixType;
 
 			# The current keyword level is part of the mode name.
 			my $mode = $client->modeParam("modeName");
@@ -2497,6 +2499,7 @@ sub keywordOnRightHandler {
 					$line1BrowseText =
 					  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ALBUMS}';
 					$hierarchy = 'album,track';
+					$mixType = 'album';
 
 				} elsif ( $level == 2 ) {
 
@@ -2505,6 +2508,7 @@ sub keywordOnRightHandler {
 					$line1BrowseText =
 					  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_TRACKS}';
 					$hierarchy = 'track';
+					$mixType = 'song';
 
 				}
 
@@ -2562,6 +2566,12 @@ sub keywordOnRightHandler {
 
 					# What overlays are shown on lines 1 and 2.
 					overlayRef => \&lazyOverlay,
+
+					# Our mix type that will be used if the user tries to
+					# create a MusicIP mix here. The type depends on the
+					# current position in the browsing hierarchy and so is
+					# determined above.
+					mixType => $mixType,
 
 					# To keep BrowseDB's create_mix handler happy.
 					hierarchy => $hierarchy,
