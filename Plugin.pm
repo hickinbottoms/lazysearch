@@ -2054,12 +2054,26 @@ sub scanDoneCallback($) {
 "Re-lazifying (plugin version changed from '$prefRevision' to '$pluginRevision')"
 		);
 		$force = 1;
-		$myPrefs->set( 'pref_revision', $pluginRevision );
 	} else {
 		$log->info("Lazifying database items not already done");
 	}
 
 	lazifyDatabase($force);
+}
+
+# Updated the version of the plugin used for the last scan in our preferences.
+# This is used to ensure that we re-lazify the database if the plugin version
+# changes (since the new plugin version might have changed the database
+# format).
+sub touchPluginVersion() {
+	my $prefRevision   = $myPrefs->get('pref_revision');
+	my $pluginRevision = '@@COMMIT@@';
+
+	if ( $prefRevision ne $pluginRevision ) {
+		$log->info("Updating plugin revision used for lazification from '$prefRevision' to '$pluginRevision'");
+
+		$myPrefs->set( 'pref_revision', $pluginRevision );
+	}
 }
 
 # This function is called when the music database scan has finished. It
@@ -2373,6 +2387,9 @@ sub encodeTask {
 
 		# Unblock server power control.
 		spcEnd();
+
+		# Note the version of the plugin used for lazification.
+		touchPluginVersion();
 
 		# Clear the global flag indicating the task is in progress.
 		$lazifyingDatabase = 0;
