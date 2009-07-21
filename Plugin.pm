@@ -1014,12 +1014,14 @@ sub lazyForceSearch {
 # toggle modes or not, or whether it's going to enter an immediate search
 # of a defined type.
 sub lazyOnSearch {
-	my $client          = shift;
-	my $mode            = Slim::Buttons::Common::mode($client);
-	my $inLazySearchTop = ( $mode eq LAZYSEARCH_TOP_MODE )
+	my $client = shift;
+	my $mode   = Slim::Buttons::Common::mode($client);
+	my $inLazySearchTop =
+	     ( $mode eq LAZYSEARCH_TOP_MODE )
 	  || ( $mode eq LAZYSEARCH_CATEGORY_MENU_MODE )
 	  || 0;
-	my $inLazySearch = $inLazySearchTop
+	my $inLazySearch =
+	     $inLazySearchTop
 	  || ( $mode eq LAZYBROWSE_MODE )
 	  || 0;
 	my $gotoLazy     = 0;
@@ -2070,7 +2072,9 @@ sub touchPluginVersion() {
 	my $pluginRevision = '@@COMMIT@@';
 
 	if ( $prefRevision ne $pluginRevision ) {
-		$log->info("Updating plugin revision used for lazification from '$prefRevision' to '$pluginRevision'");
+		$log->info(
+"Updating plugin revision used for lazification from '$prefRevision' to '$pluginRevision'"
+		);
 
 		$myPrefs->set( 'pref_revision', $pluginRevision );
 	}
@@ -2121,7 +2125,13 @@ sub lazifyDatabase($) {
 # if it is present.
 sub spcBegin {
 	$log->debug("Blocking server power control");
-	my $request = Slim::Control::Request::executeRequest(undef, ['srvrpowerctrl', 'setblock', 'Performing_Lazification', 'LazySearch2']);
+	my $request = Slim::Control::Request::executeRequest(
+		undef,
+		[
+			'srvrpowerctrl',           'setblock',
+			'Performing_Lazification', 'LazySearch2'
+		]
+	);
 	$spcBlockCode = $request->getResult('_blockcode') || 'none';
 	$log->debug("blockcode $spcBlockCode");
 }
@@ -2130,7 +2140,8 @@ sub spcBegin {
 # plugin if it is present.
 sub spcEnd {
 	$log->debug("Unblocking server power control");
-	Slim::Control::Request::executeRequest(undef, ['srvrpowerctrl', 'clearblock', $spcBlockCode, 'LazySearch2']);
+	Slim::Control::Request::executeRequest( undef,
+		[ 'srvrpowerctrl', 'clearblock', $spcBlockCode, 'LazySearch2' ] );
 	$spcBlockCode = undef;
 }
 
@@ -2165,7 +2176,8 @@ sub lazifyDatabaseType {
 	my $isTrackEncode         = 0;
 
 	# If any keyword encoding is considered then it's a track encode.
-	$isTrackEncode = $considerKeywordArtist
+	$isTrackEncode =
+	     $considerKeywordArtist
 	  || $considerKeywordAlbum
 	  || $considerKeywordTrack;
 
@@ -2469,7 +2481,8 @@ tr/ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 /222333444555666777788899991234567890X/;
 # Determines whether keyword searching is enabled. It's enabled if at least one
 # of the keyword search categories is enabled.
 sub keywordSearchEnabled {
-	return $myPrefs->get('pref_keyword_artists_enabled')
+	return
+	     $myPrefs->get('pref_keyword_artists_enabled')
 	  || $myPrefs->get('pref_keyword_albums_enabled')
 	  || $myPrefs->get('pref_keyword_tracks_enabled');
 }
@@ -2518,7 +2531,7 @@ sub keywordOnRightHandler {
 					$line1BrowseText =
 					  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_ALBUMS}';
 					$hierarchy = 'album,track';
-					$mixType = 'album';
+					$mixType   = 'album';
 
 				} elsif ( $level == 2 ) {
 
@@ -2527,7 +2540,7 @@ sub keywordOnRightHandler {
 					$line1BrowseText =
 					  '{PLUGIN_LAZYSEARCH2_LINE1_BROWSE_TRACKS}';
 					$hierarchy = 'track';
-					$mixType = 'song';
+					$mixType   = 'song';
 
 				}
 
@@ -2636,7 +2649,7 @@ sub keywordMatchText($$$) {
 	foreach my $keyword (@keywordParts) {
 		next if ( length($keyword) == 0 );
 		next
-		  if ( !$searchForced
+		  if (!$searchForced
 			&& $hideShorties
 			&& ( length($keyword) < $clientMode{$client}{min_search_length} ) );
 
