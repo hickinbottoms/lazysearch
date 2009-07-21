@@ -104,7 +104,7 @@ use constant KEYWORD_SEPARATOR_CHARACTER => ',';
 # The root of our web pages.
 use constant URL_BASE => 'plugins/LazySearch2';
 
-# Maximum WoL keep-awake interval.
+# Maximum WoL keep-awake interval (seconds).
 use constant WOL_TICKLE_INTERVAL => 60;
 
 # Export the version to the server (as a subversion keyword).
@@ -2381,6 +2381,8 @@ sub encodeTask {
 	return $rescheduleTask;
 }
 
+# NOTE: This is where the magic happens.
+#
 # Convert a search string to a lazy-entry encoded search string. This includes
 # both the original search term and a lazy-encoded version. Later, when
 # searching, both are tried. The original search text is kept in upper-case
@@ -2687,7 +2689,7 @@ sub relazifyDatabase {
 sub webPages {
 	my $class = shift;
 
-	Slim::Web::HTTP::addPageFunction( URL_BASE . '/settings/logo.jpg',
+	Slim::Web::Pages->addPageFunction( URL_BASE . '/settings/logo.jpg',
 		\&handleLogoJPG );
 }
 
