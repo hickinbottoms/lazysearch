@@ -1,4 +1,4 @@
-# LazySearch2 Plugin for SqueezeCentre
+# LazySearch2 Plugin for Squeezebox Server
 # Copyright © Stuart Hickinbottom 2004-2009
 
 # This file is part of LazySearch2.
@@ -233,7 +233,7 @@ my %numberScrollMap = (
 	'numberScroll_9' => '9',
 );
 
-# Below are functions that are part of the standard SqueezeCentreplugin
+# Below are functions that are part of the standard Squeezebox Server plugin
 # interface.
 
 # Main mode of this plugin; offers the artist/album/genre/song browse options
@@ -485,7 +485,7 @@ sub searchTracksForArtist($) {
 	my $condition = undef;
 
 	# We restrict the search to include artists related in the roles the
-	# user wants (set through SqueezeCentre preferences).
+	# user wants (set through Squeezebox Server preferences).
 	my $roles = Slim::Schema->artistOnlyRoles('TRACKARTIST');
 	if ($roles) {
 		$condition->{'role'} = { 'in' => $roles };
@@ -886,7 +886,7 @@ sub setSearchBrowseMode {
 
 	# Make sure we pop back to the first result - most useful because of the
 	# second-row help that is included because it might confuse the user to
-	# see that when the re-enter the search mode (SqueezeCentre will try to
+	# see that when the re-enter the search mode (Squeezebox Server will try to
 	# resume the mode on the same row that it was last on).
 	if ( length( $clientMode{$client}{search_performed} ) == 0 ) {
 		$params{initialValue} = $itemsRef->[0];
@@ -1519,7 +1519,7 @@ sub performArtistSearch($$) {
 	my $condition  = undef;
 
 	# We restrict the search to include artists related in the roles the
-	# user wants (set through SqueezeCentre preferences).
+	# user wants (set through Squeezebox Server preferences).
 	my $roles = Slim::Schema->artistOnlyRoles('TRACKARTIST');
 	if ($roles) {
 		$condition->{'role'} = { 'in' => $roles };
@@ -1698,7 +1698,7 @@ sub doKeywordSearch($$$$$$) {
 	if ( $level == 1 ) {
 
 		# We restrict the search to include artists related in the roles the
-		# user wants (set through SqueezeCenter preferences).
+		# user wants (set through Squeezebox Server preferences).
 		my $artistOnlyRoles = Slim::Schema->artistOnlyRoles('TRACKARTIST');
 		if ( !defined($artistOnlyRoles) ) {
 			my @emptyArtists;
@@ -2038,8 +2038,8 @@ sub checkDefaults {
 	}
 }
 
-# This is called by SqueezeCentre when a scan has finished. We use this to kick
-# off lazification of the database once it's been populated with all music
+# This is called by Squeezebox Server when a scan has finished. We use this to
+# kick off lazification of the database once it's been populated with all music
 # information.
 sub scanDoneCallback($) {
 	$log->debug("Received notification of end of rescan");
@@ -2082,7 +2082,7 @@ sub touchPluginVersion() {
 
 # This function is called when the music database scan has finished. It
 # identifies each artist, track and album that has not yet been encoded into
-# lazy form and schedules a SqueezeCentre background task to encode them.
+# lazy form and schedules a Squeezebox Server background task to encode them.
 sub lazifyDatabase($) {
 
 	my $force = shift;
@@ -2244,9 +2244,9 @@ sub lazifyDatabaseType {
 	}
 }
 
-# This task function is periodically called by SqueezeCentre when it is 'idle'.
-# It works through the IDs of the objects that require encoding. They are
-# encoded in chunks taking a maximum amount of time to keep the server and
+# This task function is periodically called by Squeezebox Server when it is
+# 'idle'.  It works through the IDs of the objects that require encoding. They
+# are encoded in chunks taking a maximum amount of time to keep the server and
 # players responsive. This function returns 0 when the task has finished, and
 # 1 when there is more work to do and this function should be called again.
 sub encodeTask {
@@ -2462,7 +2462,7 @@ sub lazyEncode($) {
 tr/ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 /222333444555666777788899991234567890X/;
 
 	# Now, if there's any punctuation left in we remove that to aid searching.
-	# We do that by calling the SqueezeCentre method that transforms all
+	# We do that by calling the Squeezebox Server method that transforms all
 	# punctuation to spaces, then remove those spaces (since the original
 	# spaces are temporarily turned to X's, we'll be able to recover those
 	# in the next step).

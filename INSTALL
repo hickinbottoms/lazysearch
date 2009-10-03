@@ -1,27 +1,30 @@
 This file contains very brief instructions on how to install and activate
-this plugin on SqueezeCenter. For full details please refer to:
+this plugin on Squeezebox Server. For full details please refer to:
 http://www.hickinbottom.com/lazysearch
 
-1. Make sure you are running SqueezeCenter 7.0 or later (you need different
-versions of the plugin for earlier versions of SqueezeCenter (or SlimServer as it was previously called) - see the website if that applies to you).
+1. Make sure you are running Squeezebox Server 7.0 or later (you need different
+versions of the plugin for earlier versions of the server (or SlimServer, or
+SqueezeCenter as it was previously called) - see the website if that applies to
+you).
 
 2. Extract the ZIP file (being sure to preserve the paths in the ZIP file), and
-copy the resulting LazySearch2 directory to your SqueezeCenter plugins
+copy the resulting LazySearch2 directory to your Squeezebox Server plugins
 directory.
 
-Windows: C:\Program Files\SqueezeCenter\Server\Plugins
+Windows: C:\Program Files\Squeezebox Server\Server\Plugins
 Linux: it depends, but something like /usr/local/squeezecentre/Plugins
-MacOSX: ~/Library/Application Support/SqueezeCenter/Plugins (I believe you need
-  to do this as the user that you originally installed SqueezeCenter as.
+MacOSX: ~/Library/Application Support/Squeezebox Server/Plugins (I believe you
+  need to do this as the user that you originally installed Squeezebox Server
+  as.
 
-3. Restart SqueezeCenter to make sure it has seen the new plugin.
-Windows: use the 'services' applet in the control panel, or the SqueezeCenter
-         tray icon in the bottom-right of the screen if you have it running.
+3. Restart Squeezebox Server to make sure it has seen the new plugin.
+Windows: use the 'services' applet in the control panel, or the Squeezebox
+  Server tray icon in the bottom-right of the screen if you have it running.
 Linux: it depends, but something like '/etc/init.d/squeezecentre restart'.
 Mac OS X: use the standard OSX 'System Properties' menu.
 
 4. Make sure the plugin is present and enabled on the 'Settings/Plugins'
-page on the SqueezeCenter web interface.
+page on the Squeezebox Server web interface.
 
 5. Start using the plugin when the initial background scan has finished.
 The plugin will begin adding lazy search indexing the first time the server
