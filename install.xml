@@ -38,6 +38,6 @@
 	<targetApplication>
 		<id>Squeezebox Server</id>
 		<minVersion>7.3</minVersion>
-		<maxVersion>7.4+</maxVersion>
+		<maxVersion>7.5+</maxVersion>
 	</targetApplication>
 </extension>
