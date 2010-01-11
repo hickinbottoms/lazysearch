@@ -1,4 +1,4 @@
-# Makefile for LazySearch2 plugin for SqueezeCentre 7.0 (and later)
+# Makefile for LazySearch2 plugin for Squeezebox Server 7.0 (and later)
 # Copyright © Stuart Hickinbottom 2004-2010
 
 # This file is part of LazySearch2.
@@ -23,20 +23,20 @@ HTMLSOURCE=HTML/EN/plugins/LazySearch2/settings/basic.html HTML/EN/plugins/LazyS
 SOURCE=$(PERLSOURCE) $(HTMLSOURCE) INSTALL strings.txt install.xml LICENSE
 RELEASEDIR=releases
 STAGEDIR=stage
-SLIMDIR=/usr/local/squeezecenter/server
+SLIMDIR=/usr/local/squeezebox-server-7.5/server
 PLUGINSDIR=$(SLIMDIR)/Plugins
 PLUGINDIR=LazySearch2
 COMMIT=`git log -1 --pretty=format:%H`
 DISTFILE=LazySearch2-7-$(VERSION).zip
 DISTFILEDIR=$(RELEASEDIR)/$(DISTFILE)
 LATESTLINK=$(RELEASEDIR)/LazySearch2-7-latest.zip
-PREFS=/etc/squeezecenter.pref
+PREFS=/etc/squeezebox-server.pref
 
 # VM stuff for testing
 PIDFILE=/home/stuarth/code/audiothings/scebuild/qemu.pid
 VMHOST=chandra
 LOCAL_PORTAGE=/usr/local/portage
-EBUILD_PREFIX=squeezecenter-lazysearch
+EBUILD_PREFIX=squeezeboxserver-lazysearch
 EBUILD_CATEGORY=media-plugins/$(EBUILD_PREFIX)
 EBUILD_DIR=$(LOCAL_PORTAGE)/$(EBUILD_CATEGORY)
 
@@ -70,7 +70,7 @@ pretty:
 	done
 	echo "You're Beautiful..."
 
-# Install the plugin in SqueezeCentre.
+# Install the plugin in Squeezebox Server.
 install: make-stage
 	echo Installing plugin...
 	-[[ -d "$(PLUGINSDIR)/$(PLUGINDIR)" ]] && sudo chmod -R +w "$(PLUGINSDIR)/$(PLUGINDIR)"
@@ -78,24 +78,24 @@ install: make-stage
 	sudo cp -r "$(STAGEDIR)/$(PLUGINDIR)" "$(PLUGINSDIR)"
 	sudo chmod -R -w "$(PLUGINSDIR)/$(PLUGINDIR)"
 
-# Restart SqueezeCentre, quite forcefully. This is obviously quite
+# Restart Squeezebox Server, quite forcefully. This is obviously quite
 # Gentoo-specific.
 restart:
-	echo "Forcefully restarting SqueezeCentre..."
+	echo "Forcefully restarting Squeezebox Server..."
 	-sudo pkill -9 squeezeslave
 	sudo /etc/init.d/squeezeslave zap
-	sudo /etc/init.d/squeezecenter stop
-	sudo /etc/init.d/squeezecenter zap
+	sudo /etc/init.d/squeezebox-server stop
+	sudo /etc/init.d/squeezebox-server zap
 	sleep 2
-	sudo sh -c ">/var/log/squeezecenter/server.log"
-	sudo sh -c ">/var/log/squeezecenter/scanner.log"
-	sudo sh -c ">/var/log/squeezecenter/perfmon.log"
-	sudo /etc/init.d/squeezecenter restart
-	sudo /etc/init.d/squeezeslave restart
+	sudo sh -c ">/var/log/squeezebox-server/server.log"
+	sudo sh -c ">/var/log/squeezebox-server/scanner.log"
+	sudo sh -c ">/var/log/squeezebox-server/perfmon.log"
+	sudo /etc/init.d/squeezebox-server restart
+	sudo /etc/init.d/squeezebox-server restart
 
 logtail:
-	echo "Following the end of the SqueezeCentre log..."
-	multitail -f /var/log/squeezecenter/server.log
+	echo "Following the end of the Squeezebox Server log..."
+	multitail -f /var/log/squeezebox-server/server.log
 
 # Build a distribution package for this Plugin.
 release: make-stage

@@ -769,8 +769,11 @@ sub initPlugin() {
 	Slim::Hardware::IR::addModeDefaultMapping( LAZYBROWSE_KEYWORD_MODE,
 		\%keywordInputMap );
 
-	# Intercept the 'search' button to take us to our top-level menu.
+	# Intercept the 'search' button to take us to our top-level menu. We do
+	# both 'search' and 'globalsearch' because the former was renamed to the
+	# latter in SBS 7.5.
 	Slim::Buttons::Common::setFunction( 'search', \&lazyOnSearch );
+	Slim::Buttons::Common::setFunction( 'globalsearch', \&lazyOnSearch );
 
 	# Schedule a lazification to ensure that the database is lazified. This
 	# is useful because the user might shut down the server during the scan
