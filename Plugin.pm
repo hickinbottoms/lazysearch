@@ -1258,6 +1258,9 @@ sub lazyOnPlay {
 	# Not sure why, but we don't need to start the play
 	# here - seems something by default is grabbing and
 	# processing the button. Strange...
+
+	# Go into "now playing".
+	Slim::Buttons::Common::setMode( $client, 'playlist' );
 }
 
 # Pick up each number button press and add it to the current lazy search text,
