@@ -34,6 +34,7 @@ PLUGIN_LAZYSEARCH2
 
 PLUGIN_LAZYSEARCH2_DESC
 	EN	Perform searches more quickly and easily using your player's remote control.
+	DE	Suche schneller und einfacher mit der Fernbedienung deines Players.
 
 PLUGIN_LAZYSEARCH2_LINE1_BROWSE
 	DA	Lazy Search
@@ -157,6 +158,7 @@ PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_GENRES
 
 PLUGIN_LAZYSEARCH2_LINE2_BRIEF_HELP
 	EN	Press the number key correponding to each letter you wish to enter - eg "786637" for "STONES". The search is performed automatically after entry.
+	DE	Drücke die zu dem gewünschten Buchstaben korrespondierende Zifferntaste - z.B. "786637" für "STONES". Die Suche wird nach der Eingabe automatisch durchgeführt.
 
 PLUGIN_LAZYSEARCH2_KEYWORD_MENU_ITEM
 	DA	Keywords
@@ -178,12 +180,15 @@ PLUGIN_LAZYSEARCH2_LINE2_ENTER_MORE_KEYWORDS
 
 PLUGIN_LAZYSEARCH2_MIX_CREATING
 	EN	Creating mix...
+	DE	Erzeuge Mix...
 
 PLUGIN_LAZYSEARCH2_MIX_EMPTY
 	EN	No songs found for mix
+	DE	Keine Lieder für Mix gefunden
 
 SETUP_PLUGIN_LAZYSEARCH2_SHOWHELP
 	EN	Show descriptions for settings:
+	DE	Zeige Erläuterungen zu den Einstellungen:
 
 SETUP_PLUGIN_LAZYSEARCH2_GROUP_LAZYSEARCH2
 	DA	Lazy Search
@@ -203,6 +208,7 @@ SETUP_PLUGIN_LAZYSEARCH2_GROUP_LAZYSEARCH2_DESC
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_HEAD
 	EN	Minimum Search Lengths
+	DE	Mindestlängen für die Suche
 
 SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_DESC
 	DA	Søgning efter kunstner, album, genre eller sang med et kort antal tegn er ikke brugbart i praksis, da det vil resultere i et stort antal resultater. For at undgå at søgningen starter før et mere brugbart antal tegn bliver tastet, kan et minimum antal tegn specificeres her. Der er separate indstillinger for kunstner og album navn, genre og sangtitel. - Det anbefales at bruge 3 for kunstner, album og genre, og 4 for sangtitel.
@@ -246,6 +252,7 @@ SETUP_PLUGIN_LAZYSEARCH2_MINLENGTH_GENRE_CHOOSE
 
 SETUP_PLUGIN_LAZYSEARCH2_BUTTON_BEHAVIOUR
 	EN	Remote Control Button Behaviour
+	DE	Verhalten der Fernbedienungstasten
 
 SETUP_PLUGIN_LAZYSEARCH2_LEFTDELETES_DESC
 	DA	Du kan vælge hvordan VESTRE-knappen på fjernbetjæningen opfører sig når man trykker en søgetekst. VESTRE kan enten slette det sidst tastet tegn (for at rette en fejl), eller forlade søgeningen.
@@ -291,6 +298,7 @@ SETUP_PLUGIN_LAZYSEARCH2_IGNOREAAKEYWORD_CHOOSE
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_DESC
 	EN	You can also choose to have the SEARCH button on the remote control remapped to the <i>lazy search music</i> function instead of the original <i>search music</i> function. Further options allow the SEARCH button to immediately enter a chosen type of lazy search, which saves time if that's the type of search you prefer to use most often.
+	DE	Man kann auch einstellen, dass der SEARCH-Taste auf der Fernbedieung die Funktion der <i>Faulpelz-Suche<i> anstelle der <i>Original-Suche<i> zugeordnet ist. Weitere Einstellungen ermöglichen, dass die SEARCH-Taste unmittelbar einen ausgewählten Typ der Faulpelz-Suche aufruft. Dies spart Zeit, wenn man diesen Suchtyp meistens für seine Suche verwendet.
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_CHOOSE
 	DA	Tryk på SEARCH knappen på Squeezebox/Transporter fjernbetjæningen:
@@ -310,6 +318,7 @@ SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_0
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_1
 	EN	Toggles between lazy search and standard search
+	DE	Wechselt zwischen Faulpelz-Suche und Standardsuche
 
 SETUP_PLUGIN_LAZYSEARCH2_HOOKSEARCHBUTTON_2
 	DE	Startet eine Faulpelz-Suche nach einem Interpret
@@ -354,6 +363,7 @@ PLUGIN_LAZYSEARCH2_SCAN_IN_PROGRESS
 
 SETUP_PLUGIN_LAZYSEARCH2_DEBUGGING
 	EN	Debugging and Troubleshooting
+	DE	Fehlersuche und Fehlerbehebung
 
 SETUP_PLUGIN_LAZYSEARCH2_LAZIFYNOW_DESC
 	DA	Dette plugin er lavet til at vedligeholde Lazy Search indexet når det er nødvendigt. Derfor er det ikke, under normale omstændigheder, nødvendigt at tivnge re-index igennem. Du kan dog, hvis du vil være sikker på at indexet er opbygget korrekt, trykke denne knap. Dette er primært en debug funktion.
