@@ -2362,8 +2362,14 @@ sub encodeTask {
 			}
 
 			# Get the custom search added to the database.
-			$obj->set_column( 'customsearch', $customSearch );
-			$obj->update;
+			eval {
+				$obj->set_column( 'customsearch', $customSearch );
+				$obj->update;
+			};
+			if ($@) {
+				my $e = $@;
+				$log->debug("$type '" . $obj->get_column($sourceAttr) . "' error when setting customsearch column; skipping ($e)");
+			}
 
 			$rowsDone++;
 		}
@@ -2380,7 +2386,7 @@ sub encodeTask {
 	if ( $endTime != $startTime ) {
 		$speed = int( $rowsDone / ( $endTime - $startTime ) );
 	}
-	$log->debug( "Lazifier running at $speed $type" . "s/sec" );
+	$log->debug( "Lazifier running at $speed $type" . 's/sec' );
 
 	# If we've exhausted the ids for this type then remove this type from the
 	# hash. If there are any left, however, we'll leave those in for the task
