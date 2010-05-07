@@ -17,13 +17,13 @@
 # along with LazySearch2; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-VERSION=3.5.5
+VERSION=3.5.6
 PERLSOURCE=Plugin.pm Settings.pm
 HTMLSOURCE=HTML/EN/plugins/LazySearch2/settings/basic.html HTML/EN/plugins/LazySearch2/settings/logo.jpg
 SOURCE=$(PERLSOURCE) $(HTMLSOURCE) INSTALL strings.txt install.xml LICENSE
 RELEASEDIR=releases
 STAGEDIR=stage
-SLIMDIR=/usr/local/squeezebox-server-7.5/server
+SLIMDIR=/usr/local/squeezebox-server-7.6/server
 PLUGINSDIR=$(SLIMDIR)/Plugins
 PLUGINDIR=LazySearch2
 COMMIT=`git log -1 --pretty=format:%H`
