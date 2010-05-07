@@ -1740,7 +1740,7 @@ sub doKeywordSearch($$$$$$) {
 				]
 			},
 			{
-				order_by => 'titlesort',
+				order_by => 'album.titlesort',
 				distinct => 1,
 				join     => 'contributorTracks'
 			}
