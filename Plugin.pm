@@ -1257,10 +1257,12 @@ sub lazyOnPlay {
 	$log->debug( "About to '$cmd' " . scalar @playItems . " items" );
 	$client->execute( [ 'playlist', $cmd, 'listref', \@playItems ] );
 
-	# Go into "now playing".
-	Slim::Buttons::Common::setMode($client, 'home');
-	Slim::Buttons::Home::jump($client, 'playlist');
-	Slim::Buttons::Common::pushModeLeft($client, 'playlist');
+	# Go into "now playing", if playing.
+	if ($addMode == 0) {
+		Slim::Buttons::Common::setMode($client, 'home');
+		Slim::Buttons::Home::jump($client, 'playlist');
+		Slim::Buttons::Common::pushModeLeft($client, 'playlist');
+	}
 
 	# Inform the user what has happened.
 	if ( $client->linesPerScreen == 1 ) {
