@@ -539,6 +539,8 @@ sub rightIntoArtist($$) {
 	my $client = shift;
 	my $item   = shift;
 
+	$log->debug("Pushing right into ARTIST " . $item->id);
+
 	# Browse albums by this artist.
 	Slim::Buttons::Common::pushModeLeft(
 		$client,
@@ -557,15 +559,30 @@ sub rightIntoAlbum($$) {
 	my $item   = shift;
 
 	# Browse tracks for this album.
-	Slim::Buttons::Common::pushModeLeft(
-		$client,
-		'browsedb',
-		{
-			'hierarchy'    => 'album,track',
-			'level'        => 1,
-			'findCriteria' => { 'album.id' => $item->id },
-		}
-	);
+#@@@
+#	Slim::Buttons::Common::pushModeLeft(
+#		$client,
+#		'browsedb',
+#		{
+#			'hierarchy'    => 'album,track',
+#			'level'        => 1,
+#			'findCriteria' => { 'album.id' => $item->id },
+#		}
+#	);
+
+	# Useful resources:
+	# try to get xmlbrowser to work
+	# http://forums.slimdevices.com/showthread.php?t=87127
+	# spotify plugin
+
+	if (blessed($item)) {
+		$log->debug("Attempting to push right from ALBUM result (" . $item->id . ", " . $item->url . ")");
+
+
+
+	} else {
+		$log->info("Avoiding entering non-object menu");
+	}
 
 }
 
@@ -573,6 +590,8 @@ sub rightIntoAlbum($$) {
 sub rightIntoGenre($$) {
 	my $client = shift;
 	my $item   = shift;
+
+	$log->debug("Pushing right into GENRE " . $item->id);
 
 	# Browse artists by this genre.
 	Slim::Buttons::Common::pushModeLeft(
@@ -591,6 +610,8 @@ sub rightIntoTrack($$) {
 	my $client = shift;
 	my $item   = shift;
 
+	$log->debug("Pushing right into TRACK " . $item->id);
+	
 	# Push into the trackinfo mode for this one track.
 	my $track = Slim::Schema->rs('Track')->find( $item->id );
 	Slim::Buttons::Common::pushModeLeft( $client, 'trackinfo',
@@ -1202,25 +1223,6 @@ sub lazyOnPlay {
 		$cmd = "loadtracks";
 	}
 
-	if ( $client->linesPerScreen == 1 ) {
-		$line1 = $client->doubleString($msg);
-	} else {
-		$line1 = $client->string($msg);
-		if ( blessed($item) ) {
-			$line2 = $item->name;
-		} else {
-			my $strToken = $clientMode{$client}{all_entry};
-			$strToken =~ s/(\{|\})//g;
-			$line2 = $client->string($strToken);
-		}
-	}
-	$client->showBriefly(
-		{
-			'line1' => $line1,
-			'line2' => $line2
-		}
-	);
-
 	# The playlist of tracks that we'll then action with the appropriate
 	# command. This is built up for both an individual item or for ALL items.
 	my @playItems = ();
@@ -1255,12 +1257,31 @@ sub lazyOnPlay {
 	$log->debug( "About to '$cmd' " . scalar @playItems . " items" );
 	$client->execute( [ 'playlist', $cmd, 'listref', \@playItems ] );
 
+	# Go into "now playing".
+	Slim::Buttons::Common::setMode($client, 'home');
+	Slim::Buttons::Home::jump($client, 'playlist');
+	Slim::Buttons::Common::pushModeLeft($client, 'playlist');
+
+	# Inform the user what has happened.
+	if ( $client->linesPerScreen == 1 ) {
+		$line1 = $client->doubleString($msg);
+	} else {
+		$line1 = $client->string($msg);
+		if ( blessed($item) ) {
+			$line2 = $item->name;
+		} else {
+			my $strToken = $clientMode{$client}{all_entry};
+			$strToken =~ s/(\{|\})//g;
+			$line2 = $client->string($strToken);
+		}
+	}
+	$client->showBriefly(
+		{ 'line' => [ $line1, $line2 ] }
+	);
+
 	# Not sure why, but we don't need to start the play
 	# here - seems something by default is grabbing and
 	# processing the button. Strange...
-
-	# Go into "now playing".
-	Slim::Buttons::Common::setMode( $client, 'playlist' );
 }
 
 # Pick up each number button press and add it to the current lazy search text,

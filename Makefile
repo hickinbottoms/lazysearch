@@ -1,5 +1,5 @@
 # Makefile for LazySearch2 plugin for Squeezebox Server 7.0 (and later)
-# Copyright © Stuart Hickinbottom 2004-2010
+# Copyright © Stuart Hickinbottom 2004-2011
 
 # This file is part of LazySearch2.
 #
@@ -17,7 +17,7 @@
 # along with LazySearch2; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-VERSION=3.5.6
+VERSION=3.6.0
 PERLSOURCE=Plugin.pm Settings.pm
 HTMLSOURCE=HTML/EN/plugins/LazySearch2/settings/basic.html HTML/EN/plugins/LazySearch2/settings/logo.jpg
 SOURCE=$(PERLSOURCE) $(HTMLSOURCE) INSTALL strings.txt install.xml LICENSE
@@ -84,8 +84,9 @@ restart:
 	echo "Forcefully restarting Squeezebox Server..."
 	-sudo pkill -9 squeezeslave
 	sudo /etc/init.d/squeezeslave zap
-	sudo /etc/init.d/squeezebox-server stop
-	sudo /etc/init.d/squeezebox-server zap
+	-sudo /etc/init.d/squeezebox-server stop
+	-sudo /etc/init.d/squeezebox-server zap
+	-sudo pkill slimserver
 	sleep 2
 	sudo sh -c ">/var/log/squeezebox-server/server.log"
 	sudo sh -c ">/var/log/squeezebox-server/scanner.log"
@@ -95,7 +96,11 @@ restart:
 
 logtail:
 	echo "Following the end of the Squeezebox Server log..."
-	multitail -f /var/log/squeezebox-server/server.log
+	tail -F /var/log/squeezebox-server/server.log | grep -v "par-slim"
+
+logtail2:
+	echo "Following the end of the Squeezebox Server log (LazySearch only)..."
+	multitail -e LazySearch -f /var/log/squeezebox-server/server.log
 
 # Build a distribution package for this Plugin.
 release: make-stage
@@ -105,13 +110,6 @@ release: make-stage
 	(cd "$(STAGEDIR)" && zip -r "../$(DISTFILEDIR)" "$(PLUGINDIR)")
 	-rm "$(LATESTLINK)" >/dev/null 2>&1
 	ln -s "$(DISTFILE)" "$(LATESTLINK)"
-
-# Utility target to clear lazification from the database without the bother
-# of having to do a full rescan.
-unlazify:
-	echo Unlazifying the database...
-	sh -c "mysql --user=`grep -i dbuser $(PREFS) | cut -d' ' -f2` --password=`grep -i dbpassword $(PREFS) | cut -d' ' -f2` `grep -i dbsource $(PREFS) | cut -d' ' -f2 | cut -d= -f2 | cut -d';' -f1` < unlazify.sql"
-
 
 inject:
 	[ -f $(PIDFILE) ] || echo error: VM not running
