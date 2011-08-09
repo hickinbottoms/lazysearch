@@ -1,6 +1,6 @@
 /* Remove lazification from the database. Useful for testing to force
  * relazification as the database is restarted.
- * Copyright © Stuart Hickinbottom 2004-2010
+ * Copyright © Stuart Hickinbottom 2004-2011
  * 
  * This file is part of LazySearch2.
  * 

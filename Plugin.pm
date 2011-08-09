@@ -1,5 +1,5 @@
 # LazySearch2 Plugin for Squeezebox Server
-# Copyright © Stuart Hickinbottom 2004-2010
+# Copyright © Stuart Hickinbottom 2004-2011
 
 # This file is part of LazySearch2.
 #
@@ -553,6 +553,15 @@ sub rightIntoArtist($$) {
 	);
 }
 
+# Perform a search into a lazy search result and return an OPML menu to allow browsing
+# using the XMLBrowser mode.
+sub buildResultsSubmenu($$$) {
+	my ($client, $submenuType, $id) = @_;
+
+#@@@
+	$log->debug("Building browsing submenu $submenuType, id: $id");
+}
+
 # Browse into a particular album.
 sub rightIntoAlbum($$) {
 	my $client = shift;
@@ -575,14 +584,35 @@ sub rightIntoAlbum($$) {
 	# http://forums.slimdevices.com/showthread.php?t=87127
 	# spotify plugin
 
+#@@@@
 	if (blessed($item)) {
 		$log->debug("Attempting to push right from ALBUM result (" . $item->id . ", " . $item->url . ")");
 
+		# Build and return the submenu to push into; we'll then use the XMLBrowser (7.6+) to
+		# display and handle these results
+		my $getMenu = sub {
+			my ( $client, $callback ) = @_;
 
+			my $menu = buildResultsSubmenu($client, 'TracksForAlbum', $item->id);
+
+			if ( $callback ) {
+				# Callback is used during a menu refresh
+				$callback->($menu);
+			} else {
+				return $menu;
+			}
+		};
+
+		# Push ino the search results
+		Slim::Buttons::Common::pushMode($client, 'xmlbrowser', {
+				modeName  => 'LazySearchResultBrowser',
+				opml      => $getMenu->($client),
+			});
 
 	} else {
 		$log->info("Avoiding entering non-object menu");
 	}
+#@@@@
 
 }
 
@@ -1258,11 +1288,12 @@ sub lazyOnPlay {
 	$client->execute( [ 'playlist', $cmd, 'listref', \@playItems ] );
 
 	# Go into "now playing", if playing.
-	if ($addMode == 0) {
-		Slim::Buttons::Common::setMode($client, 'home');
-		Slim::Buttons::Home::jump($client, 'playlist');
-		Slim::Buttons::Common::pushModeLeft($client, 'playlist');
-	}
+	#@@@
+#	if ($addMode == 0) {
+#		Slim::Buttons::Common::setMode($client, 'home');
+#		Slim::Buttons::Home::jump($client, 'playlist');
+#		Slim::Buttons::Common::pushModeLeft($client, 'playlist');
+#	}
 
 	# Inform the user what has happened.
 	if ( $client->linesPerScreen == 1 ) {

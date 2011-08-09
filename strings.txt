@@ -1,5 +1,5 @@
 # String file for LazySearch2 plugin
-# Copyright © Stuart Hickinbottom 2004-2010
+# Copyright © Stuart Hickinbottom 2004-2011
 
 # This file is part of LazySearch2.
 #
