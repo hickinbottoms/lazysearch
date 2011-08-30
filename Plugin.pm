@@ -59,6 +59,7 @@ use constant SEARCH_TYPE_KEYWORD => 'Keyword';
 use constant LAZYSEARCH_TOP_MODE           => 'PLUGIN_LAZYSEARCH2.topmode';
 use constant LAZYSEARCH_CATEGORY_MENU_MODE => 'PLUGIN_LAZYSEARCH2.categorymenu';
 use constant LAZYBROWSE_MODE               => 'PLUGIN_LAZYSEARCH2.browsemode';
+use constant LAZYBROWSE_RESULTS_MODE => 'PLUGIN_LAZYSEARCH2.browseresults';
 use constant LAZYBROWSE_KEYWORD_MODE => 'PLUGIN_LAZYSEARCH2.keywordbrowse';
 
 # Search button behaviour options.
@@ -539,7 +540,7 @@ sub rightIntoArtist($$) {
 	my $client = shift;
 	my $item   = shift;
 
-	$log->debug("Pushing right into ARTIST " . $item->id);
+	$log->debug( "Pushing right into ARTIST " . $item->id );
 
 	# Browse albums by this artist.
 	Slim::Buttons::Common::pushModeLeft(
@@ -553,66 +554,96 @@ sub rightIntoArtist($$) {
 	);
 }
 
-# Perform a search into a lazy search result and return an OPML menu to allow browsing
-# using the XMLBrowser mode.
-sub buildResultsSubmenu($$$) {
-	my ($client, $submenuType, $id) = @_;
-
-#@@@
-	$log->debug("Building browsing submenu $submenuType, id: $id");
-}
-
 # Browse into a particular album.
 sub rightIntoAlbum($$) {
 	my $client = shift;
 	my $item   = shift;
 
 	# Browse tracks for this album.
-#@@@
-#	Slim::Buttons::Common::pushModeLeft(
-#		$client,
-#		'browsedb',
-#		{
-#			'hierarchy'    => 'album,track',
-#			'level'        => 1,
-#			'findCriteria' => { 'album.id' => $item->id },
-#		}
-#	);
+	#@@@
+	#	Slim::Buttons::Common::pushModeLeft(
+	#		$client,
+	#		'browsedb',
+	#		{
+	#			'hierarchy'    => 'album,track',
+	#			'level'        => 1,
+	#			'findCriteria' => { 'album.id' => $item->id },
+	#		}
+	#	);
 
-	# Useful resources:
-	# try to get xmlbrowser to work
-	# http://forums.slimdevices.com/showthread.php?t=87127
-	# spotify plugin
+	#@@@@
+	if ( blessed($item) ) {
 
-#@@@@
-	if (blessed($item)) {
-		$log->debug("Attempting to push right from ALBUM result (" . $item->id . ", " . $item->url . ")");
+		# A result set of the items we're going to show.
+		my $items = Slim::Schema->search(
+			'track',
+			{ 'album'    => $item },
+			{ 'order_by' => 'me.disc, me.tracknum, me.titlesort' }
+		)->all;
 
-		# Build and return the submenu to push into; we'll then use the XMLBrowser (7.6+) to
-		# display and handle these results
-		my $getMenu = sub {
-			my ( $client, $callback ) = @_;
+		# The current unique text to make the mode unique, and other browse constants.
+		my $searchText  = $clientMode{$client}{search_text};
+		my $forceSearch = $clientMode{$client}{search_forced};
+		my $mixType     = 'track';
+		my $browseResultType = 'TRACKS';
 
-			my $menu = buildResultsSubmenu($client, 'TracksForAlbum', $item->id);
+	  # Use INPUT.Choice to display the results for this browse-into mode.
+		my %params = (
 
-			if ( $callback ) {
-				# Callback is used during a menu refresh
-				$callback->($menu);
-			} else {
-				return $menu;
-			}
-		};
+			# The header (first line) to display whilst in this mode.
+			header => '{BROWSE_BY_ARTIST} {count}',
 
-		# Push ino the search results
-		Slim::Buttons::Common::pushMode($client, 'xmlbrowser', {
-				modeName  => 'LazySearchResultBrowser',
-				opml      => $getMenu->($client),
-			});
+			# A reference to the list of items to display.
+			listRef => $items,
+
+			# The function to extract the title of each item.
+			name => \&lazyGetText,
+
+			# A unique name for this mode that won't actually get displayed
+			# anywhere.
+			modeName => 'LAZYBROWSE_RESULTS_'
+			  . $browseResultType
+			  . "_MODE:$searchText",
+
+		  # An anonymous function that is called every time the user presses the
+		  # RIGHT button.
+#@@@@		onRight => \&keywordOnRightHandler,
+
+			onLeft => sub {
+				$log->debug("LEFT");
+			},
+
+			# A handler that manages play/add/insert (differentiated by the
+			# last parameter).
+			onPlay => sub {
+				my ( $client, $item, $addMode ) = @_;
+
+			  # Start playing the item selected (in the correct mode - play, add
+			  # or insert).
+				lazyOnPlay( $client, $item, $addMode );
+			},
+
+			# What overlays are shown on lines 1 and 2.
+			overlayRef => \&lazyOverlay,
+
+			# Our mix type that will be used if the user tries to
+			# create a MusicIP mix here. The type depends on the
+			# current position in the browsing hierarchy and so is
+			# determined above.
+			mixType => $mixType,
+		);
+
+	  # Use our INPUT.Choice-derived mode to show the menu and let it do all the
+	  # hard work of displaying the list, moving it up and down, etc, etc.
+		$log->debug( 'Pushing right into ' . $browseResultType . ' from higher item ' . $item->id );
+		Slim::Buttons::Common::pushModeLeft( $client, LAZYBROWSE_RESULTS_MODE,
+			\%params );
 
 	} else {
 		$log->info("Avoiding entering non-object menu");
 	}
-#@@@@
+
+	#@@@@
 
 }
 
@@ -621,7 +652,7 @@ sub rightIntoGenre($$) {
 	my $client = shift;
 	my $item   = shift;
 
-	$log->debug("Pushing right into GENRE " . $item->id);
+	$log->debug( "Pushing right into GENRE " . $item->id );
 
 	# Browse artists by this genre.
 	Slim::Buttons::Common::pushModeLeft(
@@ -640,8 +671,8 @@ sub rightIntoTrack($$) {
 	my $client = shift;
 	my $item   = shift;
 
-	$log->debug("Pushing right into TRACK " . $item->id);
-	
+	$log->debug( "Pushing right into TRACK " . $item->id );
+
 	# Push into the trackinfo mode for this one track.
 	my $track = Slim::Schema->rs('Track')->find( $item->id );
 	Slim::Buttons::Common::pushModeLeft( $client, 'trackinfo',
@@ -820,10 +851,45 @@ sub initPlugin() {
 	Slim::Hardware::IR::addModeDefaultMapping( LAZYBROWSE_KEYWORD_MODE,
 		\%keywordInputMap );
 
+#@@@@@
+
+	# The mode that is used to browse search results. This is quite similar to the keyword results browse mode.
+	my %chFunctions3 = %{ Slim::Buttons::Input::Choice::getFunctions() };
+	$chFunctions3{'playSingle'}  = \&onPlayHandler;
+	$chFunctions3{'playHold'}    = \&onCreateMixHandler;
+	$chFunctions3{'addSingle'}   = \&onAddHandler;
+	$chFunctions3{'addHold'}     = \&onInsertHandler;
+	Slim::Buttons::Common::addMode( LAZYBROWSE_RESULTS_MODE, \%chFunctions3,
+		\&Slim::Buttons::Input::Choice::setMode );
+
+	# Our input map for the new browse results mode, based on the default map
+	# contents for INPUT.Choice.
+	my %resultsInputMap = (
+		'arrow_left'        => 'exit_left',
+		'arrow_right'       => 'exit_right',
+		'play.single'       => 'playSingle',
+		'play.hold'         => 'playHold',
+		'play'              => 'dead',
+		'play.repeat'       => 'dead',
+		'play.hold_release' => 'dead',
+		'play.double'       => 'dead',
+		'pause.single'      => 'pause',
+		'pause.hold'        => 'stop',
+		'add.single'        => 'addSingle',
+		'add.hold'          => 'addHold',
+	);
+	for my $buttonPressMode (qw{repeat hold hold_release single double}) {
+		$resultsInputMap{ 'search.' . $buttonPressMode } = 'dead';
+	}
+	Slim::Hardware::IR::addModeDefaultMapping( LAZYBROWSE_RESULTS_MODE,
+		\%resultsInputMap );
+
+#@@@@@
+
 	# Intercept the 'search' button to take us to our top-level menu. We do
 	# both 'search' and 'globalsearch' because the former was renamed to the
 	# latter in SBS 7.5.
-	Slim::Buttons::Common::setFunction( 'search', \&lazyOnSearch );
+	Slim::Buttons::Common::setFunction( 'search',       \&lazyOnSearch );
 	Slim::Buttons::Common::setFunction( 'globalsearch', \&lazyOnSearch );
 
 	# Schedule a lazification to ensure that the database is lazified. This
@@ -1289,11 +1355,11 @@ sub lazyOnPlay {
 
 	# Go into "now playing", if playing.
 	#@@@
-#	if ($addMode == 0) {
-#		Slim::Buttons::Common::setMode($client, 'home');
-#		Slim::Buttons::Home::jump($client, 'playlist');
-#		Slim::Buttons::Common::pushModeLeft($client, 'playlist');
-#	}
+	#	if ($addMode == 0) {
+	#		Slim::Buttons::Common::setMode($client, 'home');
+	#		Slim::Buttons::Home::jump($client, 'playlist');
+	#		Slim::Buttons::Common::pushModeLeft($client, 'playlist');
+	#	}
 
 	# Inform the user what has happened.
 	if ( $client->linesPerScreen == 1 ) {
@@ -1308,9 +1374,7 @@ sub lazyOnPlay {
 			$line2 = $client->string($strToken);
 		}
 	}
-	$client->showBriefly(
-		{ 'line' => [ $line1, $line2 ] }
-	);
+	$client->showBriefly( { 'line' => [ $line1, $line2 ] } );
 
 	# Not sure why, but we don't need to start the play
 	# here - seems something by default is grabbing and
@@ -2422,7 +2486,10 @@ sub encodeTask {
 			};
 			if ($@) {
 				my $e = $@;
-				$log->debug("$type '" . $obj->get_column($sourceAttr) . "' error when setting customsearch column; skipping ($e)");
+				$log->debug( "$type '"
+					  . $obj->get_column($sourceAttr)
+					  . "' error when setting customsearch column; skipping ($e)"
+				);
 			}
 
 			$rowsDone++;
