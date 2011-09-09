@@ -575,11 +575,19 @@ sub rightIntoAlbum($$) {
 	if ( blessed($item) ) {
 
 		# A result set of the items we're going to show.
-		my $items = Slim::Schema->search(
+		my $childrenRS = Slim::Schema->search(
 			'track',
-			{ 'album'    => $item },
+			{ 'album'    => $item->id },
 			{ 'order_by' => 'me.disc, me.tracknum, me.titlesort' }
-		)->all;
+		);
+
+
+		# Each element of the listRef will be a hash with keys name and value.
+		# This is true for artists, albums and tracks.
+		my @items = ();
+		while ( my $childItem = $childrenRS->next ) {
+			push @items, $childItem;
+		}
 
 		# The current unique text to make the mode unique, and other browse constants.
 		my $searchText  = $clientMode{$client}{search_text};
@@ -591,10 +599,10 @@ sub rightIntoAlbum($$) {
 		my %params = (
 
 			# The header (first line) to display whilst in this mode.
-			header => '{BROWSE_BY_ARTIST} {count}',
+			header => '{BROWSE_BY_SONG} {count}',
 
 			# A reference to the list of items to display.
-			listRef => $items,
+			listRef => \@items,
 
 			# The function to extract the title of each item.
 			name => \&lazyGetText,
