@@ -1224,7 +1224,7 @@ sub lazyOnSearch {
 
 			# Into the normal search menu.
 			$log->debug("Entering normal SEARCH menu");
-			Slim::Buttons::Home::jumpToMenu( $client, "SEARCH" );
+			Slim::Buttons::Home::jumpToMenu( $client, 'GLOBAL_SEARCH' );
 		}
 	}
 }
