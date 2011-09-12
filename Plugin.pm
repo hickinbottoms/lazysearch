@@ -599,7 +599,7 @@ sub rightIntoAlbum($$) {
 		my %params = (
 
 			# The header (first line) to display whilst in this mode.
-			header => '{BROWSE_BY_SONG} {count}',
+			header => $item->name . ' {count}',
 
 			# A reference to the list of items to display.
 			listRef => \@items,
@@ -628,7 +628,7 @@ sub rightIntoAlbum($$) {
 
 			  # Start playing the item selected (in the correct mode - play, add
 			  # or insert).
-				lazyOnPlay( $client, $item, $addMode );
+				lazyPlayOrAddResults($client, $item, $addMode, \&searchTracksForTrack);
 			},
 
 			# What overlays are shown on lines 1 and 2.
@@ -1289,7 +1289,6 @@ sub lazyOnPlay {
 	# If no list loaded (eg search returned nothing), or
 	# user has not entered enough text yet, then ignore the
 	# command.
-	my $listRef = $client->modeParam('listRef');
 	if ( length( $clientMode{$client}{search_performed} ) == 0 ) {
 		return;
 	}
@@ -1312,7 +1311,15 @@ sub lazyOnPlay {
 		}
 	}
 
+	lazyPlayOrAddResults($client, $item, $addMode, $searchTracksFunction);
+}
+
+# Play or add the results of a search to 'now playing'.
+sub lazyPlayOrAddResults {
+	my ($client, $item, $addMode, $searchTracksFunction) = @_;
+
 	my ( $line1, $line2, $msg, $cmd );
+	my $listRef = $client->modeParam('listRef');
 
 	if ( $addMode == 1 ) {
 		$msg = "ADDING_TO_PLAYLIST";
@@ -1336,14 +1343,12 @@ sub lazyOnPlay {
 	if ( blessed($item) ) {
 		my $id = $item->id;
 
-		$log->debug(
-"PLAY/ADD/INSERT pressed on '$clientMode{$client}{search_type}' search results (id $id), addMode=$addMode"
-		);
+		$log->debug( "PLAY/ADD/INSERT pressed on search results (id $id), addMode=$addMode");
 
 		@playItems = &$searchTracksFunction($id);
 	} else {
 
-		$log->debug("All for '$clientMode{$client}{search_type}' chosen");
+		$log->debug('All for chosen');
 
 		for $item (@$listRef) {
 
