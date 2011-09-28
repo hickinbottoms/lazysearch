@@ -603,20 +603,49 @@ sub rightIntoGenre($$) {
 	my $client = shift;
 	my $item   = shift;
 
-	$log->debug( "Pushing right into GENRE " . $item->id );
+	# Browse tracks for this album.
+	if ( blessed($item) ) {
 
-#@@@@ TODO - fix for onebrowser
-
-	# Browse artists by this genre.
-	Slim::Buttons::Common::pushModeLeft(
-		$client,
-		'browsedb',
-		{
-			'hierarchy'    => 'genre,contributor,album,track',
-			'level'        => 1,
-			'findCriteria' => { 'genre.id' => $item->id },
+		# We restrict the search to include artists related in the roles the
+		# user wants (set through Squeezebox Server preferences).
+		my $artistOnlyRoles = Slim::Schema->artistOnlyRoles('TRACKARTIST');
+		if ( !defined($artistOnlyRoles) ) {
+			my @emptyArtists;
+			$artistOnlyRoles = \@emptyArtists;
 		}
-	);
+		my @roles = @{$artistOnlyRoles};
+
+		# If the user wants, remove the ALBUMARTIST role (ticket:42)
+		if ( !$myPrefs->get('pref_keyword_return_albumartists') ) {
+			my $albumArtistRole =
+			  Slim::Schema::Contributor->typeToRole('ALBUMARTIST');
+			@roles = grep { !/^$albumArtistRole$/ } @roles;
+		}
+
+		my $condition = undef;
+		if ( scalar(@roles) > 0 ) {
+			$condition->{'role'} = { 'in' => \@roles };
+		}
+
+		# Browse artists for this genre.
+		my $childrenRS = Slim::Schema->search( 'GenreTrack', { 'me.genre' => $item->id } )
+			->search_related( 'track')
+			->search_related( 'contributorTracks', $condition )
+			->search_related('contributor')->distinct;
+
+		# Each element of the listRef will be a hash with keys name and value.
+		# This is true for artists, albums and tracks.
+		my @items = ();
+		while ( my $childItem = $childrenRS->next ) {
+			push @items, $childItem;
+		}
+
+		# Show the browse results and let the user interact with them.
+		browseLazyResults($client, $item, \@items, 'genre', 'GENRES', $item->name, \&searchTracksForArtist, \&rightIntoArtist);
+
+	} else {
+		$log->info("Avoiding entering non-object menu");
+	}
 }
 
 # Browse into a particular track.
