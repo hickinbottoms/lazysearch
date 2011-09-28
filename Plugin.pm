@@ -542,6 +542,8 @@ sub rightIntoArtist($$) {
 
 	$log->debug( "Pushing right into ARTIST " . $item->id );
 
+#@@@@ TODO - fix for onebrowser
+
 	# Browse albums by this artist.
 	Slim::Buttons::Common::pushModeLeft(
 		$client,
@@ -656,6 +658,8 @@ sub rightIntoGenre($$) {
 	my $item   = shift;
 
 	$log->debug( "Pushing right into GENRE " . $item->id );
+
+#@@@@ TODO - fix for onebrowser
 
 	# Browse artists by this genre.
 	Slim::Buttons::Common::pushModeLeft(
