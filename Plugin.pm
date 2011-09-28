@@ -540,20 +540,32 @@ sub rightIntoArtist($$) {
 	my $client = shift;
 	my $item   = shift;
 
-	$log->debug( "Pushing right into ARTIST " . $item->id );
+	# Browse albums for this artist
+	if ( blessed($item) ) {
 
-#@@@@ TODO - fix for onebrowser
+		# A result set of the items we're going to show.
+		my $childrenRS = Slim::Schema->search(
+				'track',
+				{ 'contributorTracks.contributor' => $item->id },
+				{ order_by => 'album.titlesort',
+					distinct => 1,
+					join     => 'contributorTracks'
+				}
+		)->search_related('album')->distinct;
 
-	# Browse albums by this artist.
-	Slim::Buttons::Common::pushModeLeft(
-		$client,
-		'browsedb',
-		{
-			'hierarchy'    => 'contributor,album,track',
-			'level'        => 1,
-			'findCriteria' => { 'contributor.id' => $item->id },
+		# Each element of the listRef will be a hash with keys name and value.
+		# This is true for artists, albums and tracks.
+		my @items = ();
+		while ( my $childItem = $childrenRS->next ) {
+			push @items, $childItem;
 		}
-	);
+
+		# Show the browse results and let the user interact with them.
+		browseLazyResults($client, $item, \@items, 'album', 'ALBUMS', $item->name, \&searchTracksForAlbum, \&rightIntoAlbum);
+
+	} else {
+		$log->info("Avoiding entering non-object menu");
+	}
 }
 
 # Browse into a particular album.
@@ -584,6 +596,40 @@ sub rightIntoAlbum($$) {
 	} else {
 		$log->info("Avoiding entering non-object menu");
 	}
+}
+
+# Browse into a particular genre.
+sub rightIntoGenre($$) {
+	my $client = shift;
+	my $item   = shift;
+
+	$log->debug( "Pushing right into GENRE " . $item->id );
+
+#@@@@ TODO - fix for onebrowser
+
+	# Browse artists by this genre.
+	Slim::Buttons::Common::pushModeLeft(
+		$client,
+		'browsedb',
+		{
+			'hierarchy'    => 'genre,contributor,album,track',
+			'level'        => 1,
+			'findCriteria' => { 'genre.id' => $item->id },
+		}
+	);
+}
+
+# Browse into a particular track.
+sub rightIntoTrack($$) {
+	my $client = shift;
+	my $item   = shift;
+
+	$log->debug( "Pushing right into TRACK " . $item->id );
+
+	# Push into the trackinfo mode for this one track.
+	my $track = Slim::Schema->rs('Track')->find( $item->id );
+	Slim::Buttons::Common::pushModeLeft( $client, 'trackinfo',
+		{ 'track' => $track } );
 }
 
 # Generalised lazy search result browser. This supports all the browse result types
@@ -654,40 +700,6 @@ sub browseLazyResults($$$$$) {
 	$log->debug( 'Pushing right into ' . $browseResultType . ' from higher item ' . $item->id );
 	Slim::Buttons::Common::pushModeLeft( $client, LAZYBROWSE_RESULTS_MODE,
 		\%params );
-}
-
-# Browse into a particular genre.
-sub rightIntoGenre($$) {
-	my $client = shift;
-	my $item   = shift;
-
-	$log->debug( "Pushing right into GENRE " . $item->id );
-
-#@@@@ TODO - fix for onebrowser
-
-	# Browse artists by this genre.
-	Slim::Buttons::Common::pushModeLeft(
-		$client,
-		'browsedb',
-		{
-			'hierarchy'    => 'genre,contributor,album,track',
-			'level'        => 1,
-			'findCriteria' => { 'genre.id' => $item->id },
-		}
-	);
-}
-
-# Browse into a particular track.
-sub rightIntoTrack($$) {
-	my $client = shift;
-	my $item   = shift;
-
-	$log->debug( "Pushing right into TRACK " . $item->id );
-
-	# Push into the trackinfo mode for this one track.
-	my $track = Slim::Schema->rs('Track')->find( $item->id );
-	Slim::Buttons::Common::pushModeLeft( $client, 'trackinfo',
-		{ 'track' => $track } );
 }
 
 # Function called when leaving our top-level lazy search menu mode. We use this
