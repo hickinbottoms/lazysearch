@@ -578,78 +578,82 @@ sub rightIntoAlbum($$) {
 			push @items, $childItem;
 		}
 
-#@@@@
-#call generalised browseLazyResults with the following args:
-#  @items (reference)
-#  mixType ('track')
-#  browseResultsType ('TRACKS')
-#  header name ($item->name)
-#  trackSearchMethod (&searchTracksForTrack)
-#
-# this method is generalised from the following code
-
-		# The current unique text to make the mode unique, and other browse constants.
-		my $searchText  = $clientMode{$client}{search_text};
-		my $forceSearch = $clientMode{$client}{search_forced};
-		my $mixType     = 'track';
-		my $browseResultType = 'TRACKS';
-
-		# Use INPUT.Choice to display the results for this browse-into mode.
-		my %params = (
-
-			# The header (first line) to display whilst in this mode.
-			header => $item->name . ' {count}',
-
-			# A reference to the list of items to display.
-			listRef => \@items,
-
-			# The function to extract the title of each item.
-			name => \&lazyGetText,
-
-			# A unique name for this mode that won't actually get displayed
-			# anywhere.
-			modeName => 'LAZYBROWSE_RESULTS_'
-			  . $browseResultType
-			  . "_MODE:$searchText",
-
-		  # An anonymous function that is called every time the user presses the
-		  # RIGHT button.
-#@@@@		onRight => \&keywordOnRightHandler,
-
-			onLeft => sub {
-				$log->debug("LEFT");
-			},
-
-			# A handler that manages play/add/insert (differentiated by the
-			# last parameter).
-			onPlay => sub {
-				my ( $client, $item, $addMode ) = @_;
-
-			  # Start playing the item selected (in the correct mode - play, add
-			  # or insert).
-				lazyPlayOrAddResults($client, $item, $addMode, \&searchTracksForTrack);
-			},
-
-			# What overlays are shown on lines 1 and 2.
-			overlayRef => \&lazyOverlay,
-
-			# Our mix type that will be used if the user tries to
-			# create a MusicIP mix here. The type depends on the
-			# current position in the browsing hierarchy and so is
-			# determined above.
-			mixType => $mixType,
-		);
-
-	  # Use our INPUT.Choice-derived mode to show the menu and let it do all the
-	  # hard work of displaying the list, moving it up and down, etc, etc.
-		$log->debug( 'Pushing right into ' . $browseResultType . ' from higher item ' . $item->id );
-		Slim::Buttons::Common::pushModeLeft( $client, LAZYBROWSE_RESULTS_MODE,
-			\%params );
+		# Show the browse results and let the user interact with them.
+		browseLazyResults($client, $item, \@items, 'track', 'TRACKS', $item->name, \&searchTracksForTrack, \&rightIntoTrack);
 
 	} else {
 		$log->info("Avoiding entering non-object menu");
 	}
+}
 
+# Generalised lazy search result browser. This supports all the browse result types
+# and pushing into a hierarchy of search results.
+sub browseLazyResults($$$$$) {
+	my $client = shift;
+	my $item = shift;
+	my $itemArray = shift;
+	my $mixType = shift;
+	my $browseType = shift;
+	my $headerName = shift;
+	my $trackSearchMethod = shift;
+	my $pushRightMethod = shift;
+
+	# The current unique text to make the mode unique, and other browse constants.
+	my $searchText  = $clientMode{$client}{search_text};
+	my $forceSearch = $clientMode{$client}{search_forced};
+	my $browseResultType = $browseType;
+
+	# Use INPUT.Choice to display the results for this browse-into mode.
+	my %params = (
+
+		# The header (first line) to display whilst in this mode.
+		header => $headerName . ' {count}',
+
+		# A reference to the list of items to display.
+		listRef => $itemArray,
+
+		# The function to extract the title of each item.
+		name => \&lazyGetText,
+
+		# A unique name for this mode that won't actually get displayed
+		# anywhere.
+		modeName => 'LAZYBROWSE_RESULTS_'
+		  . $browseResultType
+		  . "_MODE:$searchText",
+
+		# An anonymous function that is called every time the user presses the
+		# RIGHT button.
+		onRight => $pushRightMethod,
+
+		onLeft => sub {
+			$log->debug("LEFT");
+		},
+
+		# A handler that manages play/add/insert (differentiated by the
+		# last parameter).
+		onPlay => sub {
+			my ( $client, $item, $addMode ) = @_;
+
+		  # Start playing the item selected (in the correct mode - play, add
+		  # or insert).
+			lazyPlayOrAddResults($client, $item, $addMode, $trackSearchMethod);
+		},
+
+		# What overlays are shown on lines 1 and 2.
+		overlayRef => \&lazyOverlay,
+
+		# Our mix type that will be used if the user tries to
+		# create a MusicIP mix here. The type depends on the
+		# current position in the browsing hierarchy and so is
+		# determined above.
+		mixType => $mixType,
+	);
+
+	# Use our INPUT.Choice-derived mode to show the menu and let it do all the
+	# hard work of displaying the list, moving it up and down, etc, etc.
+	$log->debug( 'Pushing right into ' . $browseResultType . ' from higher item ' . $item->id );
+	Slim::Buttons::Common::pushModeLeft( $client, LAZYBROWSE_RESULTS_MODE,
+		\%params );
 }
 
 # Browse into a particular genre.
