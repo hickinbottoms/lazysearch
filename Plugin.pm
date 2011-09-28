@@ -545,12 +545,13 @@ sub rightIntoArtist($$) {
 
 		# A result set of the items we're going to show.
 		my $childrenRS = Slim::Schema->search(
-				'track',
-				{ 'contributorTracks.contributor' => $item->id },
-				{ order_by => 'album.titlesort',
-					distinct => 1,
-					join     => 'contributorTracks'
-				}
+			'track',
+			{ 'contributorTracks.contributor' => $item->id },
+			{
+				order_by => 'album.titlesort',
+				distinct => 1,
+				join     => 'contributorTracks'
+			}
 		)->search_related('album')->distinct;
 
 		# Each element of the listRef will be a hash with keys name and value.
@@ -561,7 +562,8 @@ sub rightIntoArtist($$) {
 		}
 
 		# Show the browse results and let the user interact with them.
-		browseLazyResults($client, $item, \@items, 'album', 'ALBUMS', $item->name, \&searchTracksForAlbum, \&rightIntoAlbum);
+		browseLazyResults( $client, $item, \@items, 'album', 'ALBUMS',
+			$item->name, \&searchTracksForAlbum, \&rightIntoAlbum );
 
 	} else {
 		$log->info("Avoiding entering non-object menu");
@@ -591,7 +593,8 @@ sub rightIntoAlbum($$) {
 		}
 
 		# Show the browse results and let the user interact with them.
-		browseLazyResults($client, $item, \@items, 'track', 'TRACKS', $item->name, \&searchTracksForTrack, \&rightIntoTrack);
+		browseLazyResults( $client, $item, \@items, 'track', 'TRACKS',
+			$item->name, \&searchTracksForTrack, \&rightIntoTrack );
 
 	} else {
 		$log->info("Avoiding entering non-object menu");
@@ -628,10 +631,11 @@ sub rightIntoGenre($$) {
 		}
 
 		# Browse artists for this genre.
-		my $childrenRS = Slim::Schema->search( 'GenreTrack', { 'me.genre' => $item->id } )
-			->search_related( 'track')
-			->search_related( 'contributorTracks', $condition )
-			->search_related('contributor')->distinct;
+		my $childrenRS =
+		  Slim::Schema->search( 'GenreTrack', { 'me.genre' => $item->id } )
+		  ->search_related('track')
+		  ->search_related( 'contributorTracks', $condition )
+		  ->search_related('contributor')->distinct;
 
 		# Each element of the listRef will be a hash with keys name and value.
 		# This is true for artists, albums and tracks.
@@ -641,7 +645,8 @@ sub rightIntoGenre($$) {
 		}
 
 		# Show the browse results and let the user interact with them.
-		browseLazyResults($client, $item, \@items, 'genre', 'GENRES', $item->name, \&searchTracksForArtist, \&rightIntoArtist);
+		browseLazyResults( $client, $item, \@items, 'genre', 'GENRES',
+			$item->name, \&searchTracksForArtist, \&rightIntoArtist );
 
 	} else {
 		$log->info("Avoiding entering non-object menu");
@@ -664,18 +669,18 @@ sub rightIntoTrack($$) {
 # Generalised lazy search result browser. This supports all the browse result types
 # and pushing into a hierarchy of search results.
 sub browseLazyResults($$$$$) {
-	my $client = shift;
-	my $item = shift;
-	my $itemArray = shift;
-	my $mixType = shift;
-	my $browseType = shift;
-	my $headerName = shift;
+	my $client            = shift;
+	my $item              = shift;
+	my $itemArray         = shift;
+	my $mixType           = shift;
+	my $browseType        = shift;
+	my $headerName        = shift;
 	my $trackSearchMethod = shift;
-	my $pushRightMethod = shift;
+	my $pushRightMethod   = shift;
 
-	# The current unique text to make the mode unique, and other browse constants.
-	my $searchText  = $clientMode{$client}{search_text};
-	my $forceSearch = $clientMode{$client}{search_forced};
+  # The current unique text to make the mode unique, and other browse constants.
+	my $searchText       = $clientMode{$client}{search_text};
+	my $forceSearch      = $clientMode{$client}{search_forced};
 	my $browseResultType = $browseType;
 
 	# Use INPUT.Choice to display the results for this browse-into mode.
@@ -709,9 +714,10 @@ sub browseLazyResults($$$$$) {
 		onPlay => sub {
 			my ( $client, $item, $addMode ) = @_;
 
-		  # Start playing the item selected (in the correct mode - play, add
-		  # or insert).
-			lazyPlayOrAddResults($client, $item, $addMode, $trackSearchMethod);
+			# Start playing the item selected (in the correct mode - play, add
+			# or insert).
+			lazyPlayOrAddResults( $client, $item, $addMode,
+				$trackSearchMethod );
 		},
 
 		# What overlays are shown on lines 1 and 2.
@@ -726,7 +732,10 @@ sub browseLazyResults($$$$$) {
 
 	# Use our INPUT.Choice-derived mode to show the menu and let it do all the
 	# hard work of displaying the list, moving it up and down, etc, etc.
-	$log->debug( 'Pushing right into ' . $browseResultType . ' from higher item ' . $item->id );
+	$log->debug( 'Pushing right into '
+		  . $browseResultType
+		  . ' from higher item '
+		  . $item->id );
 	Slim::Buttons::Common::pushModeLeft( $client, LAZYBROWSE_RESULTS_MODE,
 		\%params );
 }
@@ -903,12 +912,12 @@ sub initPlugin() {
 	Slim::Hardware::IR::addModeDefaultMapping( LAZYBROWSE_KEYWORD_MODE,
 		\%keywordInputMap );
 
-	# The mode that is used to browse search results. This is quite similar to the keyword results browse mode.
+# The mode that is used to browse search results. This is quite similar to the keyword results browse mode.
 	my %chFunctions3 = %{ Slim::Buttons::Input::Choice::getFunctions() };
-	$chFunctions3{'playSingle'}  = \&onPlayHandler;
-	$chFunctions3{'playHold'}    = \&onCreateMixHandler;
-	$chFunctions3{'addSingle'}   = \&onAddHandler;
-	$chFunctions3{'addHold'}     = \&onInsertHandler;
+	$chFunctions3{'playSingle'} = \&onPlayHandler;
+	$chFunctions3{'playHold'}   = \&onCreateMixHandler;
+	$chFunctions3{'addSingle'}  = \&onAddHandler;
+	$chFunctions3{'addHold'}    = \&onInsertHandler;
 	Slim::Buttons::Common::addMode( LAZYBROWSE_RESULTS_MODE, \%chFunctions3,
 		\&Slim::Buttons::Input::Choice::setMode );
 
@@ -1351,12 +1360,12 @@ sub lazyOnPlay {
 		}
 	}
 
-	lazyPlayOrAddResults($client, $item, $addMode, $searchTracksFunction);
+	lazyPlayOrAddResults( $client, $item, $addMode, $searchTracksFunction );
 }
 
 # Play or add the results of a search to 'now playing'.
 sub lazyPlayOrAddResults {
-	my ($client, $item, $addMode, $searchTracksFunction) = @_;
+	my ( $client, $item, $addMode, $searchTracksFunction ) = @_;
 
 	my ( $line1, $line2, $msg, $cmd );
 	my $listRef = $client->modeParam('listRef');
@@ -1383,7 +1392,9 @@ sub lazyPlayOrAddResults {
 	if ( blessed($item) ) {
 		my $id = $item->id;
 
-		$log->debug( "PLAY/ADD/INSERT pressed on search results (id $id), addMode=$addMode");
+		$log->debug(
+"PLAY/ADD/INSERT pressed on search results (id $id), addMode=$addMode"
+		);
 
 		@playItems = &$searchTracksFunction($id);
 	} else {
