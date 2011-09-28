@@ -560,18 +560,6 @@ sub rightIntoAlbum($$) {
 	my $item   = shift;
 
 	# Browse tracks for this album.
-	#@@@
-	#	Slim::Buttons::Common::pushModeLeft(
-	#		$client,
-	#		'browsedb',
-	#		{
-	#			'hierarchy'    => 'album,track',
-	#			'level'        => 1,
-	#			'findCriteria' => { 'album.id' => $item->id },
-	#		}
-	#	);
-
-	#@@@@
 	if ( blessed($item) ) {
 
 		# A result set of the items we're going to show.
@@ -581,7 +569,6 @@ sub rightIntoAlbum($$) {
 			{ 'order_by' => 'me.disc, me.tracknum, me.titlesort' }
 		);
 
-
 		# Each element of the listRef will be a hash with keys name and value.
 		# This is true for artists, albums and tracks.
 		my @items = ();
@@ -589,13 +576,23 @@ sub rightIntoAlbum($$) {
 			push @items, $childItem;
 		}
 
+#@@@@
+#call generalised browseLazyResults with the following args:
+#  @items (reference)
+#  mixType ('track')
+#  browseResultsType ('TRACKS')
+#  header name ($item->name)
+#  trackSearchMethod (&searchTracksForTrack)
+#
+# this method is generalised from the following code
+
 		# The current unique text to make the mode unique, and other browse constants.
 		my $searchText  = $clientMode{$client}{search_text};
 		my $forceSearch = $clientMode{$client}{search_forced};
 		my $mixType     = 'track';
 		my $browseResultType = 'TRACKS';
 
-	  # Use INPUT.Choice to display the results for this browse-into mode.
+		# Use INPUT.Choice to display the results for this browse-into mode.
 		my %params = (
 
 			# The header (first line) to display whilst in this mode.
@@ -650,8 +647,6 @@ sub rightIntoAlbum($$) {
 	} else {
 		$log->info("Avoiding entering non-object menu");
 	}
-
-	#@@@@
 
 }
 
@@ -859,8 +854,6 @@ sub initPlugin() {
 	Slim::Hardware::IR::addModeDefaultMapping( LAZYBROWSE_KEYWORD_MODE,
 		\%keywordInputMap );
 
-#@@@@@
-
 	# The mode that is used to browse search results. This is quite similar to the keyword results browse mode.
 	my %chFunctions3 = %{ Slim::Buttons::Input::Choice::getFunctions() };
 	$chFunctions3{'playSingle'}  = \&onPlayHandler;
@@ -891,8 +884,6 @@ sub initPlugin() {
 	}
 	Slim::Hardware::IR::addModeDefaultMapping( LAZYBROWSE_RESULTS_MODE,
 		\%resultsInputMap );
-
-#@@@@@
 
 	# Intercept the 'search' button to take us to our top-level menu. We do
 	# both 'search' and 'globalsearch' because the former was renamed to the
