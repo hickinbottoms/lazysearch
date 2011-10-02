@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 # This is a plugin to implement lazy searching using the Squeezebox/Transporter
-# remote control.
+# IR remote control.
 #
 # For further details see:
 # http://www.hickinbottom.com/lazysearch
@@ -558,7 +558,7 @@ sub rightIntoArtist($$) {
 		# This is true for artists, albums and tracks.
 		my @items = ();
 		while ( my $childItem = $childrenRS->next ) {
-			push @items, $childItem;
+			push @items, $childItem if(blessed($childItem));
 		}
 
 		# Show the browse results and let the user interact with them.
@@ -589,7 +589,7 @@ sub rightIntoAlbum($$) {
 		# This is true for artists, albums and tracks.
 		my @items = ();
 		while ( my $childItem = $childrenRS->next ) {
-			push @items, $childItem;
+			push @items, $childItem if(blessed($childItem));
 		}
 
 		# Show the browse results and let the user interact with them.
@@ -641,7 +641,7 @@ sub rightIntoGenre($$) {
 		# This is true for artists, albums and tracks.
 		my @items = ();
 		while ( my $childItem = $childrenRS->next ) {
-			push @items, $childItem;
+			push @items, $childItem if(blessed($childItem));
 		}
 
 		# Show the browse results and let the user interact with them.
@@ -1140,10 +1140,15 @@ sub lazyGetText {
 		if ( scalar(@$listRef) == 0 ) {
 			return $client->string('EMPTY');
 		} else {
-			if ( ref($item) eq 'Slim::Schema::Track' ) {
-				return Slim::Music::Info::standardTitle( $client, $item->url );
+			if (blessed($item)) {
+				if ( ref($item) eq 'Slim::Schema::Track' ) {
+					return Slim::Music::Info::standardTitle( $client, $item->url );
+				} else {
+					return $item->name;
+				}
 			} else {
-				return $item->name;
+				# It's not an object so it must be a plain item (ie "ALL X")
+				return $item->{name};
 			}
 		}
 	}
@@ -1417,14 +1422,6 @@ sub lazyPlayOrAddResults {
 	# Now we've built the list of track items, play them.
 	$log->debug( "About to '$cmd' " . scalar @playItems . " items" );
 	$client->execute( [ 'playlist', $cmd, 'listref', \@playItems ] );
-
-	# Go into "now playing", if playing.
-	#@@@
-	#	if ($addMode == 0) {
-	#		Slim::Buttons::Common::setMode($client, 'home');
-	#		Slim::Buttons::Home::jump($client, 'playlist');
-	#		Slim::Buttons::Common::pushModeLeft($client, 'playlist');
-	#	}
 
 	# Inform the user what has happened.
 	if ( $client->linesPerScreen == 1 ) {
@@ -1800,7 +1797,7 @@ sub performTimedItemSearch($) {
 	# This is true for artists, albums and tracks.
 	my @searchItems = ();
 	while ( my $searchItem = $searchResults->next ) {
-		push @searchItems, $searchItem;
+		push @searchItems, $searchItem if(blessed($searchItem));
 	}
 
 	# If there are multiple results, show the 'all X' choice.
