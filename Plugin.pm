@@ -558,7 +558,7 @@ sub rightIntoArtist($$) {
 		# This is true for artists, albums and tracks.
 		my @items = ();
 		while ( my $childItem = $childrenRS->next ) {
-			push @items, $childItem if(blessed($childItem));
+			push @items, $childItem if ( blessed($childItem) );
 		}
 
 		# Show the browse results and let the user interact with them.
@@ -589,7 +589,7 @@ sub rightIntoAlbum($$) {
 		# This is true for artists, albums and tracks.
 		my @items = ();
 		while ( my $childItem = $childrenRS->next ) {
-			push @items, $childItem if(blessed($childItem));
+			push @items, $childItem if ( blessed($childItem) );
 		}
 
 		# Show the browse results and let the user interact with them.
@@ -641,7 +641,7 @@ sub rightIntoGenre($$) {
 		# This is true for artists, albums and tracks.
 		my @items = ();
 		while ( my $childItem = $childrenRS->next ) {
-			push @items, $childItem if(blessed($childItem));
+			push @items, $childItem if ( blessed($childItem) );
 		}
 
 		# Show the browse results and let the user interact with them.
@@ -1140,13 +1140,15 @@ sub lazyGetText {
 		if ( scalar(@$listRef) == 0 ) {
 			return $client->string('EMPTY');
 		} else {
-			if (blessed($item)) {
+			if ( blessed($item) ) {
 				if ( ref($item) eq 'Slim::Schema::Track' ) {
-					return Slim::Music::Info::standardTitle( $client, $item->url );
+					return Slim::Music::Info::standardTitle( $client,
+						$item->url );
 				} else {
 					return $item->name;
 				}
 			} else {
+
 				# It's not an object so it must be a plain item (ie "ALL X")
 				return $item->{name};
 			}
@@ -1797,7 +1799,7 @@ sub performTimedItemSearch($) {
 	# This is true for artists, albums and tracks.
 	my @searchItems = ();
 	while ( my $searchItem = $searchResults->next ) {
-		push @searchItems, $searchItem if(blessed($searchItem));
+		push @searchItems, $searchItem if ( blessed($searchItem) );
 	}
 
 	# If there are multiple results, show the 'all X' choice.
