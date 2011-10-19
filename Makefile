@@ -17,20 +17,19 @@
 # along with LazySearch2; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-VERSION=3.6.0
+VERSION=3.6.1
 PERLSOURCE=Plugin.pm Settings.pm
 HTMLSOURCE=HTML/EN/plugins/LazySearch2/settings/basic.html HTML/EN/plugins/LazySearch2/settings/logo.jpg
 SOURCE=$(PERLSOURCE) $(HTMLSOURCE) INSTALL strings.txt install.xml LICENSE
 RELEASEDIR=releases
 STAGEDIR=stage
-SLIMDIR=/usr/local/squeezebox-server-7.6/server
+SLIMDIR=/usr/local/squeezeboxserver-7.7/server
 PLUGINSDIR=$(SLIMDIR)/Plugins
 PLUGINDIR=LazySearch2
 COMMIT=`git log -1 --pretty=format:%H`
 DISTFILE=LazySearch2-7-$(VERSION).zip
 DISTFILEDIR=$(RELEASEDIR)/$(DISTFILE)
 LATESTLINK=$(RELEASEDIR)/LazySearch2-7-latest.zip
-PREFS=/etc/squeezebox-server.pref
 
 # VM stuff for testing
 PIDFILE=/home/stuarth/code/audiothings/scebuild/qemu.pid
@@ -84,23 +83,22 @@ restart:
 	echo "Forcefully restarting Squeezebox Server..."
 	-sudo pkill -9 squeezeslave
 	sudo /etc/init.d/squeezeslave zap
-	-sudo /etc/init.d/squeezebox-server stop
-	-sudo /etc/init.d/squeezebox-server zap
+	-sudo /etc/init.d/squeezeboxserver-7.7 stop
+	-sudo /etc/init.d/squeezeboxserver-7.7 zap
 	-sudo pkill slimserver
 	sleep 2
-	sudo sh -c ">/var/log/squeezebox-server/server.log"
-	sudo sh -c ">/var/log/squeezebox-server/scanner.log"
-	sudo sh -c ">/var/log/squeezebox-server/perfmon.log"
-	sudo /etc/init.d/squeezebox-server restart
-	sudo /etc/init.d/squeezebox-server restart
+	sudo sh -c ">/var/log/squeezeboxserver-7.7/server.log"
+	sudo sh -c ">/var/log/squeezeboxserver-7.7/scanner.log"
+	sudo sh -c ">/var/log/squeezeboxserver-7.7/perfmon.log"
+	sudo /etc/init.d/squeezeboxserver-7.7 restart
 
 logtail:
 	echo "Following the end of the Squeezebox Server log..."
-	tail -F /var/log/squeezebox-server/server.log | grep -v "par-slim"
+	tail -F /var/log/squeezeboxserver-7.7/server.log | grep -v "par-slim"
 
 logtail2:
 	echo "Following the end of the Squeezebox Server log (LazySearch only)..."
-	multitail -e LazySearch -f /var/log/squeezebox-server/server.log
+	multitail -e LazySearch -f /var/log/squeezeboxserver-7.7/server.log
 
 # Build a distribution package for this Plugin.
 release: make-stage

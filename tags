@@ -1,0 +1,121 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.7	//
+KEYWORD_SEPARATOR_CHARACTER	Plugin.pm	/^use constant KEYWORD_SEPARATOR_CHARACTER => ',';$/;"	c
+LAZYBROWSE_KEYWORD_MODE	Plugin.pm	/^use constant LAZYBROWSE_KEYWORD_MODE => 'PLUGIN_LAZYSEARCH2.keywordbrowse';$/;"	c
+LAZYBROWSE_MODE	Plugin.pm	/^use constant LAZYBROWSE_MODE               => 'PLUGIN_LAZYSEARCH2.browsemode';$/;"	c
+LAZYBROWSE_RESULTS_MODE	Plugin.pm	/^use constant LAZYBROWSE_RESULTS_MODE => 'PLUGIN_LAZYSEARCH2.browseresults';$/;"	c
+LAZYSEARCH_ALLENTRIES_DEFAULT	Plugin.pm	/^use constant LAZYSEARCH_ALLENTRIES_DEFAULT           => 1;$/;"	c
+LAZYSEARCH_CATEGORY_MENU_MODE	Plugin.pm	/^use constant LAZYSEARCH_CATEGORY_MENU_MODE => 'PLUGIN_LAZYSEARCH2.categorymenu';$/;"	c
+LAZYSEARCH_ENCODE_MAX_QUANTA	Plugin.pm	/^use constant LAZYSEARCH_ENCODE_MAX_QUANTA    => 0.4;$/;"	c
+LAZYSEARCH_HOME_MENUITEM	Plugin.pm	/^use constant LAZYSEARCH_HOME_MENUITEM => 'LazySearch2';$/;"	c
+LAZYSEARCH_HOOKSEARCHBUTTON_DEFAULT	Plugin.pm	/^use constant LAZYSEARCH_HOOKSEARCHBUTTON_DEFAULT =>$/;"	c
+LAZYSEARCH_INITIAL_LAZIFY_DELAY	Plugin.pm	/^use constant LAZYSEARCH_INITIAL_LAZIFY_DELAY => 5;$/;"	c
+LAZYSEARCH_KEYWORD_ALBUMARTISTS_DEFAULT	Plugin.pm	/^use constant LAZYSEARCH_KEYWORD_ALBUMARTISTS_DEFAULT => 0;$/;"	c
+LAZYSEARCH_KEYWORD_ALBUMS_DEFAULT	Plugin.pm	/^use constant LAZYSEARCH_KEYWORD_ALBUMS_DEFAULT       => 1;$/;"	c
+LAZYSEARCH_KEYWORD_ARTISTS_DEFAULT	Plugin.pm	/^use constant LAZYSEARCH_KEYWORD_ARTISTS_DEFAULT      => 1;$/;"	c
+LAZYSEARCH_KEYWORD_TRACKS_DEFAULT	Plugin.pm	/^use constant LAZYSEARCH_KEYWORD_TRACKS_DEFAULT       => 1;$/;"	c
+LAZYSEARCH_LEFTDELETES_DEFAULT	Plugin.pm	/^use constant LAZYSEARCH_LEFTDELETES_DEFAULT       => 1;$/;"	c
+LAZYSEARCH_MINLENGTH_ALBUM_DEFAULT	Plugin.pm	/^use constant LAZYSEARCH_MINLENGTH_ALBUM_DEFAULT   => 3;$/;"	c
+LAZYSEARCH_MINLENGTH_ARTIST_DEFAULT	Plugin.pm	/^use constant LAZYSEARCH_MINLENGTH_ARTIST_DEFAULT  => 3;$/;"	c
+LAZYSEARCH_MINLENGTH_GENRE_DEFAULT	Plugin.pm	/^use constant LAZYSEARCH_MINLENGTH_GENRE_DEFAULT   => 3;$/;"	c
+LAZYSEARCH_MINLENGTH_KEYWORD_DEFAULT	Plugin.pm	/^use constant LAZYSEARCH_MINLENGTH_KEYWORD_DEFAULT => 4;$/;"	c
+LAZYSEARCH_MINLENGTH_MAX	Plugin.pm	/^use constant LAZYSEARCH_MINLENGTH_MAX             => 9;$/;"	c
+LAZYSEARCH_MINLENGTH_MIN	Plugin.pm	/^use constant LAZYSEARCH_MINLENGTH_MIN             => 2;$/;"	c
+LAZYSEARCH_MINLENGTH_TRACK_DEFAULT	Plugin.pm	/^use constant LAZYSEARCH_MINLENGTH_TRACK_DEFAULT   => 4;$/;"	c
+LAZYSEARCH_SEARCHBUTTON_ALBUM	Plugin.pm	/^use constant LAZYSEARCH_SEARCHBUTTON_ALBUM    => 3;$/;"	c
+LAZYSEARCH_SEARCHBUTTON_ARTIST	Plugin.pm	/^use constant LAZYSEARCH_SEARCHBUTTON_ARTIST   => 2;$/;"	c
+LAZYSEARCH_SEARCHBUTTON_GENRE	Plugin.pm	/^use constant LAZYSEARCH_SEARCHBUTTON_GENRE    => 4;$/;"	c
+LAZYSEARCH_SEARCHBUTTON_KEYWORD	Plugin.pm	/^use constant LAZYSEARCH_SEARCHBUTTON_KEYWORD  => 6;$/;"	c
+LAZYSEARCH_SEARCHBUTTON_MENU	Plugin.pm	/^use constant LAZYSEARCH_SEARCHBUTTON_MENU     => 7;$/;"	c
+LAZYSEARCH_SEARCHBUTTON_STANDARD	Plugin.pm	/^use constant LAZYSEARCH_SEARCHBUTTON_STANDARD => 0;$/;"	c
+LAZYSEARCH_SEARCHBUTTON_TOGGLE	Plugin.pm	/^use constant LAZYSEARCH_SEARCHBUTTON_TOGGLE   => 1;$/;"	c
+LAZYSEARCH_SEARCHBUTTON_TRACK	Plugin.pm	/^use constant LAZYSEARCH_SEARCHBUTTON_TRACK    => 5;$/;"	c
+LAZYSEARCH_SHOWHELP_DEFAULT	Plugin.pm	/^use constant LAZYSEARCH_SHOWHELP_DEFAULT          => 0;$/;"	c
+LAZYSEARCH_TOP_MODE	Plugin.pm	/^use constant LAZYSEARCH_TOP_MODE           => 'PLUGIN_LAZYSEARCH2.topmode';$/;"	c
+PLUGIN_NAME	Plugin.pm	/^use constant PLUGIN_NAME => 'PLUGIN_LAZYSEARCH2';$/;"	c
+Plugins::LazySearch2::Plugin	Plugin.pm	/^package Plugins::LazySearch2::Plugin;$/;"	p
+Plugins::LazySearch2::Settings	Settings.pm	/^package Plugins::LazySearch2::Settings;$/;"	p
+RESULT_ENTRY_ID_ALL	Plugin.pm	/^use constant RESULT_ENTRY_ID_ALL => -1;$/;"	c
+SEARCH_TYPE_KEYWORD	Plugin.pm	/^use constant SEARCH_TYPE_KEYWORD => 'Keyword';$/;"	c
+URL_BASE	Plugin.pm	/^use constant URL_BASE => 'plugins\/LazySearch2';$/;"	c
+WOL_TICKLE_INTERVAL	Plugin.pm	/^use constant WOL_TICKLE_INTERVAL => 60;$/;"	c
+addLazySearchCharacter	Plugin.pm	/^sub addLazySearchCharacter {$/;"	s
+addPendingSearch	Plugin.pm	/^sub addPendingSearch($) {$/;"	s
+browseLazyResults	Plugin.pm	/^sub browseLazyResults($$$$$) {$/;"	s
+buildFind	Plugin.pm	/^sub buildFind($) {$/;"	s
+cancelPendingSearch	Plugin.pm	/^sub cancelPendingSearch($) {$/;"	s
+checkDefaults	Plugin.pm	/^sub checkDefaults {$/;"	s
+doKeywordSearch	Plugin.pm	/^sub doKeywordSearch($$$$$$) {$/;"	s
+encodeTask	Plugin.pm	/^sub encodeTask {$/;"	s
+enterAlbumSearch	Plugin.pm	/^sub enterAlbumSearch($$) {$/;"	s
+enterArtistSearch	Plugin.pm	/^sub enterArtistSearch($$) {$/;"	s
+enterCategoryItem	Plugin.pm	/^sub enterCategoryItem($$) {$/;"	s
+enterCategoryMenu	Plugin.pm	/^sub enterCategoryMenu {$/;"	s
+enterGenreSearch	Plugin.pm	/^sub enterGenreSearch($$) {$/;"	s
+enterKeywordSearch	Plugin.pm	/^sub enterKeywordSearch($$) {$/;"	s
+enterTrackSearch	Plugin.pm	/^sub enterTrackSearch($$) {$/;"	s
+getDisplayName	Plugin.pm	/^sub getDisplayName {$/;"	s
+getFunctions	Plugin.pm	/^sub getFunctions {$/;"	s
+handleLogoJPG	Plugin.pm	/^sub handleLogoJPG {$/;"	s
+handler	Settings.pm	/^sub handler {$/;"	s
+initPlugin	Plugin.pm	/^sub initPlugin() {$/;"	s
+keywordMatchText	Plugin.pm	/^sub keywordMatchText($$$) {$/;"	s
+keywordOnRightHandler	Plugin.pm	/^sub keywordOnRightHandler {$/;"	s
+keywordSearchEnabled	Plugin.pm	/^sub keywordSearchEnabled {$/;"	s
+keywordSepHandler	Plugin.pm	/^sub keywordSepHandler {$/;"	s
+lazifyColumn	Plugin.pm	/^sub lazifyColumn {$/;"	s
+lazifyDatabase	Plugin.pm	/^sub lazifyDatabase($) {$/;"	s
+lazifyDatabaseType	Plugin.pm	/^sub lazifyDatabaseType {$/;"	s
+lazifyNow	Plugin.pm	/^sub lazifyNow {$/;"	s
+lazyEncode	Plugin.pm	/^sub lazyEncode($) {$/;"	s
+lazyForceSearch	Plugin.pm	/^sub lazyForceSearch {$/;"	s
+lazyGetText	Plugin.pm	/^sub lazyGetText {$/;"	s
+lazyKeyHandler	Plugin.pm	/^sub lazyKeyHandler {$/;"	s
+lazyOnPlay	Plugin.pm	/^sub lazyOnPlay {$/;"	s
+lazyOnRight	Plugin.pm	/^sub lazyOnRight {$/;"	s
+lazyOnSearch	Plugin.pm	/^sub lazyOnSearch {$/;"	s
+lazyOverlay	Plugin.pm	/^sub lazyOverlay {$/;"	s
+lazyPlayOrAddResults	Plugin.pm	/^sub lazyPlayOrAddResults {$/;"	s
+leaveMode	Plugin.pm	/^sub leaveMode {$/;"	s
+maxKeywordLength	Plugin.pm	/^sub maxKeywordLength($) {$/;"	s
+minKeywordLength	Plugin.pm	/^sub minKeywordLength($) {$/;"	s
+name	Settings.pm	/^sub name {$/;"	s
+new	Settings.pm	/^sub new {$/;"	s
+onAddHandler	Plugin.pm	/^sub onAddHandler {$/;"	s
+onCreateMixHandler	Plugin.pm	/^sub onCreateMixHandler {$/;"	s
+onDelAllHandler	Plugin.pm	/^sub onDelAllHandler {$/;"	s
+onDelCharHandler	Plugin.pm	/^sub onDelCharHandler {$/;"	s
+onFindTimer	Plugin.pm	/^sub onFindTimer() {$/;"	s
+onInsertHandler	Plugin.pm	/^sub onInsertHandler {$/;"	s
+onPlayHandler	Plugin.pm	/^sub onPlayHandler {$/;"	s
+page	Settings.pm	/^sub page {$/;"	s
+performAlbumSearch	Plugin.pm	/^sub performAlbumSearch($$) {$/;"	s
+performArtistSearch	Plugin.pm	/^sub performArtistSearch($$) {$/;"	s
+performGenreSearch	Plugin.pm	/^sub performGenreSearch($$) {$/;"	s
+performTimedItemSearch	Plugin.pm	/^sub performTimedItemSearch($) {$/;"	s
+performTimedKeywordSearch	Plugin.pm	/^sub performTimedKeywordSearch($$) {$/;"	s
+performTrackSearch	Plugin.pm	/^sub performTrackSearch($$) {$/;"	s
+relazifyDatabase	Plugin.pm	/^sub relazifyDatabase {$/;"	s
+rightIntoAlbum	Plugin.pm	/^sub rightIntoAlbum($$) {$/;"	s
+rightIntoArtist	Plugin.pm	/^sub rightIntoArtist($$) {$/;"	s
+rightIntoGenre	Plugin.pm	/^sub rightIntoGenre($$) {$/;"	s
+rightIntoTrack	Plugin.pm	/^sub rightIntoTrack($$) {$/;"	s
+scanDoneCallback	Plugin.pm	/^sub scanDoneCallback($) {$/;"	s
+scheduleForcedRelazify	Plugin.pm	/^sub scheduleForcedRelazify {$/;"	s
+searchTracksForAlbum	Plugin.pm	/^sub searchTracksForAlbum($) {$/;"	s
+searchTracksForArtist	Plugin.pm	/^sub searchTracksForArtist($) {$/;"	s
+searchTracksForGenre	Plugin.pm	/^sub searchTracksForGenre($) {$/;"	s
+searchTracksForTrack	Plugin.pm	/^sub searchTracksForTrack($) {$/;"	s
+setMode	Plugin.pm	/^sub setMode {$/;"	s
+setSearchBrowseMode	Plugin.pm	/^sub setSearchBrowseMode {$/;"	s
+shutdownPlugin	Plugin.pm	/^sub shutdownPlugin() {$/;"	s
+spcBegin	Plugin.pm	/^sub spcBegin {$/;"	s
+spcEnd	Plugin.pm	/^sub spcEnd {$/;"	s
+touchPluginVersion	Plugin.pm	/^sub touchPluginVersion() {$/;"	s
+updateLazyEntry	Plugin.pm	/^sub updateLazyEntry {$/;"	s
+webPages	Plugin.pm	/^sub webPages {$/;"	s
+zeroButtonHandler	Plugin.pm	/^sub zeroButtonHandler {$/;"	s
