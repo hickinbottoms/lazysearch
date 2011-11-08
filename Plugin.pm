@@ -481,7 +481,8 @@ sub enterKeywordSearch($$) {
 
 # Return a result set that contains all tracks for a given artist, for when
 # PLAY/INSERT/ADD is pressed on one of those items.
-sub searchTracksForArtist($) {
+sub searchTracksForArtist($$) {
+	my $client    = shift;
 	my $id        = shift;
 	my $condition = undef;
 
@@ -505,7 +506,8 @@ sub searchTracksForArtist($) {
 
 # Return a result set that contains all tracks for a given album, for when
 # PLAY/INSERT/ADD is pressed on one of those items.
-sub searchTracksForAlbum($) {
+sub searchTracksForAlbum($$) {
+	my $client    = shift;
 	my $id = shift;
 	return Slim::Schema->search(
 		'track',
@@ -516,7 +518,8 @@ sub searchTracksForAlbum($) {
 
 # Return a result set that contains all tracks for a given genre, for when
 # PLAY/INSERT/ADD is pressed on one of those items.
-sub searchTracksForGenre($) {
+sub searchTracksForGenre($$) {
+	my $client    = shift;
 	my $id = shift;
 	return Slim::Schema->search( 'GenreTrack', { 'me.genre' => $id } )
 	  ->search_related(
@@ -530,9 +533,37 @@ sub searchTracksForGenre($) {
 
 # Return a result set that contain the given track, for when PLAY/INSERT/ADD is
 # pressed on one of those items.
-sub searchTracksForTrack($) {
+sub searchTracksForTrack($$) {
+	my $client    = shift;
 	my $id = shift;
-	return Slim::Schema->find( 'Track', $id );
+
+	# Try to look up whether this client wants to play other tracks
+	# in the same album. This code shamelessly pinched from
+	# XMLBrowser::playItem.
+	my $playAlbum = $serverPrefs->client($client)->get('playtrackalbum');
+
+	# If player pref for playtrack album is not set, get the old server pref.
+	if (!defined $playAlbum) {
+		$playAlbum = $serverPrefs->get('playtrackalbum');
+	}
+
+	# If we're supposed to do the whole album then we'll use the album
+	# track search method instead.
+	my $track = Slim::Schema->find( 'Track', $id );
+	if ($playAlbum) {
+		$log->debug( "Playing/adding/inserting other tracks in album");
+
+		# Find the album this track lives in.
+		my $album = $track->album;
+
+		# Find all the tracks in this album.
+		return searchTracksForAlbum($client, $album->id);
+
+	} else {
+		# Otherwise, it's just the one track you get.
+		$log->debug( "Playing/adding/inserting only this one track");
+		return $track;
+	}
 }
 
 # Browse into a particular artist.
@@ -1403,10 +1434,10 @@ sub lazyPlayOrAddResults {
 "PLAY/ADD/INSERT pressed on search results (id $id), addMode=$addMode"
 		);
 
-		@playItems = &$searchTracksFunction($id);
+		@playItems = &$searchTracksFunction($client, $id);
 	} else {
 
-		$log->debug('All for chosen');
+		$log->debug('ALL chosen');
 
 		for $item (@$listRef) {
 
@@ -1414,7 +1445,7 @@ sub lazyPlayOrAddResults {
 			next if !blessed($item);
 
 			# Find the tracks by this artist.
-			my @tracks = &$searchTracksFunction( $item->id );
+			my @tracks = &$searchTracksFunction( $client, $item->id );
 
 			# Add these tracks to the list we're building up for the playlist.
 			push @playItems, @tracks;
