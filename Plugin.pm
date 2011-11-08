@@ -507,8 +507,8 @@ sub searchTracksForArtist($$) {
 # Return a result set that contains all tracks for a given album, for when
 # PLAY/INSERT/ADD is pressed on one of those items.
 sub searchTracksForAlbum($$) {
-	my $client    = shift;
-	my $id = shift;
+	my $client = shift;
+	my $id     = shift;
 	return Slim::Schema->search(
 		'track',
 		{ 'album'    => $id },
@@ -519,8 +519,8 @@ sub searchTracksForAlbum($$) {
 # Return a result set that contains all tracks for a given genre, for when
 # PLAY/INSERT/ADD is pressed on one of those items.
 sub searchTracksForGenre($$) {
-	my $client    = shift;
-	my $id = shift;
+	my $client = shift;
+	my $id     = shift;
 	return Slim::Schema->search( 'GenreTrack', { 'me.genre' => $id } )
 	  ->search_related(
 		'track', undef,
@@ -534,8 +534,8 @@ sub searchTracksForGenre($$) {
 # Return a result set that contain the given track, for when PLAY/INSERT/ADD is
 # pressed on one of those items.
 sub searchTracksForTrack($$) {
-	my $client    = shift;
-	my $id = shift;
+	my $client = shift;
+	my $id     = shift;
 
 	# Try to look up whether this client wants to play other tracks
 	# in the same album. This code shamelessly pinched from
@@ -543,7 +543,7 @@ sub searchTracksForTrack($$) {
 	my $playAlbum = $serverPrefs->client($client)->get('playtrackalbum');
 
 	# If player pref for playtrack album is not set, get the old server pref.
-	if (!defined $playAlbum) {
+	if ( !defined $playAlbum ) {
 		$playAlbum = $serverPrefs->get('playtrackalbum');
 	}
 
@@ -551,17 +551,18 @@ sub searchTracksForTrack($$) {
 	# track search method instead.
 	my $track = Slim::Schema->find( 'Track', $id );
 	if ($playAlbum) {
-		$log->debug( "Playing/adding/inserting other tracks in album");
+		$log->debug("Playing/adding/inserting other tracks in album");
 
 		# Find the album this track lives in.
 		my $album = $track->album;
 
 		# Find all the tracks in this album.
-		return searchTracksForAlbum($client, $album->id);
+		return searchTracksForAlbum( $client, $album->id );
 
 	} else {
+
 		# Otherwise, it's just the one track you get.
-		$log->debug( "Playing/adding/inserting only this one track");
+		$log->debug("Playing/adding/inserting only this one track");
 		return $track;
 	}
 }
@@ -1434,7 +1435,7 @@ sub lazyPlayOrAddResults {
 "PLAY/ADD/INSERT pressed on search results (id $id), addMode=$addMode"
 		);
 
-		@playItems = &$searchTracksFunction($client, $id);
+		@playItems = &$searchTracksFunction( $client, $id );
 	} else {
 
 		$log->debug('ALL chosen');
