@@ -3,7 +3,7 @@
 !_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
-!_TAG_PROGRAM_VERSION	5.7	//
+!_TAG_PROGRAM_VERSION	5.8	//
 KEYWORD_SEPARATOR_CHARACTER	Plugin.pm	/^use constant KEYWORD_SEPARATOR_CHARACTER => ',';$/;"	c
 LAZYBROWSE_KEYWORD_MODE	Plugin.pm	/^use constant LAZYBROWSE_KEYWORD_MODE => 'PLUGIN_LAZYSEARCH2.keywordbrowse';$/;"	c
 LAZYBROWSE_MODE	Plugin.pm	/^use constant LAZYBROWSE_MODE               => 'PLUGIN_LAZYSEARCH2.browsemode';$/;"	c
@@ -106,10 +106,10 @@ rightIntoGenre	Plugin.pm	/^sub rightIntoGenre($$) {$/;"	s
 rightIntoTrack	Plugin.pm	/^sub rightIntoTrack($$) {$/;"	s
 scanDoneCallback	Plugin.pm	/^sub scanDoneCallback($) {$/;"	s
 scheduleForcedRelazify	Plugin.pm	/^sub scheduleForcedRelazify {$/;"	s
-searchTracksForAlbum	Plugin.pm	/^sub searchTracksForAlbum($) {$/;"	s
-searchTracksForArtist	Plugin.pm	/^sub searchTracksForArtist($) {$/;"	s
-searchTracksForGenre	Plugin.pm	/^sub searchTracksForGenre($) {$/;"	s
-searchTracksForTrack	Plugin.pm	/^sub searchTracksForTrack($) {$/;"	s
+searchTracksForAlbum	Plugin.pm	/^sub searchTracksForAlbum($$$$) {$/;"	s
+searchTracksForArtist	Plugin.pm	/^sub searchTracksForArtist($$$$) {$/;"	s
+searchTracksForGenre	Plugin.pm	/^sub searchTracksForGenre($$$$) {$/;"	s
+searchTracksForTrack	Plugin.pm	/^sub searchTracksForTrack($$$$) {$/;"	s
 setMode	Plugin.pm	/^sub setMode {$/;"	s
 setSearchBrowseMode	Plugin.pm	/^sub setSearchBrowseMode {$/;"	s
 shutdownPlugin	Plugin.pm	/^sub shutdownPlugin() {$/;"	s
