@@ -545,6 +545,20 @@ sub searchTracksForTrack($$$$) {
 	my $jumpTrackIdRef = shift;
 	my $jumpIndexRef = shift;
 
+	$log->debug("Playing/adding/inserting only this one track");
+	return Slim::Schema->find( 'Track', $id );
+
+}
+
+# Return a result set that contain the given track, for when PLAY/INSERT/ADD is
+# pressed on one of those items. This also can return the entire album's items
+# as a playlist if the appropriate server/player preference is set.
+sub searchTracksForTrackOrAlbum($$$$) {
+	my $client = shift;
+	my $id     = shift;
+	my $jumpTrackIdRef = shift;
+	my $jumpIndexRef = shift;
+
 	# Try to look up whether this client wants to play other tracks
 	# in the same album. This code shamelessly pinched from
 	# XMLBrowser::playItem.
@@ -658,7 +672,7 @@ sub rightIntoAlbum($$) {
 
 		# Show the browse results and let the user interact with them.
 		browseLazyResults( $client, $item, \@items, 'track', 'TRACKS',
-			$item->name, \&searchTracksForTrack, \&rightIntoTrack );
+			$item->name, \&searchTracksForTrackOrAlbum, \&rightIntoTrack );
 
 	} else {
 		$log->info("Avoiding entering non-object menu");
