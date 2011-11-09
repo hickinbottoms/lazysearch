@@ -481,9 +481,11 @@ sub enterKeywordSearch($$) {
 
 # Return a result set that contains all tracks for a given artist, for when
 # PLAY/INSERT/ADD is pressed on one of those items.
-sub searchTracksForArtist($$) {
+sub searchTracksForArtist($$$$) {
 	my $client    = shift;
 	my $id        = shift;
+	my $jumpTrackIdRef = shift;
+	my $jumpIndexRef = shift;
 	my $condition = undef;
 
 	# We restrict the search to include artists related in the roles the
@@ -506,9 +508,11 @@ sub searchTracksForArtist($$) {
 
 # Return a result set that contains all tracks for a given album, for when
 # PLAY/INSERT/ADD is pressed on one of those items.
-sub searchTracksForAlbum($$) {
+sub searchTracksForAlbum($$$$) {
 	my $client = shift;
 	my $id     = shift;
+	my $jumpTrackIdRef = shift;
+	my $jumpIndexRef = shift;
 	return Slim::Schema->search(
 		'track',
 		{ 'album'    => $id },
@@ -518,9 +522,11 @@ sub searchTracksForAlbum($$) {
 
 # Return a result set that contains all tracks for a given genre, for when
 # PLAY/INSERT/ADD is pressed on one of those items.
-sub searchTracksForGenre($$) {
+sub searchTracksForGenre($$$$) {
 	my $client = shift;
 	my $id     = shift;
+	my $jumpTrackIdRef = shift;
+	my $jumpIndexRef = shift;
 	return Slim::Schema->search( 'GenreTrack', { 'me.genre' => $id } )
 	  ->search_related(
 		'track', undef,
@@ -533,9 +539,11 @@ sub searchTracksForGenre($$) {
 
 # Return a result set that contain the given track, for when PLAY/INSERT/ADD is
 # pressed on one of those items.
-sub searchTracksForTrack($$) {
+sub searchTracksForTrack($$$$) {
 	my $client = shift;
 	my $id     = shift;
+	my $jumpTrackIdRef = shift;
+	my $jumpIndexRef = shift;
 
 	# Try to look up whether this client wants to play other tracks
 	# in the same album. This code shamelessly pinched from
@@ -551,13 +559,37 @@ sub searchTracksForTrack($$) {
 	# track search method instead.
 	my $track = Slim::Schema->find( 'Track', $id );
 	if ($playAlbum) {
-		$log->debug("Playing/adding/inserting other tracks in album");
 
 		# Find the album this track lives in.
 		my $album = $track->album;
 
 		# Find all the tracks in this album.
-		return searchTracksForAlbum( $client, $album->id );
+		my @albumTracks = searchTracksForAlbum( $client, $album->id, undef, $jumpIndexRef);
+
+		# Now loop over this result set and find which entry has the track we started
+		# with. This becomes the 'jumpIndex' - ie the entry at which the playlist
+		# begins playing even though it is loaded with all tracks in the album.
+		my $index = 0;
+		my $jumpIndex = undef;
+		my $track = undef;
+		foreach $track (@albumTracks) {
+
+			# If this track is the one we started our search for then it
+			# is the one that we should jump to in the playlist.
+			if ($track->id == $id) {
+				$jumpIndex = $index;
+			}
+
+			$index++;
+		}
+
+		# Return the jump index.
+		$$jumpIndexRef = $jumpIndex;
+
+		$log->debug("Playing/adding/inserting other tracks in album; jumpIndex=" . $jumpIndex);
+
+		# The playlist is all of the tracks in the album.
+		return @albumTracks;
 
 	} else {
 
@@ -1427,6 +1459,12 @@ sub lazyPlayOrAddResults {
 	# command. This is built up for both an individual item or for ALL items.
 	my @playItems = ();
 
+	# The index of the item in the playlist to jump to. This is only used when
+	# playing a song and the "play other songs in album" is set - the playlist
+	# loads the whole album and starts playing from the selected song's
+	# posiition.
+	my $jumpIndex = undef;
+
 	# Handle 'ALL' entries specially
 	if ( blessed($item) ) {
 		my $id = $item->id;
@@ -1435,7 +1473,7 @@ sub lazyPlayOrAddResults {
 "PLAY/ADD/INSERT pressed on search results (id $id), addMode=$addMode"
 		);
 
-		@playItems = &$searchTracksFunction( $client, $id );
+		@playItems = &$searchTracksFunction( $client, $id, undef, \$jumpIndex );
 	} else {
 
 		$log->debug('ALL chosen');
@@ -1446,7 +1484,7 @@ sub lazyPlayOrAddResults {
 			next if !blessed($item);
 
 			# Find the tracks by this artist.
-			my @tracks = &$searchTracksFunction( $client, $item->id );
+			my @tracks = &$searchTracksFunction( $client, $item->id, undef, \$jumpIndex );
 
 			# Add these tracks to the list we're building up for the playlist.
 			push @playItems, @tracks;
@@ -1455,7 +1493,7 @@ sub lazyPlayOrAddResults {
 
 	# Now we've built the list of track items, play them.
 	$log->debug( "About to '$cmd' " . scalar @playItems . " items" );
-	$client->execute( [ 'playlist', $cmd, 'listref', \@playItems ] );
+	$client->execute( [ 'playlist', $cmd, 'listref', \@playItems, undef, $jumpIndex ] );
 
 	# Inform the user what has happened.
 	if ( $client->linesPerScreen == 1 ) {
