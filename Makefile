@@ -17,13 +17,14 @@
 # along with LazySearch2; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-VERSION=3.6.3
+VERSION=3.6.4
 PERLSOURCE=Plugin.pm Settings.pm
 HTMLSOURCE=HTML/EN/plugins/LazySearch2/settings/basic.html HTML/EN/plugins/LazySearch2/settings/logo.jpg
 SOURCE=$(PERLSOURCE) $(HTMLSOURCE) INSTALL strings.txt install.xml LICENSE
 RELEASEDIR=releases
 STAGEDIR=stage
-SLIMDIR=/usr/local/squeezeboxserver-7.7/server
+SLIMVER=7.8
+SLIMDIR=/usr/local/squeezeboxserver-$(SLIMVER)/server
 PLUGINSDIR=$(SLIMDIR)/Plugins
 PLUGINDIR=LazySearch2
 COMMIT=`git log -1 --pretty=format:%H`
@@ -83,22 +84,22 @@ restart:
 	echo "Forcefully restarting Squeezebox Server..."
 	-sudo pkill -9 squeezeslave
 	sudo /etc/init.d/squeezeslave zap
-	-sudo /etc/init.d/squeezeboxserver-7.7 stop
-	-sudo /etc/init.d/squeezeboxserver-7.7 zap
+	-sudo /etc/init.d/squeezeboxserver-$(SLIMVER) stop
+	-sudo /etc/init.d/squeezeboxserver-$(SLIMVER) zap
 	-sudo pkill slimserver
 	sleep 2
-	sudo sh -c ">/var/log/squeezeboxserver-7.7/server.log"
-	sudo sh -c ">/var/log/squeezeboxserver-7.7/scanner.log"
-	sudo sh -c ">/var/log/squeezeboxserver-7.7/perfmon.log"
-	sudo /etc/init.d/squeezeboxserver-7.7 restart
+	sudo sh -c ">/var/log/squeezeboxserver-$(SLIMVER)/server.log"
+	sudo sh -c ">/var/log/squeezeboxserver-$(SLIMVER)/scanner.log"
+	sudo sh -c ">/var/log/squeezeboxserver-$(SLIMVER)/perfmon.log"
+	sudo /etc/init.d/squeezeboxserver-$(SLIMVER) restart
 
 logtail:
 	echo "Following the end of the Squeezebox Server log..."
-	tail -F /var/log/squeezeboxserver-7.7/server.log | grep -v "par-slim"
+	tail -F /var/log/squeezeboxserver-$(SLIMVER)/server.log | grep -v "par-slim"
 
 logtail2:
 	echo "Following the end of the Squeezebox Server log (LazySearch only)..."
-	multitail -e LazySearch -f /var/log/squeezeboxserver-7.7/server.log
+	multitail -e LazySearch -f /var/log/squeezeboxserver-$(SLIMVER)/server.log
 
 # Build a distribution package for this Plugin.
 release: make-stage
