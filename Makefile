@@ -17,7 +17,7 @@
 # along with LazySearch2; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-VERSION=3.6.4
+VERSION=3.6.5
 PERLSOURCE=Plugin.pm Settings.pm
 HTMLSOURCE=HTML/EN/plugins/LazySearch2/settings/basic.html HTML/EN/plugins/LazySearch2/settings/logo.jpg
 SOURCE=$(PERLSOURCE) $(HTMLSOURCE) INSTALL strings.txt install.xml LICENSE
@@ -121,4 +121,3 @@ inject:
 	echo Unmasking ebuild...
 	ssh root@$(VMHOST) mkdir -p /etc/portage
 	ssh root@$(VMHOST) "grep -q '$(EBUILD_CATEGORY)' /etc/portage/package.keywords >/dev/null 2>&1 || echo '$(EBUILD_CATEGORY) ~x86' >> /etc/portage/package.keywords"
-
