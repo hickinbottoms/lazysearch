@@ -1,5 +1,5 @@
 # Makefile for LazySearch2 plugin for Squeezebox Server 7.0 (and later)
-# Copyright © Stuart Hickinbottom 2004-2011
+# Copyright © Stuart Hickinbottom 2004-2014
 
 # This file is part of LazySearch2.
 #
@@ -24,7 +24,7 @@ SOURCE=$(PERLSOURCE) $(HTMLSOURCE) INSTALL strings.txt install.xml LICENSE
 RELEASEDIR=releases
 STAGEDIR=stage
 SLIMVER=7.8
-SLIMDIR=/usr/local/squeezeboxserver-$(SLIMVER)/server
+SLIMDIR=/usr/local/slimserver
 PLUGINSDIR=$(SLIMDIR)/Plugins
 PLUGINDIR=LazySearch2
 COMMIT=`git log -1 --pretty=format:%H`

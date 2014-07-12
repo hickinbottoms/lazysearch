@@ -1,5 +1,5 @@
 # Web settings page handler for LazySearch2 plugin for SqueezeCentre.
-# Copyright © Stuart Hickinbottom 2004-2011
+# Copyright © Stuart Hickinbottom 2004-2014
 
 # This file is part of LazySearch2.
 #
