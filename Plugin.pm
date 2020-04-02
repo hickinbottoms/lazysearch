@@ -1,5 +1,5 @@
 # LazySearch2 Plugin for Squeezebox Server
-# Copyright © Stuart Hickinbottom 2004-2014
+# Copyright © Stuart Hickinbottom 2004-2020
 
 # This file is part of LazySearch2.
 #

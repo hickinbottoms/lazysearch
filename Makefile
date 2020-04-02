@@ -1,5 +1,5 @@
 # Makefile for LazySearch2 plugin for Squeezebox Server 7.0 (and later)
-# Copyright © Stuart Hickinbottom 2004-2014
+# Copyright © Stuart Hickinbottom 2004-2020
 
 # This file is part of LazySearch2.
 #
@@ -17,7 +17,7 @@
 # along with LazySearch2; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-VERSION=3.6.5
+VERSION=3.6.6
 PERLSOURCE=Plugin.pm Settings.pm
 HTMLSOURCE=HTML/EN/plugins/LazySearch2/settings/basic.html HTML/EN/plugins/LazySearch2/settings/logo.jpg
 SOURCE=$(PERLSOURCE) $(HTMLSOURCE) INSTALL strings.txt install.xml LICENSE
